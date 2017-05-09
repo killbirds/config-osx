@@ -1,0 +1,14 @@
+#!/bin/bash
+
+PROJECTS=(`ls -la1`)
+BASE_DIR=$(pwd)
+
+for PROJECT in "${PROJECTS[@]}"; do
+  if [ -d "$PROJECT" -a -d "$PROJECT/.git" ]; then
+    pushd "$PROJECT" > /dev/null
+    echo "current dir:" $(pwd)
+    git pull --all --recurse --log
+    popd > /dev/null
+    echo "--------------------------------------"
+  fi
+done

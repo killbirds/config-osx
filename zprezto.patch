@@ -1,0 +1,168 @@
+diff --git a/runcoms/zpreztorc b/runcoms/zpreztorc
+index ab26ff8..d820f6a 100644
+--- a/runcoms/zpreztorc
++++ b/runcoms/zpreztorc
+@@ -31,7 +31,14 @@ zstyle ':prezto:load' pmodule \
+   'directory' \
+   'spectrum' \
+   'utility' \
++  'ssh' \
+   'completion' \
++  'fasd' \
++  'git' \
++  'node' \
++  'syntax-highlighting' \
++  'history-substring-search' \
++  'tmux' \
+   'prompt'
+ 
+ #
+@@ -46,7 +53,8 @@ zstyle ':prezto:load' pmodule \
+ #
+ 
+ # Set the key mapping style to 'emacs' or 'vi'.
+-zstyle ':prezto:module:editor' key-bindings 'emacs'
++# zstyle ':prezto:module:editor' key-bindings 'emacs'
++zstyle ':prezto:module:editor' key-bindings 'vi'
+ 
+ # Auto convert .... to ../..
+ # zstyle ':prezto:module:editor' dot-expansion 'yes'
+@@ -116,7 +124,7 @@ zstyle ':prezto:module:prompt' theme 'sorin'
+ #
+ 
+ # Set the SSH identities to load into the agent.
+-# zstyle ':prezto:module:ssh:load' identities 'id_rsa' 'id_rsa2' 'id_github'
++zstyle ':prezto:module:ssh:load' identities 'id_rsa' 'id_rsa2' 'id_github'
+ 
+ #
+ # Syntax Highlighting
+@@ -124,14 +132,14 @@ zstyle ':prezto:module:prompt' theme 'sorin'
+ 
+ # Set syntax highlighters.
+ # By default, only the main highlighter is enabled.
+-# zstyle ':prezto:module:syntax-highlighting' highlighters \
+-#   'main' \
+-#   'brackets' \
+-#   'pattern' \
+-#   'line' \
+-#   'cursor' \
+-#   'root'
+-#
++zstyle ':prezto:module:syntax-highlighting' highlighters \
++  'main' \
++  'brackets' \
++  'pattern' \
++  'line' \
++  'cursor' \
++  'root'
++
+ # Set syntax highlighting styles.
+ # zstyle ':prezto:module:syntax-highlighting' styles \
+ #   'builtin' 'bg=blue' \
+@@ -165,4 +173,4 @@ zstyle ':prezto:module:prompt' theme 'sorin'
+ # zstyle ':prezto:module:tmux:auto-start' remote 'yes'
+ 
+ # Integrate with iTerm2.
+-# zstyle ':prezto:module:tmux:iterm' integrate 'yes'
++zstyle ':prezto:module:tmux:iterm' integrate 'yes'
+diff --git a/runcoms/zprofile b/runcoms/zprofile
+index 052d5f9..ead9b4d 100644
+--- a/runcoms/zprofile
++++ b/runcoms/zprofile
+@@ -17,8 +17,8 @@ fi
+ # Editors
+ #
+ 
+-export EDITOR='nano'
+-export VISUAL='nano'
++export EDITOR='vi'
++export VISUAL='vi'
+ export PAGER='less'
+ 
+ #
+diff --git a/runcoms/zshrc b/runcoms/zshrc
+index 039b882..0fc1b0a 100644
+--- a/runcoms/zshrc
++++ b/runcoms/zshrc
+@@ -11,3 +11,81 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
+ fi
+ 
+ # Customize to your needs...
++
++export GROOVY_HOME="/usr/local/opt/groovy/libexec"
++alias java_ls='/usr/libexec/java_home -V 2>&1 | grep -E "\d.\d.\d_\d\d" | cut -d , -f 1 | colrm 1 4 |  grep -v Home'
++
++function java_use() {
++    export JAVA_HOME=$(/usr/libexec/java_home -v $1)
++    java -version
++}
++
++## DOCKER
++#export DOCKER_HOST=tcp://192.168.59.103:2376
++#export DOCKER_CERT_PATH=/Users/killbirds/.boot2docker/certs/boot2docker-vm
++#export DOCKER_TLS_VERIFY=1
++##eval "$(docker-machine env default)"
++
++## GO
++export GOPATH=$HOME/workspace/go
++
++path=(
++    $HOME/bin
++    #`yarn global bin`
++    $HOME/.config/yarn/global/node_modules/.bin
++    $GOPATH/bin
++    $path
++    /usr/local/opt/go/libexec/bin
++)
++
++###-begin-pm2-completion-###
++### credits to npm for the completion file model
++#
++# Installation: pm2 completion >> ~/.bashrc  (or ~/.zshrc)
++#
++
++COMP_WORDBREAKS=${COMP_WORDBREAKS/=/}
++COMP_WORDBREAKS=${COMP_WORDBREAKS/@/}
++export COMP_WORDBREAKS
++
++if type complete &>/dev/null; then
++  _pm2_completion () {
++    local si="$IFS"
++    IFS=$'\n' COMPREPLY=($(COMP_CWORD="$COMP_CWORD" \
++                           COMP_LINE="$COMP_LINE" \
++                           COMP_POINT="$COMP_POINT" \
++                           pm2 completion -- "${COMP_WORDS[@]}" \
++                           2>/dev/null)) || return $?
++    IFS="$si"
++  }
++  complete -o default -F _pm2_completion pm2
++elif type compctl &>/dev/null; then
++  _pm2_completion () {
++    local cword line point words si
++    read -Ac words
++    read -cn cword
++    let cword-=1
++    read -l line
++    read -ln point
++    si="$IFS"
++    IFS=$'\n' reply=($(COMP_CWORD="$cword" \
++                       COMP_LINE="$line" \
++                       COMP_POINT="$point" \
++                       pm2 completion -- "${words[@]}" \
++                       2>/dev/null)) || return $?
++    IFS="$si"
++  }
++  compctl -K _pm2_completion + -f + pm2
++fi
++###-end-pm2-completion-###
++
++###-begin-nvm-###
++export NVM_DIR=~/.nvm
++. $(brew --prefix nvm)/nvm.sh
++###-end-nvm-###
++
++
++###-begin-rbenv-###
++eval "$(rbenv init -)"
++###-enb-rbenv-###
++

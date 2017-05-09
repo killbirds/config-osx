@@ -1,0 +1,11 @@
+*~
+.DS_Store
+.ensime
+.ensime_lucene
+.ctags_srcs
+.tags
+cscope.files
+cscope.out
+config.codekit
+npm-debug.log
+.*.swp

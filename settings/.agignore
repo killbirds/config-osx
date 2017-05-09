@@ -1,0 +1,17 @@
+.git/
+.ctags_srcs/
+.tags
+.tags_sorted_by_file
+.sbtserver
+.sbtserver.lock
+node_modules/
+tmp/
+target/
+
+*.log
+*.exe
+*.so
+*.dll
+*.dist
+*.sw?
+

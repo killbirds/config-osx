@@ -1,0 +1,20 @@
+#!/bin/bash
+
+cur=`pwd`
+
+install=$cur/script/install.sh
+
+# bin
+(cd script; $install ~/bin)
+
+# settings
+(cd settings; $install ~)
+
+# sbt settings
+(cd sbt/0.13; $install ~/.sbt/0.13)
+
+git config --global core.excludesfile ~/.gitignore_global
+
+vi +PlugInstall +qall
+
+
