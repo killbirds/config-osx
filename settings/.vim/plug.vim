@@ -51,6 +51,6 @@ Plug 'lambdatoast/elm.vim'
 
 Plug 'jeetsukumaran/vim-buffergator'
 
-"Plug 'ensime/ensime-vim'
+Plug 'ensime/ensime-vim'
 call plug#end()
 
