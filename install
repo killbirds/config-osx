@@ -12,6 +12,7 @@ install=$cur/script/install.sh
 
 # sbt settings
 (cd sbt/0.13; $install ~/.sbt/0.13)
+(cd sbt/1.0; $install ~/.sbt/1.0)
 
 git config --global core.excludesfile ~/.gitignore_global
 

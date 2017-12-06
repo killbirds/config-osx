@@ -4,7 +4,7 @@
 "au FileType scala nnoremap <localleader>df :EnDeclarationSplit v<CR>
 
 if !exists(':EnTypeCheck')
-  autocmd BufWritePost *.scala silent :EnTypeCheck
+  "autocmd BufWritePost *.scala silent :EnTypeCheck
   nnoremap <localleader>t :EnType<CR>
   au FileType scala nnoremap <localleader>df :EnDeclarationSplit v<CR>
 endif
