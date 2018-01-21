@@ -36,10 +36,10 @@ Plug 'editorconfig/editorconfig-vim'
 "Plug 'ternjs/tern_for_vim'
 
 "Plug 'sheerun/vim-polyglot'
-Plug 'derekwyatt/vim-scala'
+"Plug 'derekwyatt/vim-scala'
 Plug 'kchmck/vim-coffee-script'
 Plug 'pangloss/vim-javascript'
-Plug 'digitaltoad/vim-jade'
+Plug 'digitaltoad/vim-pug'
 Plug 'fatih/vim-go'
 Plug 'groenewege/vim-less'
 Plug 'vim-ruby/vim-ruby'
@@ -52,5 +52,9 @@ Plug 'lambdatoast/elm.vim'
 Plug 'jeetsukumaran/vim-buffergator'
 
 "Plug 'ensime/ensime-vim'
+Plug 'autozimu/LanguageClient-neovim', {
+    \ 'branch': 'next',
+    \ 'do': 'bash install.sh',
+    \ }
 call plug#end()
 
