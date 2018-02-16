@@ -27,7 +27,6 @@ Plug 'qpkorr/vim-bufkill'
 Plug 'tpope/vim-eunuch'
 Plug 'Chiel92/vim-autoformat'
 Plug 'ervandew/supertab'
-Plug 'shougo/neocomplete.vim'
 Plug 'airblade/vim-gitgutter'
 Plug 'godlygeek/tabular'
 Plug 'tpope/vim-repeat'
@@ -56,5 +55,14 @@ Plug 'autozimu/LanguageClient-neovim', {
     \ 'branch': 'next',
     \ 'do': 'bash install.sh',
     \ }
+
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+
 call plug#end()
 
