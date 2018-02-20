@@ -43,6 +43,7 @@ Plug 'groenewege/vim-less'
 Plug 'vim-ruby/vim-ruby'
 Plug 'plasticboy/vim-markdown'
 Plug 'elmcast/elm-vim'
+Plug 'posva/vim-vue'
 
 Plug 'altercation/vim-colors-solarized'
 
