@@ -26,11 +26,11 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'rizzatti/dash.vim'
 
-"Plug 'vim-syntastic/syntastic'
 Plug 'w0rp/ale'
+"Plug 'vim-syntastic/syntastic'
+"Plug 'Chiel92/vim-autoformat'
 
 Plug 'qpkorr/vim-bufkill'
-Plug 'Chiel92/vim-autoformat'
 Plug 'airblade/vim-gitgutter'
 Plug 'godlygeek/tabular'
 Plug 'editorconfig/editorconfig-vim'
