@@ -25,7 +25,10 @@ Plug 'terryma/vim-multiple-cursors'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'rizzatti/dash.vim'
-Plug 'vim-syntastic/syntastic'
+
+"Plug 'vim-syntastic/syntastic'
+Plug 'w0rp/ale'
+
 Plug 'qpkorr/vim-bufkill'
 Plug 'Chiel92/vim-autoformat'
 Plug 'airblade/vim-gitgutter'
@@ -48,6 +51,7 @@ Plug 'posva/vim-vue'
 Plug 'altercation/vim-colors-solarized'
 
 Plug 'jeetsukumaran/vim-buffergator'
+
 
 "Plug 'ensime/ensime-vim'
 Plug 'autozimu/LanguageClient-neovim', {

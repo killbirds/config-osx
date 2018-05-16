@@ -3,7 +3,7 @@ set hidden
 
 set signcolumn=yes
  
-let g:LanguageClient_autoStart = 1
+let g:LanguageClient_autoStart = 0
 
 let g:LanguageClient_serverCommands = {
     \ 'rust': ['rustup', 'run', 'nightly', 'rls'],
