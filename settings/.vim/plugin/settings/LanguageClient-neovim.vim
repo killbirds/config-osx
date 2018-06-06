@@ -11,12 +11,13 @@ let g:LanguageClient_serverCommands = {
     \ 'scala': ['node', expand('~/bin/sbt-server-stdio.js')]
     \ }
 
-" <leader>ld to go to definition
-autocmd FileType javascript nnoremap <buffer>
-  \ <leader>ld :call LanguageClient_textDocument_definition()<cr>
-" <leader>lh for type info under cursor
-autocmd FileType javascript nnoremap <buffer>
-  \ <leader>lh :call LanguageClient_textDocument_hover()<cr>
-" <leader>lr to rename variable under cursor
-autocmd FileType javascript nnoremap <buffer>
-  \ <leader>lr :call LanguageClient_textDocument_rename()<cr>
+
+let g:LanguageClient_rootMarkers = {
+    \ 'javascript': ['project.json', '.git'],
+    \ }
+
+nnoremap <F5> :call LanguageClient_contextMenu()<CR>
+" Or map each action separately
+"nnoremap <leader> K :call LanguageClient#textDocument_hover()<CR>
+"nnoremap <leader> gd :call LanguageClient#textDocument_definition()<CR>
+"nnoremap <leader> <F2> :call LanguageClient#textDocument_rename()<CR>
