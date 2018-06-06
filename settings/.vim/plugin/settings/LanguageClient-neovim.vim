@@ -4,10 +4,12 @@ set hidden
 set signcolumn=yes
  
 let g:LanguageClient_autoStart = 0
+autocmd FileType javascript LanguageClientStart
 
 let g:LanguageClient_serverCommands = {
     \ 'rust': ['rustup', 'run', 'nightly', 'rls'],
-    \ 'javascript': ['flow-language-server', '--stdio'],
+    \ 'javascript': ['flow-language-server', '--try-flow-bin', '--stdio'],
+    \ 'javascript.jsx': ['flow-language-server', '--try-flow-bin', '--stdio'],
     \ 'scala': ['node', expand('~/bin/sbt-server-stdio.js')]
     \ }
 
