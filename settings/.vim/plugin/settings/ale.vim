@@ -2,6 +2,10 @@
 " After this is configured, :ALEFix will try and fix your JS code with ESLint.
 let g:ale_fixers = {
 \   'javascript': ['prettier'],
+\   'js': ['prettier'],
+\   'scss': ['prettier'],
+\   'css': ['prettier'],
+\   'json': ['prettier'],
 \}
 
 " Set this setting in vimrc if you want to fix files automatically on save.

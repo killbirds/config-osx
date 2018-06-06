@@ -32,8 +32,8 @@ Plug 'w0rp/ale'
 
 Plug 'qpkorr/vim-bufkill'
 Plug 'airblade/vim-gitgutter'
-Plug 'godlygeek/tabular'
-Plug 'editorconfig/editorconfig-vim'
+"Plug 'editorconfig/editorconfig-vim'
+"Plug 'godlygeek/tabular'
 "Plug 'ternjs/tern_for_vim'
 
 "Plug 'sheerun/vim-polyglot'

@@ -7,7 +7,7 @@ let g:LanguageClient_autoStart = 0
 
 let g:LanguageClient_serverCommands = {
     \ 'rust': ['rustup', 'run', 'nightly', 'rls'],
-    \ 'javascript': ['javascript-typescript-stdio'],
+    \ 'javascript': ['flow-language-server', '--stdio'],
     \ 'scala': ['node', expand('~/bin/sbt-server-stdio.js')]
     \ }
 

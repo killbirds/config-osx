@@ -36,6 +36,12 @@ brew install scalafmt
 brew install ag
 ```
 
+- flow-language-server
+```
+// https://github.com/flowtype/flow-language-server
+yarn global add flow-language-server
+```
+
 <!--- ensime-sbt-->
 <!--http://ensime.github.io/editors/vim/install/-->
 <!--```-->
