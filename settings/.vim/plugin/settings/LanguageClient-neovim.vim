@@ -4,7 +4,7 @@ set hidden
 set signcolumn=yes
  
 let g:LanguageClient_autoStart = 0
-autocmd FileType javascript LanguageClientStart
+"autocmd FileType javascript LanguageClientStart
 
 let g:LanguageClient_serverCommands = {
     \ 'rust': ['rustup', 'run', 'nightly', 'rls'],

@@ -6,4 +6,7 @@ addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.0")
 
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0")
 
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.2.1")
+
+
 
