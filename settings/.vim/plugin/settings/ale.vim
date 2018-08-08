@@ -6,6 +6,11 @@ let g:ale_fixers = {
 \   'scss': ['prettier'],
 \   'css': ['prettier'],
 \   'json': ['prettier'],
+\   'scala': ['scalafmt'],
+\}
+
+let g:ale_linters = {
+\   'java': ['checkstyle'],
 \}
 
 " Set this setting in vimrc if you want to fix files automatically on save.
@@ -18,6 +23,8 @@ let g:ale_completion_enabled = 0
 let g:ale_sign_column_always = 1
 
 let g:ale_javascript_prettier_use_local_config = 1
+
+let g:ale_scala_scalafmt_executable = 'ng'
 
 " Set this. Airline will handle the rest.
 let g:airline#extensions#ale#enabled = 1
