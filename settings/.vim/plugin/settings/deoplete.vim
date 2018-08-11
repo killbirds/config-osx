@@ -5,12 +5,9 @@ let g:deoplete#enable_at_startup = 1
 autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
 
 " Disable the candidates in Comment/String syntaxes.
-call deoplete#custom#source('_',
-            \ 'disabled_syntaxes', ['Comment', 'String'])
+call deoplete#custom#source('_', 'disabled_syntaxes', ['Comment', 'String'])
 
-call deoplete#custom#source('LanguageClient',
-            \ 'min_pattern_length',
-            \ 2)
+call deoplete#custom#source('LanguageClient', 'min_pattern_length', 2)
 
 " set custom sources
 "call deoplete#custom#option('sources', {

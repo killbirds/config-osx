@@ -1,4 +1,4 @@
-inoremap jj <esc> " jk is escape
+" inoremap jj <esc> " jk is escape
 nnoremap <leader><space> :nohlsearch<CR>
 
 nnoremap <Leader>w :w<CR>

@@ -2,7 +2,7 @@
 set hidden
 
 set signcolumn=yes
- 
+
 let g:LanguageClient_autoStart = 0
 "autocmd FileType javascript LanguageClientStart
 
@@ -16,6 +16,7 @@ let g:LanguageClient_serverCommands = {
 
 let g:LanguageClient_rootMarkers = {
     \ 'javascript': ['project.json', '.git'],
+    \ 'scala': ['build.sbt', '.git'],
     \ }
 
 nnoremap <F5> :call LanguageClient_contextMenu()<CR>
