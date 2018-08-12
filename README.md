@@ -27,6 +27,7 @@ cd fonts
 
 - scalafmt
 ```
+// https://scalameta.org/scalafmt/
 brew tap olafurpg/scalafmt
 brew install scalafmt
 ```
@@ -40,6 +41,11 @@ brew install ag
 ```
 // https://github.com/flowtype/flow-language-server
 yarn global add flow-language-server
+```
+
+- google-java-format
+```
+brew install google-java-format
 ```
 
 <!--- ensime-sbt-->

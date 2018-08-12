@@ -6,6 +6,7 @@ let g:ale_fixers = {
 \   'scss': ['prettier'],
 \   'css': ['prettier'],
 \   'json': ['prettier'],
+\   'java': ['google_java_format'],
 \   'scala': ['scalafmt'],
 \}
 
@@ -27,6 +28,11 @@ let g:ale_sign_column_always = 1
 let g:ale_javascript_prettier_use_local_config = 1
 
 let g:ale_scala_scalafmt_executable = 'ng'
+
+let g:ale_google_java_format_options = '--aosp --offset 0 --length 120'
+
+let g:ale_java_checkstyle_options = '-c ~/.custom_java_checks.xml'
+
 
 " Set this. Airline will handle the rest.
 let g:airline#extensions#ale#enabled = 1
