@@ -47,6 +47,7 @@ Plug 'vim-ruby/vim-ruby'
 Plug 'plasticboy/vim-markdown'
 Plug 'elmcast/elm-vim'
 Plug 'posva/vim-vue'
+Plug 'leafgarland/typescript-vim'
 
 Plug 'altercation/vim-colors-solarized'
 

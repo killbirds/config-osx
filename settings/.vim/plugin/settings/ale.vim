@@ -3,6 +3,7 @@
 let g:ale_fixers = {
 \   'javascript': ['prettier'],
 \   'js': ['prettier'],
+\   'typescript': ['prettier'],
 \   'scss': ['prettier'],
 \   'css': ['prettier'],
 \   'json': ['prettier'],
@@ -29,7 +30,7 @@ let g:ale_javascript_prettier_use_local_config = 1
 
 let g:ale_scala_scalafmt_executable = 'ng'
 
-let g:ale_google_java_format_options = '--aosp --offset 0 --length 120'
+let g:ale_java_google_java_format_options = '--aosp --skip-sorting-imports --offset 0 --length 120'
 
 let g:ale_java_checkstyle_options = '-c ~/.custom_java_checks.xml'
 
