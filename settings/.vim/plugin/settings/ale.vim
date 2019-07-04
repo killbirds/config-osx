@@ -14,7 +14,8 @@ let g:ale_fixers = {
 let g:ale_linters = {
 \   'java': ['checkstyle'],
 \   'scala': ['fsc'],
-\   'javascript': ['eslint', 'flow', 'flow-language-server']
+\   'javascript': ['eslint'],
+\   'typescript': ['tslint'],
 \}
 
 " Set this setting in vimrc if you want to fix files automatically on save.

@@ -32,6 +32,11 @@ brew tap olafurpg/scalafmt
 brew install scalafmt
 ```
 
+- metals
+```
+// https://scalameta.org/metals/
+```
+
 - ag
 ```
 brew install ag
