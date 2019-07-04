@@ -35,6 +35,15 @@ brew install scalafmt
 - metals
 ```
 // https://scalameta.org/metals/
+
+coursier bootstrap \
+  --java-opt -Xss4m \
+  --java-opt -Xms100m \
+  --java-opt -Dmetals.client=LanguageClient-neovim \
+  org.scalameta:metals_2.12:0.7.0 \
+  -r bintray:scalacenter/releases \
+  -r sonatype:snapshots \
+  -o ~/bin/metals-vim -f
 ```
 
 - ag
