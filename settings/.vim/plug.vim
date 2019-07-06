@@ -37,7 +37,8 @@ Plug 'godlygeek/tabular'
 "Plug 'ternjs/tern_for_vim'
 
 "Plug 'sheerun/vim-polyglot'
-"Plug 'derekwyatt/vim-scala'
+
+Plug 'derekwyatt/vim-scala'
 Plug 'kchmck/vim-coffee-script'
 Plug 'pangloss/vim-javascript'
 Plug 'digitaltoad/vim-pug'
@@ -53,6 +54,7 @@ Plug 'altercation/vim-colors-solarized'
 
 Plug 'jeetsukumaran/vim-buffergator'
 
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 "Plug 'ensime/ensime-vim'
 Plug 'autozimu/LanguageClient-neovim', {

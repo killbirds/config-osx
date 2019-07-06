@@ -11,4 +11,4 @@ let g:NERDTreeToggle="<F2>"
 let NERDTreeDirArrows = 1
 let g:NERDTreeWinSize = 30
 
-let NERDTreeIgnore=['node_modules', '.git']
+let NERDTreeIgnore=['node_modules', '.git$', '.metals', '.bloop']

@@ -79,6 +79,9 @@ autocmd Filetype java setlocal ts=4 sw=4 sts=4 expandtab
 " for jade files, 2 spaces
 autocmd Filetype jade setlocal ts=2 sw=2 sts=2 expandtab=off
 
+" https://github.com/neoclide/coc.nvim/wiki/Using-the-configuration-file
+autocmd FileType json syntax match Comment +\/\/.\+$+
+
 " Auto indent pasted text
 nnoremap p p=`]<C-o>
 nnoremap P P=`]<C-o>
@@ -113,6 +116,8 @@ set wildignore+=*.gem
 set wildignore+=log/**
 set wildignore+=tmp/**
 set wildignore+=*.png,*.jpg,*.gif
+set wildignore+=.metals/**
+set wildignore+=.bloop/**
 
 set wildignore+=.hg,.git,.svn " Version Controls"
 set wildignore+=*.aux,*.out,*.toc "Latex Indermediate files"

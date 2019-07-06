@@ -32,23 +32,24 @@ brew tap olafurpg/scalafmt
 brew install scalafmt
 ```
 
+- ag
+```
+brew install ag
+```
+
 - metals
 ```
 // https://scalameta.org/metals/
+// https://scalameta.org/metals/docs/editors/vim.html
 
 coursier bootstrap \
   --java-opt -Xss4m \
   --java-opt -Xms100m \
-  --java-opt -Dmetals.client=LanguageClient-neovim \
+  --java-opt -Dmetals.client=coc.nvim \
   org.scalameta:metals_2.12:0.7.0 \
   -r bintray:scalacenter/releases \
   -r sonatype:snapshots \
   -o ~/bin/metals-vim -f
-```
-
-- ag
-```
-brew install ag
 ```
 
 - flow-language-server

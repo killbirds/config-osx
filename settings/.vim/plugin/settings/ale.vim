@@ -13,7 +13,6 @@ let g:ale_fixers = {
 
 let g:ale_linters = {
 \   'java': ['checkstyle'],
-\   'scala': ['fsc'],
 \   'javascript': ['eslint'],
 \   'typescript': ['tslint'],
 \}
@@ -35,6 +34,3 @@ let g:ale_java_google_java_format_options = '--aosp --skip-sorting-imports --off
 
 let g:ale_java_checkstyle_options = '-c ~/.custom_java_checks.xml'
 
-
-" Set this. Airline will handle the rest.
-let g:airline#extensions#ale#enabled = 1

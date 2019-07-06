@@ -15,3 +15,6 @@ let g:airline#extensions#tabline#enabled = 1
 
 " 파일명만 출력
 let g:airline#extensions#tabline#fnamemod = ':t'
+
+" enable/disable ale integration
+let g:airline#extensions#ale#enabled = 1
