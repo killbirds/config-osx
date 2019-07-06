@@ -2,8 +2,12 @@
   "languageserver": {
     "metals": {
       "command": "metals-vim",
-      "rootPatterns": ["build.sbt"],
+      "rootPatterns": ["build.sbt", ".git/"],
       "filetypes": ["scala", "sbt"]
     }
-  }
+  },
+  "diagnostic.displayByAle": true,
+  "suggest.autoTrigger": "trigger",
+  "typescript.preferences.noSemicolons": true,
+  "javascript.preferences.noSemicolons": true
 }
