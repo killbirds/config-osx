@@ -17,6 +17,8 @@ let g:ale_linters_explicit = 1
 let g:ale_linters = {
 \   'java': ['checkstyle'],
 \   'javascript': ['eslint'],
+\   'scala': [],
+\   'typescript': [],
 \}
 
 " Set this setting in vimrc if you want to fix files automatically on save.
