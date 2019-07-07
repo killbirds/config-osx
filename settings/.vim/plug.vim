@@ -52,15 +52,16 @@ Plug 'vim-ruby/vim-ruby'
 Plug 'plasticboy/vim-markdown'
 Plug 'elmcast/elm-vim'
 Plug 'posva/vim-vue'
-Plug 'leafgarland/typescript-vim'
+
+" use yats.vim for typescript because  https://github.com/neoclide/coc.nvim/issues/135
+"Plug 'leafgarland/typescript-vim'
+Plug 'HerringtonDarkholme/yats.vim'
 
 Plug 'altercation/vim-colors-solarized'
 
 Plug 'jeetsukumaran/vim-buffergator'
 
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-
-"Plug 'ensime/ensime-vim'
 
 " removed because use coc.nvim
 "Plug 'autozimu/LanguageClient-neovim', {
