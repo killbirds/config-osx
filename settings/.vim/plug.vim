@@ -22,9 +22,8 @@ Plug 'mileszs/ack.vim'
 "Plug 'majutsushi/tagbar'
 Plug 'christoomey/vim-tmux-navigator'
 
-" use vim-visual-multi because crash with coc.nvim
-"Plug 'terryma/vim-multiple-cursors'
-Plug 'mg979/vim-visual-multi'
+Plug 'terryma/vim-multiple-cursors'
+"Plug 'mg979/vim-visual-multi'
 
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
