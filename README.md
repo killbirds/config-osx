@@ -26,6 +26,7 @@ cd fonts
 ```
 
 - scalafmt
+https://scalameta.org/scalafmt/docs/installation.html#nailgun
 ```
 // https://scalameta.org/scalafmt/
 brew tap olafurpg/scalafmt
@@ -46,7 +47,7 @@ coursier bootstrap \
   --java-opt -Xss4m \
   --java-opt -Xms100m \
   --java-opt -Dmetals.client=coc.nvim \
-  org.scalameta:metals_2.12:0.7.0 \
+  org.scalameta:metals_2.12:0.7.6 \
   -r bintray:scalacenter/releases \
   -r sonatype:snapshots \
   -o ~/bin/metals-vim -f

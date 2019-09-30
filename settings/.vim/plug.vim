@@ -51,6 +51,7 @@ Plug 'vim-ruby/vim-ruby'
 Plug 'plasticboy/vim-markdown'
 Plug 'elmcast/elm-vim'
 Plug 'posva/vim-vue'
+Plug 'jparise/vim-graphql'
 
 " use yats.vim for typescript because  https://github.com/neoclide/coc.nvim/issues/135
 "Plug 'leafgarland/typescript-vim'

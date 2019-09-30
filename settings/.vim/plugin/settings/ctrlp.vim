@@ -10,7 +10,7 @@ else
   " Fall back to using git ls-files if Ag is not available
   " let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
   let g:ctrlp_custom_ignore = {
-        \ 'dir':  '\v[\/](node_modules|target|dist)|(\.(swp|ico|git|svn|hg))$',
+        \ 'dir':  '\v[\/](node_modules|target|dist)|(\.(swp|ico|git|svn|hg|bloop|metals))$',
         \ 'file': '\v\.(exe|so|dll|log|tmp)$',
         \ 'link': 'some_bad_symbolic_links',
         \ }
