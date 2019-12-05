@@ -7,7 +7,5 @@
     }
   },
   "diagnostic.displayByAle": true,
-  "suggest.autoTrigger": "trigger",
-  "typescript.preferences.noSemicolons": true,
-  "javascript.preferences.noSemicolons": true
+  "suggest.autoTrigger": "trigger"
 }
