@@ -9,8 +9,8 @@ let g:ale_fixers = {
 \   'scss': ['prettier'],
 \   'css': ['prettier'],
 \   'json': ['prettier'],
-\   'java': ['google_java_format'],
-\   'scala': ['scalafmt'],
+"\   'java': ['google_java_format'],
+"\   'scala': ['scalafmt'],
 \}
 
 let g:ale_lint_on_save = 0

@@ -1,11 +1,14 @@
 {
-  "languageserver": {
-    "metals": {
-      "command": "metals-vim",
-      "rootPatterns": ["build.sbt"],
-      "filetypes": ["scala", "sbt"]
-    }
-  },
   "diagnostic.displayByAle": true,
-  "suggest.autoTrigger": "trigger"
+  "suggest.autoTrigger": "trigger",
+  "coc.preferences.formatOnSaveFiletypes": [
+    "dart",
+    "scala"
+  ],
+  "metals": {
+    "serverVersion": "0.11.1",
+    "ammoniteJvmProperties": ["-Xmx2G"],
+    "statusBarEnabled": true,
+    "bloopSbtAlreadyInstalled": true
+  }
 }
