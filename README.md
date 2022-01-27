@@ -25,14 +25,6 @@ cd fonts
 ./install.sh
 ```
 
-- scalafmt
-https://scalameta.org/scalafmt/docs/installation.html#nailgun
-```
-// https://scalameta.org/scalafmt/
-brew tap olafurpg/scalafmt
-brew install scalafmt
-```
-
 - ag
 ```
 brew install ag
@@ -42,22 +34,8 @@ brew install ag
 ```
 // https://scalameta.org/metals/
 // https://scalameta.org/metals/docs/editors/vim.html
-
-coursier bootstrap \
-  --java-opt -Xss4m \
-  --java-opt -Xms100m \
-  --java-opt -Dmetals.client=coc.nvim \
-  org.scalameta:metals_2.12:0.7.6 \
-  -r bintray:scalacenter/releases \
-  -r sonatype:snapshots \
-  -o ~/bin/metals-vim -f
 ```
 
-- flow-language-server
-```
-// https://github.com/flowtype/flow-language-server
-yarn global add flow-language-server
-```
 
 - google-java-format
 ```
