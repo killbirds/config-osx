@@ -2,12 +2,11 @@
 
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.1")
 
-// addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.10.0-RC1")
 addDependencyTreePlugin
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.6")
 
-//addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.3.3")
+//addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.16")
 
 addSbtPlugin("ch.epfl.scala" % "sbt-bloop" % "1.4.12")
 
