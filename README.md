@@ -2,20 +2,6 @@
 
 ## Preparation
 
-- ctags
-```
-brew install ctags
-or
-
-brew tap universal-ctags/universal-ctags
-brew install --HEAD universal-ctags
-```
-
-- cscope
-```
-brew install cscope
-```
-
 - brew install vim --override-system-vi --with-lua
 
 - powerline font
