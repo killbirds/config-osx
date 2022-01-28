@@ -9,15 +9,15 @@ let g:ale_fixers = {
 \   'scss': ['prettier'],
 \   'css': ['prettier'],
 \   'json': ['prettier'],
-"\   'java': ['google_java_format'],
-"\   'scala': ['scalafmt'],
+\   'java': [],
+\   'scala': [],
 \}
 
 let g:ale_lint_on_save = 0
 let g:ale_linters_explicit = 1
 
 let g:ale_linters = {
-\   'java': ['checkstyle'],
+\   'java': [],
 \   'javascript': ['eslint'],
 \   'scala': [],
 \   'typescript': [],
