@@ -1,8 +1,6 @@
-# Development Environment 
+# Development Environment
 
 ## Preparation
-
-- brew install vim --override-system-vi --with-lua
 
 - powerline font
 ```
@@ -10,6 +8,29 @@ git clone https://github.com/powerline/fonts.git
 cd fonts
 ./install.sh
 ```
+
+- install zprezto
+https://github.com/sorin-ionescu/prezto
+zprezto 설정 변경
+
+```
+install brew
+install sdk man
+
+brew install node
+brew install nvm
+brew install yarn
+```
+
+
+- tmux
+```
+brew install tmux
+brew install reattach-to-user-namespace
+```
+
+
+- brew install vim
 
 - ag
 ```
