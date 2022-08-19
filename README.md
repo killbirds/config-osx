@@ -9,6 +9,14 @@ cd fonts
 ./install.sh
 ```
 
+- homebrew cask fonts
+https://github.com/Homebrew/homebrew-cask-fonts
+```
+brew tap homebrew/cask-fonts
+brew install font-inconsolata
+```
+
+
 - install zprezto
 https://github.com/sorin-ionescu/prezto
 zprezto 설정 변경
@@ -31,6 +39,7 @@ brew install reattach-to-user-namespace
 
 
 - brew install vim
+- brew install neovim
 
 - ag
 ```

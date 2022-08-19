@@ -17,8 +17,8 @@ let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#fnamemod = ':t'
 
 " ale integration
-let g:airline#extensions#ale#enabled = 1
+let g:airline#extensions#ale#enabled = 0
 
 " coc integration
-"let g:airline#extensions#coc#enabled = 1
+let g:airline#extensions#coc#enabled = 1
 

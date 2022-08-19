@@ -11,6 +11,12 @@ nmap <Leader>P "+P
 vmap <Leader>p "+p
 vmap <Leader>P "+P
 
+" clipboard
+noremap <Leader>y "*y
+noremap <Leader>p "*p
+noremap <Leader>Y "+y
+noremap <Leader>P "+p
+
 " move with arrow key
 "nnoremap <silent> <up>    :move-2<cr>
 "nnoremap <silent> <down>  :move+<cr>
