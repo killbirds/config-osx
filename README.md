@@ -2,18 +2,12 @@
 
 ## Preparation
 
-- powerline font
-```
-git clone https://github.com/powerline/fonts.git
-cd fonts
-./install.sh
-```
-
 - homebrew cask fonts
-https://github.com/Homebrew/homebrew-cask-fonts
 ```
+# https://www.nerdfonts.com
+
 brew tap homebrew/cask-fonts
-brew install font-inconsolata
+brew install --cask font-meslo-lg-nerd-font
 ```
 
 

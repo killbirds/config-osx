@@ -1,0 +1,118 @@
+-- This file can be loaded by calling `lua require('plugins')` from your init.vim
+
+local ensure_packer = function()
+  local fn = vim.fn
+  local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+  if fn.empty(fn.glob(install_path)) > 0 then
+    fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+    vim.cmd [[packadd packer.nvim]]
+    return true
+  end
+  return false
+end
+
+local packer_bootstrap = ensure_packer()
+
+return require('packer').startup(function(use)
+  use 'wbthomason/packer.nvim'
+
+  use 'rstacruz/vim-closer'
+
+  use 'tpope/vim-sensible'
+  use 'tpope/vim-surround'
+  use 'tpope/vim-unimpaired'
+  use { 'scrooloose/nerdcommenter', config = [[require('config.nerdcommenter')]] }
+  -- use { 'ctrlpvim/ctrlp.vim', config = [[require('config.ctrlp')]] }
+  use { 'mileszs/ack.vim', config = [[require('config.ack')]] }
+  use 'christoomey/vim-tmux-navigator'
+
+  use { 'mg979/vim-visual-multi', branch = 'master' }
+
+  use {
+    'w0rp/ale',
+    ft = {'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'css', 'scss', 'json'},
+    config = [[require('config.ale')]]
+  }
+
+  use { 'qpkorr/vim-bufkill', config = [[require('config.vim-bufkill')]] }
+  use { 'airblade/vim-gitgutter', config = [[require('config.vim-gitgutter')]] }
+  use { 'jeetsukumaran/vim-buffergator', config = [[require('config.vim-buffergator')]] }
+  use 'godlygeek/tabular'
+
+  use 'altercation/vim-colors-solarized'
+
+  -- nvim-cmp
+  -- https://github.com/jdhao/nvim-config/blob/590baf4ca95f77418dc6beee80e9ad149cd585d4/lua/plugins.lua
+
+  -- Snippet engine and snippet template
+  use { "L3MON4D3/LuaSnip" }
+
+  -- auto-completion engine
+  use { 'onsails/lspkind-nvim', event = 'VimEnter' }
+  use { 'hrsh7th/nvim-cmp', after = 'lspkind-nvim', config = [[require('config.nvim-cmp')]]}
+
+  -- nvim-cmp completion sources
+  use { 'hrsh7th/cmp-nvim-lsp', after = 'nvim-cmp' }
+  use { 'hrsh7th/cmp-nvim-lua', after = 'nvim-cmp' }
+  use { 'hrsh7th/cmp-path', after = 'nvim-cmp' }
+  use { 'hrsh7th/cmp-buffer', after = 'nvim-cmp' }
+  use { 'hrsh7th/cmp-cmdline', after = 'nvim-cmp' }
+  use { "saadparwaiz1/cmp_luasnip", after = { "nvim-cmp" } }
+ 
+  -- nvim-lsp configuration (it relies on cmp-nvim-lsp, so it should be loaded after cmp-nvim-lsp).
+  use { 'neovim/nvim-lspconfig', after = 'cmp-nvim-lsp', config = [[require('config.nvim-lspconfig')]] }
+
+  use {
+    'scalameta/nvim-metals',
+    requires = { 'nvim-lua/plenary.nvim' },
+    after = 'cmp-nvim-lsp',
+    config = [[require('config.nvim-metals')]]
+  }
+
+  use { 'neoclide/coc.nvim', branch = 'release', config = [[require('config.coc-nvim')]] }
+
+  -- Post-install/update hook with neovim command
+  use { 'nvim-treesitter/nvim-treesitter', event = 'BufEnter', run = ':TSUpdate' }
+
+  use {
+    "nvim-telescope/telescope.nvim",
+    requires = { "nvim-lua/plenary.nvim" },
+    config = [[require('config.telescope')]]
+  }
+  -- search emoji and other symbols
+  use { "nvim-telescope/telescope-symbols.nvim", after = "telescope.nvim" }
+
+  -- statusline
+  use {
+    'nvim-lualine/lualine.nvim',
+    requires = { 'nvim-tree/nvim-web-devicons', opt = true },
+    config = [[require('config.lualine')]],
+  }
+
+  -- file explorer
+  use {
+    'nvim-tree/nvim-tree.lua',
+    requires = { 'nvim-tree/nvim-web-devicons' },
+    config = [[require('config.nvim-tree')]],
+  }
+
+  -- Handy unix command inside Vim (Rename, Move etc.)
+  use { 'tpope/vim-eunuch', cmd = { 'Rename', 'Delete' } }
+
+  -- Repeat vim motions
+  use { 'tpope/vim-repeat', event = 'VimEnter' }
+
+  -- Git command inside vim
+  use { 'tpope/vim-fugitive' }
+
+  -- Better git log display
+  use { "rbong/vim-flog", requires = "tpope/vim-fugitive", cmd = { "Flog" } }
+
+
+  -- Automatically set up your configuration after cloning packer.nvim
+  -- Put this at the end after all plugins
+  if packer_bootstrap then
+    require('packer').sync()
+  end
+end)
+

@@ -1,3 +1,4 @@
-set runtimepath^=~/.vim runtimepath+=~/.vim/after
-let &packpath = &runtimepath
-source ~/.vimrc
+source ~/.config/nvim/core/init.vim
+source ~/.config/nvim/core/keys.vim
+source ~/.config/nvim/core/plugins.vim
+
