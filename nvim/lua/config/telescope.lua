@@ -10,7 +10,8 @@ require("telescope").setup({
   },
   pickers = {
     find_files = {
-      find_command = { "ag", "-l", "--nocolor", "--hidden", "-g", "" },
+      -- theme = "dropdown",
+      -- find_command = { "ag", "-l", "--nocolor", "--hidden", "-g", "" },
     },
   },
 })

@@ -26,7 +26,11 @@ return require('packer').startup(function(use)
   use 'kylechui/nvim-surround'
 
   use { 'scrooloose/nerdcommenter', config = [[require('config.nerdcommenter')]] }
+
   use { 'mileszs/ack.vim', config = [[require('config.ack')]] }
+  use { 'junegunn/fzf', run = ":call fzf#install()" }
+  use { 'junegunn/fzf.vim' }
+
   use 'christoomey/vim-tmux-navigator'
 
   use { 'mg979/vim-visual-multi', branch = 'master' }

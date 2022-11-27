@@ -17,7 +17,11 @@ require("nvim-tree").setup({
     dotfiles = true,
   },
   actions = {
+    change_dir = {
+      restrict_above_cwd = true
+    },
     open_file = {
+      quit_on_open = false,
       window_picker = {
         enable = false
       }

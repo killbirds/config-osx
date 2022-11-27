@@ -40,6 +40,11 @@ brew install reattach-to-user-namespace
 brew install ag
 ```
 
+- rg
+```
+brew instrall ripgrep
+```
+
 - metals
 ```
 // https://scalameta.org/metals/
