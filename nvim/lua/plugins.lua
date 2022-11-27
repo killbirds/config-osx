@@ -17,7 +17,9 @@ return require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
 
   -- Theme
-  use 'lifepillar/vim-solarized8'
+  -- use 'lifepillar/vim-solarized8'
+  -- use "rebelot/kanagawa.nvim"
+  use { "catppuccin/nvim", as = "catppuccin" }
 
   use 'rstacruz/vim-closer'
   use 'tpope/vim-sensible'
@@ -114,7 +116,7 @@ return require('packer').startup(function(use)
   use { "rbong/vim-flog", requires = "tpope/vim-fugitive", cmd = { "Flog" } }
 
   -- Shows a git diff in the sign column.
-  use { 'airblade/vim-gitgutter', config = [[require('config.vim-gitgutter')]] }
+  use { 'lewis6991/gitsigns.nvim', config = [[require('config.gitsigns')]] }
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
