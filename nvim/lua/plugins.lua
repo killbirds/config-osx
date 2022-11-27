@@ -62,6 +62,7 @@ return require('packer').startup(function(use)
   -- nvim-lsp configuration (it relies on cmp-nvim-lsp, so it should be loaded after cmp-nvim-lsp).
   use { 'neovim/nvim-lspconfig', after = 'cmp-nvim-lsp', config = [[require('config.nvim-lspconfig')]] }
 
+  -- scala metals
   use {
     'scalameta/nvim-metals',
     requires = { 'nvim-lua/plenary.nvim' },
@@ -69,10 +70,12 @@ return require('packer').startup(function(use)
     config = [[require('config.nvim-metals')]]
   }
 
-  use { 'neoclide/coc.nvim', branch = 'release', config = [[require('config.coc-nvim')]] }
+  -- lsp package manager
+  use { "williamboman/mason.nvim", config = [[require('config.mason')]] }
+  use { "williamboman/mason-lspconfig.nvim", alter = { "mason", "nvim-lspconfig" }, config = [[require('config.mason-lspconfig')]] }
 
   -- Post-install/update hook with neovim command
-  use { 'nvim-treesitter/nvim-treesitter', event = 'BufEnter', run = ':TSUpdate' }
+  use { 'nvim-treesitter/nvim-treesitter', event = 'BufEnter', run = ':TSUpdate', config = [[require('config.nvim-treesitter')]] }
 
   use {
     "nvim-telescope/telescope.nvim",
