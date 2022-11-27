@@ -86,8 +86,16 @@ return require('packer').startup(function(use)
   -- statusline
   use {
     'nvim-lualine/lualine.nvim',
+    event = "VimEnter",
     requires = { 'nvim-tree/nvim-web-devicons', opt = true },
     config = [[require('config.lualine')]],
+  }
+
+  use {
+    "akinsho/bufferline.nvim",
+    event = "VimEnter",
+    requires = { 'nvim-tree/nvim-web-devicons', opt = true },
+    config = [[require('config.bufferline')]]
   }
 
   -- file explorer
