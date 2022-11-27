@@ -8,10 +8,10 @@ let g:buffergator_suppress_keymaps = 1
 "let g:buffergator_mru_cycle_loop = 1
 
 " 이전 버퍼로 이동
-nmap <C-I> :BuffergatorMruCyclePrev<CR>
+nmap <silent> <C-I> :BuffergatorMruCyclePrev<CR>
 
 " 다음 버퍼로 이동
-nmap <C-O> :BuffergatorMruCycleNext<CR>
+nmap <silent> <C-O> :BuffergatorMruCycleNext<CR>
 
 " 모든 버퍼 보기
 nmap <leader>bl :BuffergatorOpen<CR>

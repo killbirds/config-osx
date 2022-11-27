@@ -3,24 +3,23 @@
 let g:ale_fixers = {
 \   'javascript': ['prettier'],
 \   'javascriptreact': ['prettier'],
-\   'js': ['prettier'],
 \   'typescript': ['prettier'],
 \   'typescriptreact': ['prettier'],
 \   'scss': ['prettier'],
 \   'css': ['prettier'],
 \   'json': ['prettier'],
-\   'java': [],
 \   'scala': [],
+\   'java': [],
 \}
 
 let g:ale_lint_on_save = 0
 let g:ale_linters_explicit = 1
 
 let g:ale_linters = {
-\   'java': [],
 \   'javascript': ['eslint'],
-\   'scala': [],
 \   'typescript': [],
+\   'scala': [],
+\   'java': [],
 \}
 
 " Set this setting in vimrc if you want to fix files automatically on save.
@@ -34,10 +33,4 @@ let g:ale_disable_lsp = 1
 let g:ale_sign_column_always = 1
 
 let g:ale_javascript_prettier_use_local_config = 1
-
-let g:ale_scala_scalafmt_executable = 'ng'
-
-let g:ale_java_google_java_format_options = '--aosp --skip-sorting-imports --offset 0 --length 120'
-
-let g:ale_java_checkstyle_options = '-c ~/.custom_java_checks.xml'
 

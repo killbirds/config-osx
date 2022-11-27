@@ -1,1 +1,1 @@
-map <C-c> :BD<cr>
+map <silent> <C-c> :BD<cr>
