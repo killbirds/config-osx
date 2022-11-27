@@ -1,3 +1,5 @@
+lua require('keys')
+
 " inoremap jj <esc> " jk is escape
 nnoremap <leader><space> :nohlsearch<CR>
 

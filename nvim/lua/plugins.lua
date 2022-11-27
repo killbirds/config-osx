@@ -58,7 +58,7 @@ return require('packer').startup(function(use)
   use { 'hrsh7th/cmp-buffer', after = 'nvim-cmp' }
   use { 'hrsh7th/cmp-cmdline', after = 'nvim-cmp' }
   use { "saadparwaiz1/cmp_luasnip", after = { "nvim-cmp" } }
- 
+
   -- nvim-lsp configuration (it relies on cmp-nvim-lsp, so it should be loaded after cmp-nvim-lsp).
   use { 'neovim/nvim-lspconfig', after = 'cmp-nvim-lsp', config = [[require('config.nvim-lspconfig')]] }
 
@@ -82,8 +82,6 @@ return require('packer').startup(function(use)
     requires = { "nvim-lua/plenary.nvim" },
     config = [[require('config.telescope')]]
   }
-  -- search emoji and other symbols
-  use { "nvim-telescope/telescope-symbols.nvim", after = "telescope.nvim" }
 
   -- statusline
   use {
