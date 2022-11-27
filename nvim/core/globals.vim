@@ -144,11 +144,3 @@ set ignorecase      " Ignore case when searching...
 set smartcase       " ...unless we type a capital
 set nowrapscan
 
-" =============== Theme ========================
-let &t_Co=256
-set background=dark
-try
-  colorscheme solarized
-catch
-endtry
-

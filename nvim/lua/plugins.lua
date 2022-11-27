@@ -39,8 +39,6 @@ return require('packer').startup(function(use)
   use { 'jeetsukumaran/vim-buffergator', config = [[require('config.vim-buffergator')]] }
   use 'godlygeek/tabular'
 
-  use 'altercation/vim-colors-solarized'
-
   -- nvim-cmp
   -- https://github.com/jdhao/nvim-config/blob/590baf4ca95f77418dc6beee80e9ad149cd585d4/lua/plugins.lua
 
@@ -106,7 +104,7 @@ return require('packer').startup(function(use)
   }
 
   -- Handy unix command inside Vim (Rename, Move etc.)
-  use { 'tpope/vim-eunuch', cmd = { 'Rename', 'Delete' } }
+  use { 'tpope/vim-eunuch', cmd = { 'Rename', 'Delete', 'Move', 'Remove', 'Mkdir' } }
 
   -- Repeat vim motions
   use { 'tpope/vim-repeat', event = 'VimEnter' }
@@ -117,6 +115,7 @@ return require('packer').startup(function(use)
   -- Better git log display
   use { "rbong/vim-flog", requires = "tpope/vim-fugitive", cmd = { "Flog" } }
 
+  use 'lifepillar/vim-solarized8'
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
