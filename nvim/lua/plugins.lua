@@ -16,13 +16,14 @@ local packer_bootstrap = ensure_packer()
 return require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
 
-  use 'rstacruz/vim-closer'
+  -- Theme
+  use 'lifepillar/vim-solarized8'
 
+  use 'rstacruz/vim-closer'
   use 'tpope/vim-sensible'
-  use 'tpope/vim-surround'
-  use 'tpope/vim-unimpaired'
+  use 'kylechui/nvim-surround'
+
   use { 'scrooloose/nerdcommenter', config = [[require('config.nerdcommenter')]] }
-  -- use { 'ctrlpvim/ctrlp.vim', config = [[require('config.ctrlp')]] }
   use { 'mileszs/ack.vim', config = [[require('config.ack')]] }
   use 'christoomey/vim-tmux-navigator'
 
@@ -34,14 +35,8 @@ return require('packer').startup(function(use)
     config = [[require('config.ale')]]
   }
 
-  use { 'qpkorr/vim-bufkill', config = [[require('config.vim-bufkill')]] }
-  use { 'airblade/vim-gitgutter', config = [[require('config.vim-gitgutter')]] }
-  use { 'jeetsukumaran/vim-buffergator', config = [[require('config.vim-buffergator')]] }
-  use 'godlygeek/tabular'
-
   -- nvim-cmp
   -- https://github.com/jdhao/nvim-config/blob/590baf4ca95f77418dc6beee80e9ad149cd585d4/lua/plugins.lua
-
   -- Snippet engine and snippet template
   use { "L3MON4D3/LuaSnip" }
 
@@ -96,6 +91,9 @@ return require('packer').startup(function(use)
     config = [[require('config.bufferline')]]
   }
 
+  use { 'qpkorr/vim-bufkill', config = [[require('config.vim-bufkill')]] }
+  use { 'jeetsukumaran/vim-buffergator', config = [[require('config.vim-buffergator')]] }
+
   -- file explorer
   use {
     'nvim-tree/nvim-tree.lua',
@@ -115,7 +113,8 @@ return require('packer').startup(function(use)
   -- Better git log display
   use { "rbong/vim-flog", requires = "tpope/vim-fugitive", cmd = { "Flog" } }
 
-  use 'lifepillar/vim-solarized8'
+  -- Shows a git diff in the sign column.
+  use { 'airblade/vim-gitgutter', config = [[require('config.vim-gitgutter')]] }
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
