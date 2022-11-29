@@ -7,6 +7,7 @@ require("nvim-tree").setup({
     mappings = {
       list = {
         { key = "u", action = "dir_up" },
+        { key = "<C-r>", action = "refresh" },
       },
     },
   },
@@ -15,6 +16,7 @@ require("nvim-tree").setup({
   },
   filters = {
     dotfiles = true,
+    custom = { 'node_modules' }
   },
   actions = {
     change_dir = {
