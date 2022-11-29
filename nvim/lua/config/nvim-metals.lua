@@ -6,7 +6,10 @@ local metals_config = require('metals').bare_config()
 
 -- Example of settings
 metals_config.settings = {
+  serverVersion = "0.11.9",
   showImplicitArguments = true,
+  ammoniteJvmProperties = {"-Xmx2G"},
+  bloopSbtAlreadyInstalled = true,
   excludedPackages = { 'akka.actor.typed.javadsl', 'com.github.swagger.akka.javadsl' },
 }
 
