@@ -21,7 +21,6 @@ return require('packer').startup(function(use)
   -- use "rebelot/kanagawa.nvim"
   use { "catppuccin/nvim", as = "catppuccin" }
 
-  use 'rstacruz/vim-closer'
   use 'tpope/vim-sensible'
   use 'kylechui/nvim-surround'
 
