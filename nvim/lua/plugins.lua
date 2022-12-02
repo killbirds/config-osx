@@ -24,7 +24,7 @@ return require('packer').startup(function(use)
   use 'tpope/vim-sensible'
   use 'kylechui/nvim-surround'
 
-  use { 'scrooloose/nerdcommenter', config = [[require('config.nerdcommenter')]] }
+  use { 'preservim/nerdcommenter', config = [[require('config.nerdcommenter')]] }
 
   use { 'mileszs/ack.vim', config = [[require('config.ack')]] }
   use { 'junegunn/fzf', run = ":call fzf#install()" }
@@ -44,6 +44,7 @@ return require('packer').startup(function(use)
   -- https://github.com/jdhao/nvim-config/blob/590baf4ca95f77418dc6beee80e9ad149cd585d4/lua/plugins.lua
   -- Snippet engine and snippet template
   use { "L3MON4D3/LuaSnip" }
+  use { "saadparwaiz1/cmp_luasnip", after = { "nvim-cmp" } }
 
   -- auto-completion engine
   use { 'onsails/lspkind-nvim', event = 'VimEnter' }
@@ -55,7 +56,6 @@ return require('packer').startup(function(use)
   use { 'hrsh7th/cmp-path', after = 'nvim-cmp' }
   use { 'hrsh7th/cmp-buffer', after = 'nvim-cmp' }
   use { 'hrsh7th/cmp-cmdline', after = 'nvim-cmp' }
-  use { "saadparwaiz1/cmp_luasnip", after = { "nvim-cmp" } }
 
   -- nvim-lsp configuration (it relies on cmp-nvim-lsp, so it should be loaded after cmp-nvim-lsp).
   use { 'neovim/nvim-lspconfig', after = 'cmp-nvim-lsp', config = [[require('config.nvim-lspconfig')]] }

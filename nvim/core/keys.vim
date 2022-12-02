@@ -42,3 +42,11 @@ nnoremap <leader>ff <cmd>Telescope find_files<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
 nnoremap <leader>fh <cmd>Telescope help_tags<cr>
+
+" terminal
+tnoremap <Esc> <C-\><C-n>
+
+" Disable command in command mode
+command! -nargs=* W w
+
+
