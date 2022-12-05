@@ -20,6 +20,6 @@ install=$cur/script/install.sh
 
 git config --global core.excludesfile ~/.gitignore_global
 
-vi +PlugInstall +qall
+vi +PackerInstall +PackerCompile +qall
 
 
