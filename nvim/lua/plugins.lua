@@ -96,7 +96,8 @@ return require('packer').startup(function(use)
     config = [[require('config.bufferline')]]
   }
 
-  use { 'qpkorr/vim-bufkill', config = [[require('config.vim-bufkill')]] }
+  use { 'famiu/bufdelete.nvim', config = [[require('config.bufdelete')]] }
+
   use { 'jeetsukumaran/vim-buffergator', config = [[require('config.vim-buffergator')]] }
 
   -- file explorer
