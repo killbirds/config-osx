@@ -1,1 +1,1 @@
-vim.cmd [[source ~/.config/nvim/lua/config/vim-bufkill.vim]]
+vim.keymap.set('', '<C-c>', '<cmd>BD<cr>', { silent = true })

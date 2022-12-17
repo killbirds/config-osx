@@ -36,13 +36,6 @@ nnoremap <silent> <left>  :vertical res -10<cr>
 nnoremap <silent> <right> :vertical res +10<cr>
 
 
-" Find files using Telescope command-line sugar.
-nnoremap <silent> <C-p> <cmd>Telescope find_files<cr>
-nnoremap <leader>ff <cmd>Telescope find_files<cr>
-nnoremap <leader>fg <cmd>Telescope live_grep<cr>
-nnoremap <leader>fb <cmd>Telescope buffers<cr>
-nnoremap <leader>fh <cmd>Telescope help_tags<cr>
-
 " terminal
 tnoremap <Esc> <C-\><C-n>
 
