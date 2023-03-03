@@ -35,7 +35,7 @@ return require('packer').startup(function(use)
   use { 'mg979/vim-visual-multi', branch = 'master' }
 
   use {
-    'w0rp/ale',
+    'dense-analysis/ale',
     ft = {'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'css', 'scss', 'json'},
     config = [[require('config.ale')]]
   }

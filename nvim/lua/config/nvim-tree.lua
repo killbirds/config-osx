@@ -40,3 +40,10 @@ vim.keymap.set("n", "<F3>", function()
   return vim.cmd [[NvimTreeFindFile]]
 end, { silent = true, desc = "find_file nvim-tree" })
 
+-- https://github.com/nvim-tree/nvim-tree.lua/wiki/Open-At-Startup#opening-nvim-tree-at-neovim-startup
+local function open_nvim_tree()
+  -- open the tree
+  require("nvim-tree.api").tree.open()
+end
+
+vim.api.nvim_create_autocmd({ "VimEnter" }, { callback = open_nvim_tree })
