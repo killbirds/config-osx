@@ -36,7 +36,7 @@ return require('packer').startup(function(use)
 
   use {
     'dense-analysis/ale',
-    ft = {'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'css', 'scss', 'json'},
+    ft = {'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'css', 'scss', 'json', 'rust'},
     config = [[require('config.ale')]]
   }
 

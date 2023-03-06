@@ -10,6 +10,7 @@ let g:ale_fixers = {
 \   'json': ['prettier'],
 \   'scala': [],
 \   'java': [],
+\   'rust': ['rustfmt'],
 \}
 
 let g:ale_lint_on_save = 0
