@@ -29,9 +29,12 @@ require("bufferline").setup {
 
       return true
     end,
+    get_element_icon = function(element)
+      local icon, hl = require('nvim-web-devicons').get_icon_by_filetype(element.filetype, { default = true })
+      return icon, hl
+    end,
     show_buffer_icons = true,
     show_buffer_close_icons = false,
-    show_buffer_default_icon = true ,
     show_close_icon = false,
     show_tab_indicators = true,
     persist_buffer_sort = true,

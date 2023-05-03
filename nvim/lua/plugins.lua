@@ -82,6 +82,8 @@ return require('packer').startup(function(use)
   }
 
   -- statusline
+  use { 'nvim-tree/nvim-web-devicons' }
+
   use {
     'nvim-lualine/lualine.nvim',
     event = "VimEnter",
@@ -103,7 +105,7 @@ return require('packer').startup(function(use)
   -- file explorer
   use {
     'nvim-tree/nvim-tree.lua',
-    requires = { 'nvim-tree/nvim-web-devicons' },
+    requires = { 'nvim-tree/nvim-web-devicons', opt = true },
     config = [[require('config.nvim-tree')]],
   }
 
@@ -121,6 +123,24 @@ return require('packer').startup(function(use)
 
   -- Shows a git diff in the sign column.
   use { 'lewis6991/gitsigns.nvim', config = [[require('config.gitsigns')]] }
+
+  -- chatGPT
+  use({
+    "jackMort/ChatGPT.nvim",
+      config = function()
+        require("chatgpt").setup({
+          -- optional configuration
+          keymaps = {
+            submit = "<C-r>",
+          },
+        })
+      end,
+      requires = {
+        "MunifTanjim/nui.nvim",
+        "nvim-lua/plenary.nvim",
+        "nvim-telescope/telescope.nvim"
+      }
+  })
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
