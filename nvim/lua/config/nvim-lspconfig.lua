@@ -23,7 +23,11 @@ require('lspconfig')['rust_analyzer'].setup{
     flags = lsp_flags,
     -- Server-specific settings...
     settings = {
-      ['rust-analyzer'] = {}
+      ['rust-analyzer'] = {
+        cargo = {
+          allFeatures = true,
+        }
+      }
     }
 }
 
