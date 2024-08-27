@@ -6,7 +6,7 @@ local metals_config = require('metals').bare_config()
 
 -- Example of settings
 metals_config.settings = {
-  serverVersion = "0.11.11",
+  serverVersion = "1.3.1",
   showImplicitArguments = true,
   ammoniteJvmProperties = {"-Xmx2G"},
   bloopSbtAlreadyInstalled = true,
@@ -24,7 +24,8 @@ vim.api.nvim_create_autocmd('FileType', {
   -- NOTE: You may or may not want java included here. You will need it if you
   -- want basic Java support but it may also conflict if you are using
   -- something like nvim-jdtls which also works on a java filetype autocmd.
-  pattern = { 'scala', 'sbt', 'java' },
+  -- pattern = { 'scala', 'sbt', 'java' },
+  pattern = { 'scala', 'sbt' },
   callback = function(opts)
     require('metals').initialize_or_attach(metals_config)
 
