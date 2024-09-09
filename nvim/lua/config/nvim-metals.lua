@@ -6,7 +6,7 @@ local metals_config = require('metals').bare_config()
 
 -- Example of settings
 metals_config.settings = {
-  serverVersion = "1.3.1",
+  serverVersion = "1.3.5",
   showImplicitArguments = true,
   ammoniteJvmProperties = {"-Xmx2G"},
   bloopSbtAlreadyInstalled = true,
