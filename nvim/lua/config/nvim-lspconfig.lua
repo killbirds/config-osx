@@ -13,7 +13,7 @@ local lsp_flags = {
   debounce_text_changes = 150,
 }
 
-require('lspconfig')['tsserver'].setup{
+require('lspconfig')['ts_ls'].setup{
     on_attach = keys.on_attach,
     flags = lsp_flags,
 }
