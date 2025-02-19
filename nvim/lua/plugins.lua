@@ -125,22 +125,22 @@ return require('packer').startup(function(use)
   use { 'lewis6991/gitsigns.nvim', config = [[require('config.gitsigns')]] }
 
   -- chatGPT
-  use({
-    "jackMort/ChatGPT.nvim",
-      config = function()
-        require("chatgpt").setup({
-          -- optional configuration
-          keymaps = {
-            submit = "<C-r>",
-          },
-        })
-      end,
-      requires = {
-        "MunifTanjim/nui.nvim",
-        "nvim-lua/plenary.nvim",
-        "nvim-telescope/telescope.nvim"
-      }
-  })
+  -- use({
+  --   "jackMort/ChatGPT.nvim",
+  --     config = function()
+  --       require("chatgpt").setup({
+  --         -- optional configuration
+  --         keymaps = {
+  --           submit = "<C-r>",
+  --         },
+  --       })
+  --     end,
+  --     requires = {
+  --       "MunifTanjim/nui.nvim",
+  --       "nvim-lua/plenary.nvim",
+  --       "nvim-telescope/telescope.nvim"
+  --     }
+  -- })
 
   -- use { "github/copilot.vim" }
 
