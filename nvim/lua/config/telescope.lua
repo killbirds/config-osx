@@ -1,5 +1,6 @@
 local actions = require("telescope.actions")
-require("telescope").setup({
+local telescope = require("telescope")
+telescope.setup({
   defaults = {
     mappings = {
       i = {
@@ -25,8 +26,14 @@ require("telescope").setup({
       -- theme = "dropdown",
       -- find_command = { "ag", "-l", "--nocolor", "--hidden", "-g", "" },
     },
+    buffers = {
+      sort_mru = true,
+      ignore_current_buffer = true,
+    }
   },
 })
+
+telescope.load_extension('fzf')
 
 vim.keymap.set('n', '<C-p>', '<cmd>Telescope find_files<cr>', { silent = true })
 vim.keymap.set('n', '<leader>ff', '<cmd>Telescope find_files<cr>', { silent = true })
