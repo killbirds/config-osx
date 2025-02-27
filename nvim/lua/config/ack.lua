@@ -1,1 +1,1 @@
-vim.cmd [[source ~/.config/nvim/lua/config/ack.vim]]
+vim.cmd([[source ~/.config/nvim/lua/config/ack.vim]])

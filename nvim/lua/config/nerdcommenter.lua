@@ -1,1 +1,1 @@
-vim.cmd [[source ~/.config/nvim/lua/config/nerdcommenter.vim]]
+vim.cmd([[source ~/.config/nvim/lua/config/nerdcommenter.vim]])
