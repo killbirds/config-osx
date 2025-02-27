@@ -27,7 +27,7 @@ return require('packer').startup(function(use)
   use { 'preservim/nerdcommenter', config = [[require('config.nerdcommenter')]] }
 
   use { 'mileszs/ack.vim', config = [[require('config.ack')]] }
-  use { 'junegunn/fzf', run = ":call fzf#install()" }
+  use { 'junegunn/fzf', run = function() vim.fn["fzf#install"]() end }
   use { 'junegunn/fzf.vim' }
 
   use 'christoomey/vim-tmux-navigator'
@@ -44,7 +44,8 @@ return require('packer').startup(function(use)
   -- https://github.com/jdhao/nvim-config/blob/590baf4ca95f77418dc6beee80e9ad149cd585d4/lua/plugins.lua
   -- Snippet engine and snippet template
   use { "L3MON4D3/LuaSnip" }
-  use { "saadparwaiz1/cmp_luasnip", after = { "nvim-cmp" } }
+  use { "saadparwaiz1/cmp_luasnip", after = { "nvim-cmp", "LuaSnip" } }
+
 
   -- auto-completion engine
   use { 'onsails/lspkind-nvim', event = 'VimEnter' }
@@ -70,10 +71,15 @@ return require('packer').startup(function(use)
 
   -- lsp package manager
   use { "williamboman/mason.nvim", config = [[require('config.mason')]] }
-  use { "williamboman/mason-lspconfig.nvim", alter = { "mason", "nvim-lspconfig" }, config = [[require('config.mason-lspconfig')]] }
+  use { "williamboman/mason-lspconfig.nvim", after = { "mason.nvim", "nvim-lspconfig" }, config = [[require('config.mason-lspconfig')]] }
 
   -- Post-install/update hook with neovim command
-  use { 'nvim-treesitter/nvim-treesitter', event = 'BufEnter', run = ':TSUpdate', config = [[require('config.nvim-treesitter')]] }
+  use {
+    'nvim-treesitter/nvim-treesitter',
+    event = 'BufEnter',
+    run = function() vim.cmd("TSUpdate") end,
+    config = [[require('config.nvim-treesitter')]]
+  }
 
   use {
     "nvim-telescope/telescope.nvim",
