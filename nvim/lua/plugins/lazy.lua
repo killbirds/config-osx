@@ -76,7 +76,7 @@ require("lazy").setup({
 	},
 	{
 		"williamboman/mason-lspconfig.nvim",
-		dependencies = { "mason.nvim", "nvim-lspconfig" },
+		dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
 		config = function()
 			require("config.mason-lspconfig")
 		end,
@@ -135,7 +135,7 @@ require("lazy").setup({
 	{
 		"echasnovski/mini.files",
 		config = function()
-			require("mini.files").setup()
+			require("config.mini-files")
 		end,
 	},
 

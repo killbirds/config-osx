@@ -24,21 +24,14 @@ return require("packer").startup(function(use)
 	use("tpope/vim-sensible")
 	use("kylechui/nvim-surround")
 
-	use({ "preservim/nerdcommenter", config = [[require('config.nerdcommenter')]] })
+	use({ "numToStr/Comment.nvim", config = [[require('config.comment')]] })
 
 	use({ "mileszs/ack.vim", config = [[require('config.ack')]] })
-	-- use { 'junegunn/fzf', run = function() vim.fn["fzf#install"]() end }
-	-- use { 'junegunn/fzf.vim' }
 
 	use("christoomey/vim-tmux-navigator")
 
 	use({ "mg979/vim-visual-multi", branch = "master" })
 
-	-- use {
-	--   'dense-analysis/ale',
-	--   ft = {'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'css', 'scss', 'json', 'rust'},
-	--   config = [[require('config.ale')]]
-	-- }
 	use({
 		"mfussenegger/nvim-lint",
 		config = [[require('config.nvim-lint')]],
@@ -81,7 +74,7 @@ return require("packer").startup(function(use)
 	use({ "williamboman/mason.nvim", config = [[require('config.mason')]] })
 	use({
 		"williamboman/mason-lspconfig.nvim",
-		after = { "mason.nvim", "nvim-lspconfig" },
+		after = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
 		config = [[require('config.mason-lspconfig')]],
 	})
 
@@ -121,8 +114,6 @@ return require("packer").startup(function(use)
 
 	use({ "famiu/bufdelete.nvim", config = [[require('config.bufdelete')]] })
 
-	-- use { 'jeetsukumaran/vim-buffergator', config = [[require('config.vim-buffergator')]] }
-
 	-- file explorer
 	use({
 		"nvim-tree/nvim-tree.lua",
@@ -131,12 +122,9 @@ return require("packer").startup(function(use)
 	})
 
 	-- Handy unix command inside Vim (Rename, Move etc.)
-	-- use { 'tpope/vim-eunuch', cmd = { 'Rename', 'Delete', 'Move', 'Remove', 'Mkdir' } }
 	use({
 		"echasnovski/mini.files",
-		config = function()
-			require("mini.files").setup()
-		end,
+		config = [[require('config.mini-files')]],
 	})
 
 	-- Repeat vim motions
@@ -150,24 +138,6 @@ return require("packer").startup(function(use)
 
 	-- Shows a git diff in the sign column.
 	use({ "lewis6991/gitsigns.nvim", config = [[require('config.gitsigns')]] })
-
-	-- chatGPT
-	-- use({
-	--   "jackMort/ChatGPT.nvim",
-	--     config = function()
-	--       require("chatgpt").setup({
-	--         -- optional configuration
-	--         keymaps = {
-	--           submit = "<C-r>",
-	--         },
-	--       })
-	--     end,
-	--     requires = {
-	--       "MunifTanjim/nui.nvim",
-	--       "nvim-lua/plenary.nvim",
-	--       "nvim-telescope/telescope.nvim"
-	--     }
-	-- })
 
 	-- use { "github/copilot.vim" }
 
