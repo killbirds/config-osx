@@ -1,32 +1,33 @@
 local M = {}
 
--- Use an on_attach function to only map the following keys
--- after the language server attaches to the current buffer
+-- 공통 키맵 설정 함수
+local function set_keymap(bufnr, lhs, rhs, desc)
+	local bufopts = { noremap = true, silent = true, buffer = bufnr }
+	vim.keymap.set("n", lhs, rhs, vim.tbl_extend("force", bufopts, { desc = desc }))
+end
+
+-- on_attach 함수: LSP가 버퍼에 연결될 때 실행됩니다.
 local on_attach = function(client, bufnr)
 	-- Enable completion triggered by <c-x><c-o>
 	vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
-	-- Mappings.
-	-- See `:help vim.lsp.*` for documentation on any of the below functions
-	local bufopts = { noremap = true, silent = true, buffer = bufnr }
-	vim.keymap.set("n", "gD", vim.lsp.buf.declaration, bufopts)
-	vim.keymap.set("n", "gd", vim.lsp.buf.definition, bufopts)
-	vim.keymap.set("n", "K", vim.lsp.buf.hover, bufopts)
-	vim.keymap.set("n", "gi", vim.lsp.buf.implementation, bufopts)
-	-- duplicate with tmux key binding
-	-- vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
-	vim.keymap.set("n", "<space>wa", vim.lsp.buf.add_workspace_folder, bufopts)
-	vim.keymap.set("n", "<space>wr", vim.lsp.buf.remove_workspace_folder, bufopts)
-	vim.keymap.set("n", "<space>wl", function()
+	-- 기본 LSP 키바인딩
+	set_keymap(bufnr, "gD", vim.lsp.buf.declaration, "Go to Declaration")
+	set_keymap(bufnr, "gd", vim.lsp.buf.definition, "Go to Definition")
+	set_keymap(bufnr, "K", vim.lsp.buf.hover, "Show Hover Documentation")
+	set_keymap(bufnr, "gi", vim.lsp.buf.implementation, "Go to Implementation")
+	set_keymap(bufnr, "<space>wa", vim.lsp.buf.add_workspace_folder, "Add Workspace Folder")
+	set_keymap(bufnr, "<space>wr", vim.lsp.buf.remove_workspace_folder, "Remove Workspace Folder")
+	set_keymap(bufnr, "<space>wl", function()
 		print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-	end, bufopts)
-	vim.keymap.set("n", "gy", vim.lsp.buf.type_definition, bufopts)
-	vim.keymap.set("n", "<space>rn", vim.lsp.buf.rename, bufopts)
-	vim.keymap.set("n", "<space>ca", vim.lsp.buf.code_action, bufopts)
-	vim.keymap.set("n", "gr", vim.lsp.buf.references, bufopts)
-	vim.keymap.set("n", "<space>f", function()
+	end, "List Workspace Folders")
+	set_keymap(bufnr, "gy", vim.lsp.buf.type_definition, "Go to Type Definition")
+	set_keymap(bufnr, "<space>rn", vim.lsp.buf.rename, "Rename Symbol")
+	set_keymap(bufnr, "<space>ca", vim.lsp.buf.code_action, "Code Action")
+	set_keymap(bufnr, "gr", vim.lsp.buf.references, "Go to References")
+	set_keymap(bufnr, "<space>f", function()
 		vim.lsp.buf.format({ async = true })
-	end, bufopts)
+	end, "Format Buffer")
 end
 
 M.on_attach = on_attach

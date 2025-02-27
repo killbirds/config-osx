@@ -1,26 +1,16 @@
 local actions = require("telescope.actions")
 local telescope = require("telescope")
+
 telescope.setup({
 	defaults = {
+		file_ignore_patterns = { "node_modules", ".git" },
 		mappings = {
 			i = {
 				["<esc>"] = actions.close,
 				["<C-h>"] = "which_key",
-				["<C-j>"] = {
-					actions.move_selection_next,
-					type = "action",
-					opts = { nowait = true, silent = true },
-				},
-				["<C-k>"] = {
-					actions.move_selection_previous,
-					type = "action",
-					opts = { nowait = true, silent = true },
-				},
-				["<C-o>"] = {
-					actions.select_default,
-					type = "action",
-					opts = { nowait = true, silent = true },
-				},
+				["<C-j>"] = actions.move_selection_next,
+				["<C-k>"] = actions.move_selection_previous,
+				["<C-o>"] = actions.select_default,
 			},
 		},
 	},
@@ -36,10 +26,19 @@ telescope.setup({
 	},
 })
 
+-- Load fzf extension
 telescope.load_extension("fzf")
 
-vim.keymap.set("n", "<C-p>", "<cmd>Telescope find_files<cr>", { silent = true })
-vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { silent = true })
-vim.keymap.set("n", "<leader>fg", "<cmd>Telescope live_grep<cr>", { silent = true })
-vim.keymap.set("n", "<leader>fb", "<cmd>Telescope buffers<cr>", { silent = true })
-vim.keymap.set("n", "<leader>fh", "<cmd>Telescope help_tags<cr>", { silent = true })
+-- Key mappings for Telescope
+local telescope_mappings = {
+	["<C-p>"] = "<cmd>Telescope find_files<cr>",
+	["<leader>ff"] = "<cmd>Telescope find_files<cr>",
+	["<leader>fg"] = "<cmd>Telescope live_grep<cr>",
+	["<leader>fb"] = "<cmd>Telescope buffers<cr>",
+	["<leader>fh"] = "<cmd>Telescope help_tags<cr>",
+}
+
+-- Set key mappings in normal mode
+for key, cmd in pairs(telescope_mappings) do
+	vim.keymap.set("n", key, cmd, { silent = true })
+end

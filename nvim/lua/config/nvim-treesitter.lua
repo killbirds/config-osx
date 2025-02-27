@@ -1,36 +1,44 @@
 require("nvim-treesitter.configs").setup({
 	-- A list of parser names, or "all"
-	ensure_installed = { "scala", "typescript", "javascript", "rust", "toml" },
+	ensure_installed = { "scala", "typescript", "javascript", "rust", "toml", "python", "html", "css" }, -- 필요한 언어 추가
 
 	-- Install parsers synchronously (only applied to `ensure_installed`)
 	sync_install = false,
 
 	-- Automatically install missing parsers when entering buffer
-	-- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+	-- Set to false if you want to handle parser installations manually
 	auto_install = true,
 
 	-- List of parsers to ignore installing (for "all")
-	ignore_install = { "lua" },
-
-	---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
-	-- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
+	ignore_install = {}, -- 불필요한 언어는 여기서 제외
 
 	ident = { enable = true },
 
 	highlight = {
-		-- `false` will disable the whole extension
+		-- Enable/disable tree-sitter highlighting
 		enable = true,
 
-		-- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
-		-- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
-		-- the name of the parser)
-		-- list of language that will be disabled
-		disable = { "lua", "rust" },
+		-- List of parsers that will be disabled
+		disable = { "lua", "rust" }, -- 기본 하이라이팅을 제외할 언어 추가
 
-		-- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-		-- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-		-- Using this option may slow down your editor, and you may see some duplicate highlights.
-		-- Instead of true it can also be a list of languages
+		-- Use tree-sitter and syntax highlighting together (may cause performance issues)
 		additional_vim_regex_highlighting = false,
+	},
+
+	-- Enable incremental selection
+	incremental_selection = {
+		enable = true,
+		keymaps = {
+			init_selection = "<CR>", -- 시작할 때
+			node_incremental = "<CR>", -- 노드 증가
+			node_decremental = "<BS>", -- 노드 감소
+			scope_incremental = "<C-Space>", -- 범위 증가
+		},
+	},
+
+	-- Enable folding based on tree-sitter
+	folding = {
+		enable = true, -- 자동 코드 접기
+		disable = { "markdown", "text" }, -- 접기를 원하지 않는 언어
 	},
 })

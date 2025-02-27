@@ -62,9 +62,7 @@ local function on_attach(bufnr)
 	vim.keymap.set("n", "<2-RightMouse>", api.tree.change_root_to_node, opts("CD"))
 	-- END_DEFAULT_ON_ATTACH
 
-	-- Mappings migrated from view.mappings.list
-	--
-	-- You will need to insert "your code goes here" for any mappings with a custom action_cb
+	-- Custom mappings
 	vim.keymap.set("n", "u", api.tree.change_root_to_parent, opts("Up"))
 	vim.keymap.set("n", "<C-r>", api.tree.reload, opts("Refresh"))
 end
@@ -96,19 +94,18 @@ require("nvim-tree").setup({
 	on_attach = on_attach,
 })
 
-local api = require("nvim-tree.api")
-
+-- Keymap for toggling nvim-tree
 vim.keymap.set("n", "<F2>", function()
-	return api.tree.toggle(true, true)
+	return require("nvim-tree.api").tree.toggle(true, true)
 end, { silent = true, desc = "toggle nvim-tree" })
 
+-- Keymap for finding file in nvim-tree
 vim.keymap.set("n", "<F3>", function()
 	return vim.cmd([[NvimTreeFindFile]])
 end, { silent = true, desc = "find_file nvim-tree" })
 
--- https://github.com/nvim-tree/nvim-tree.lua/wiki/Open-At-Startup#opening-nvim-tree-at-neovim-startup
+-- Open nvim-tree at startup
 local function open_nvim_tree()
-	-- open the tree
 	require("nvim-tree.api").tree.open()
 end
 

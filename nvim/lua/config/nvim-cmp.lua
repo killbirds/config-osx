@@ -1,4 +1,3 @@
--- Setup nvim-cmp.
 local cmp = require("cmp")
 local lspkind = require("lspkind")
 
@@ -6,17 +5,13 @@ vim.opt_global.completeopt = { "menu", "menuone", "noselect" }
 
 cmp.setup({
 	snippet = {
-		-- REQUIRED - you must specify a snippet engine
 		expand = function(args)
-			-- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-			require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
-			-- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-			-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+			require("luasnip").lsp_expand(args.body) -- luasnip 사용
 		end,
 	},
 	window = {
-		-- completion = cmp.config.window.bordered(),
-		-- documentation = cmp.config.window.bordered(),
+		completion = cmp.config.window.bordered(), -- 자동완성 창에 테두리 추가
+		documentation = cmp.config.window.bordered(), -- 문서 창에 테두리 추가
 	},
 	mapping = cmp.mapping.preset.insert({
 		["<C-d>"] = cmp.mapping.scroll_docs(-4),
@@ -42,20 +37,13 @@ cmp.setup({
 		end, { "i", "s" }),
 	}),
 	sources = cmp.config.sources({
-		{ name = "nvim_lsp" }, -- For nvim-lsp
-		{ name = "luasnip" }, -- For luasnip user.
-		{ name = "nvim_lua" }, -- for nvim lua function
-		{ name = "path" }, -- for path completion
+		{ name = "nvim_lsp" },
+		{ name = "luasnip" },
+		{ name = "nvim_lua" },
+		{ name = "path" },
 	}, {
-		{ name = "buffer", keyword_length = 4 }, -- for buffer word completion
+		{ name = "buffer", keyword_length = 4 }, -- buffer 자동완성 길이 설정
 	}),
-	completion = {
-		keyword_length = 1,
-		completeopt = "menu,menuone,noselect",
-	},
-	experimental = {
-		ghost_text = false,
-	},
 	formatting = {
 		format = lspkind.cmp_format({
 			mode = "symbol_text",
@@ -70,16 +58,16 @@ cmp.setup({
 	},
 })
 
--- Set configuration for specific filetype.
+-- gitcommit 파일 타입에 cmp_git 소스 사용
 cmp.setup.filetype("gitcommit", {
 	sources = cmp.config.sources({
-		{ name = "cmp_git" }, -- You can specify the `cmp_git` source if you were installed it.
+		{ name = "cmp_git" },
 	}, {
 		{ name = "buffer" },
 	}),
 })
 
--- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+-- cmdline에서 buffer 자동완성 사용
 cmp.setup.cmdline({ "/", "?" }, {
 	mapping = cmp.mapping.preset.cmdline(),
 	sources = {
@@ -87,7 +75,7 @@ cmp.setup.cmdline({ "/", "?" }, {
 	},
 })
 
--- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+-- cmdline에서 path와 cmdline 소스 사용
 cmp.setup.cmdline(":", {
 	mapping = cmp.mapping.preset.cmdline(),
 	sources = cmp.config.sources({
