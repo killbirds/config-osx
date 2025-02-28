@@ -1,69 +1,99 @@
+local lspconfig = require("lspconfig")
+local cmp_nvim_lsp = require("cmp_nvim_lsp")
 local keys = require("config.nvim-lspconfig-keys")
 
 -- 공통 LSP 설정 함수
-local function on_attach_and_flags(client, bufnr)
+local function setup_lsp(client, bufnr)
+	-- 키맵 및 버퍼 설정
 	keys.on_attach(client, bufnr)
-	-- 자동 완성 및 진단 활성화
-	client.server_capabilities.document_formatting = true
-	client.server_capabilities.document_range_formatting = true
+
+	-- 포매팅 기능 활성화
+	client.server_capabilities.documentFormattingProvider = true
+	client.server_capabilities.documentRangeFormattingProvider = true
+
+	-- 서버별 추가 설정 (선택적)
+	if client.name == "ts_ls" then
+		client.server_capabilities.documentFormattingProvider = false -- tsserver는 prettier에 위임 가능
+	end
 end
 
-local opts = { noremap = true, silent = true }
-
--- 진단 관련 키 매핑
-vim.keymap.set("n", "<space>e", vim.diagnostic.open_float, opts)
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
-vim.keymap.set("n", "<space>q", vim.diagnostic.setloclist, opts)
-
--- LSP 플래그 설정
-local lsp_flags = {
-	debounce_text_changes = 150,
+-- 공통 옵션 설정
+local default_opts = {
+	capabilities = cmp_nvim_lsp.default_capabilities(), -- nvim-cmp와의 통합
+	flags = {
+		debounce_text_changes = 150, -- 텍스트 변경 후 지연 시간 (ms)
+	},
+	on_attach = setup_lsp,
 }
 
--- `cmp_nvim_lsp`로 자동 완성 기능 확장
-local capabilities = require("cmp_nvim_lsp").default_capabilities()
+-- 전역 진단 키맵 설정
+local function setup_global_keymaps()
+	local opts = { noremap = true, silent = true }
+	vim.keymap.set(
+		"n",
+		"<leader>e",
+		vim.diagnostic.open_float,
+		vim.tbl_extend("force", opts, { desc = "Show Line Diagnostics" })
+	)
+	vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, vim.tbl_extend("force", opts, { desc = "Previous Diagnostic" }))
+	vim.keymap.set("n", "]d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Next Diagnostic" }))
+	vim.keymap.set(
+		"n",
+		"<leader>q",
+		vim.diagnostic.setloclist,
+		vim.tbl_extend("force", opts, { desc = "Diagnostics to Loclist" })
+	)
+end
 
--- TypeScript LSP 설정
-require("lspconfig")["ts_ls"].setup({
-	on_attach = on_attach_and_flags,
-	flags = lsp_flags,
-	capabilities = capabilities,
-})
-
--- Rust LSP 설정
-require("lspconfig")["rust_analyzer"].setup({
-	on_attach = on_attach_and_flags,
-	flags = lsp_flags,
-	capabilities = capabilities,
-	settings = {
-		["rust-analyzer"] = {
-			cargo = {
-				allFeatures = true,
+-- LSP 서버별 설정
+local servers = {
+	ts_ls = {
+		-- TypeScript/JavaScript 설정
+	},
+	rust_analyzer = {
+		settings = {
+			["rust-analyzer"] = {
+				cargo = { allFeatures = true }, -- 모든 Cargo 기능 활성화
+				checkOnSave = { command = "clippy" }, -- 저장 시 Clippy 실행
 			},
 		},
 	},
-})
-
--- Lua LSP 설정
-require("lspconfig")["lua_ls"].setup({
-	on_attach = on_attach_and_flags,
-	flags = lsp_flags,
-	capabilities = capabilities,
-	settings = {
-		Lua = {
-			runtime = {
-				version = "LuaJIT",
-			},
-			diagnostics = {
-				globals = { "vim" },
-			},
-			workspace = {
-				library = vim.api.nvim_get_runtime_file("", true),
-			},
-			telemetry = {
-				enable = false,
+	lua_ls = {
+		settings = {
+			Lua = {
+				runtime = { version = "LuaJIT" }, -- Neovim의 LuaJIT 사용
+				diagnostics = { globals = { "vim" } }, -- vim 전역 변수 인식
+				workspace = {
+					library = vim.api.nvim_get_runtime_file("", true), -- Neovim 런타임 파일
+					checkThirdParty = false, -- 성능 최적화
+				},
+				telemetry = { enable = false }, -- 텔레메트리 비활성화
 			},
 		},
 	},
+}
+
+-- LSP 초기화 함수
+local function setup_lsp_servers()
+	setup_global_keymaps() -- 전역 키맵 설정
+
+	-- 모든 서버에 대해 설정 적용
+	for server, config in pairs(servers) do
+		lspconfig[server].setup(vim.tbl_deep_extend("force", default_opts, config))
+	end
+end
+
+-- 진단 설정 (선택적)
+vim.diagnostic.config({
+	virtual_text = { prefix = "●" }, -- 가상 텍스트 표시 스타일
+	signs = true,
+	update_in_insert = false, -- 삽입 모드 업데이트 비활성화 (성능 개선)
+	severity_sort = true, -- 심각도순 정렬
 })
+
+-- 모듈 실행
+setup_lsp_servers()
+
+return {
+	setup = setup_lsp_servers, -- 외부에서 재호출 가능
+}

@@ -28,7 +28,6 @@ brew install yarn
 - tmux
 ```
 brew install tmux
-brew install reattach-to-user-namespace
 ```
 
 
