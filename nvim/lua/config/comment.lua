@@ -3,11 +3,11 @@ require("Comment").setup({
 	sticky = true, -- Keep cursor position after commenting
 	ignore = nil, -- Ignore lines that match a pattern
 	toggler = {
-		line = "<leader>/", -- Toggle line comment
+		line = "<leader>l", -- Toggle line comment
 		block = "<leader>?", -- Toggle block comment
 	},
 	opleader = {
-		line = "<leader>/",
+		line = "<leader>l",
 		block = "<leader>?",
 	},
 	extra = {
