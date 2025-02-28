@@ -1,4 +1,5 @@
 -- init
+vim.opt.mouse = "a"
 vim.opt.number = true
 vim.opt.history = 1000
 vim.opt.showcmd = true
