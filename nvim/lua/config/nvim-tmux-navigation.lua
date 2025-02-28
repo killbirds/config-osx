@@ -1,3 +1,11 @@
 require("nvim-tmux-navigation").setup({
-	-- 기본 설정 사용, 필요에 따라 옵션을 추가할 수 있습니다.
+	disable_when_zoomed = true, -- defaults to false
+	keybindings = {
+		left = "<C-h>",
+		down = "<C-j>",
+		up = "<C-k>",
+		right = "<C-l>",
+		last_active = "<C-\\>",
+		next = "<C-Space>",
+	},
 })
