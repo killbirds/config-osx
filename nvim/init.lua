@@ -2,7 +2,7 @@
 
 -- Lua 모듈 로드
 require("init")
-require("plugins.packer")
+require("manager.lazy")
 require("colors")
 
 -- Vim 설정 파일 로드
