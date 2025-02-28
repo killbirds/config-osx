@@ -26,9 +26,7 @@ return require("packer").startup(function(use)
 
 	use({ "numToStr/Comment.nvim", config = [[require('config.comment')]] })
 
-	use({ "mileszs/ack.vim", config = [[require('config.ack')]] })
-
-	use("christoomey/vim-tmux-navigator")
+	use({ "alexghergh/nvim-tmux-navigation", config = [[require('config.nvim-tmux-navigation')]] })
 
 	use({ "mg979/vim-visual-multi", branch = "master" })
 
@@ -74,7 +72,7 @@ return require("packer").startup(function(use)
 	use({ "williamboman/mason.nvim", config = [[require('config.mason')]] })
 	use({
 		"williamboman/mason-lspconfig.nvim",
-		after = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
+		after = { "mason.nvim", "nvim-lspconfig" },
 		config = [[require('config.mason-lspconfig')]],
 	})
 

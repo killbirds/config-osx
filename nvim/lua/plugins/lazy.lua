@@ -16,14 +16,13 @@ require("lazy").setup({
 			require("config.comment")
 		end,
 	},
+
 	{
-		"mileszs/ack.vim",
+		"alexghergh/nvim-tmux-navigation",
 		config = function()
-			require("config.ack")
+			require("config.nvim-tmux-navigation")
 		end,
 	},
-
-	"christoomey/vim-tmux-navigator",
 	{ "mg979/vim-visual-multi", branch = "master" },
 	{
 		"mfussenegger/nvim-lint",
@@ -76,7 +75,7 @@ require("lazy").setup({
 	},
 	{
 		"williamboman/mason-lspconfig.nvim",
-		dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
+		dependencies = { "mason.nvim", "nvim-lspconfig" },
 		config = function()
 			require("config.mason-lspconfig")
 		end,

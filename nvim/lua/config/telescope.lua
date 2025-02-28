@@ -36,9 +36,15 @@ local telescope_mappings = {
 	["<leader>fg"] = "<cmd>Telescope live_grep<cr>",
 	["<leader>fb"] = "<cmd>Telescope buffers<cr>",
 	["<leader>fh"] = "<cmd>Telescope help_tags<cr>",
+	[",ag"] = "<cmd>Telescope live_grep<cr>",
 }
 
 -- Set key mappings in normal mode
 for key, cmd in pairs(telescope_mappings) do
 	vim.keymap.set("n", key, cmd, { silent = true })
 end
+
+vim.keymap.set("n", "<leader>ag", function()
+	local current_word = vim.fn.expand("<cword>")
+	require("telescope.builtin").live_grep({ default_text = current_word })
+end, { desc = "Search for selected word" })
