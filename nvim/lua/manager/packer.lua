@@ -119,12 +119,6 @@ return require("packer").startup(function(use)
 		config = [[require('config.nvim-tree')]],
 	})
 
-	-- Handy unix command inside Vim (Rename, Move etc.)
-	use({
-		"echasnovski/mini.files",
-		config = [[require('config.mini-files')]],
-	})
-
 	-- Repeat vim motions
 	use({ "tpope/vim-repeat", event = "VimEnter" })
 

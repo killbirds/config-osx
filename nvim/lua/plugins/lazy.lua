@@ -134,12 +134,6 @@ return {
 			require("config.nvim-tree")
 		end,
 	},
-	{
-		"echasnovski/mini.files",
-		config = function()
-			require("config.mini-files")
-		end,
-	},
 
 	-- Git
 	"tpope/vim-fugitive",
