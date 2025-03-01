@@ -26,7 +26,13 @@ return {
 			require("config.nvim-tmux-navigation")
 		end,
 	},
-	{ "mg979/vim-visual-multi", branch = "master" },
+	{
+		"mg979/vim-visual-multi",
+		branch = "master",
+		config = function()
+			require("config.vim-visual-multi").setup()
+		end,
+	},
 	{
 		"mfussenegger/nvim-lint",
 		config = function()
@@ -147,4 +153,64 @@ return {
 
 	-- Miscellaneous
 	"tpope/vim-repeat",
+
+	-- 추가 플러그인
+
+	-- 인덴트 가이드
+	{
+		"lukas-reineke/indent-blankline.nvim",
+		main = "ibl",
+		opts = {},
+	},
+
+	-- 자동 괄호 닫기
+	{
+		"windwp/nvim-autopairs",
+		event = "InsertEnter",
+		opts = {},
+	},
+
+	-- 하이라이트된 단어 모두 표시
+	{
+		"RRethy/vim-illuminate",
+		config = function()
+			require("illuminate").configure({
+				providers = { "lsp", "treesitter", "regex" },
+				delay = 100,
+				filetypes_denylist = { "NvimTree", "Telescope" },
+			})
+		end,
+	},
+
+	-- 코드 액션 메뉴
+	{
+		"weilbith/nvim-code-action-menu",
+		cmd = "CodeActionMenu",
+	},
+
+	-- 터미널 통합
+	{
+		"akinsho/toggleterm.nvim",
+		version = "*",
+		opts = {
+			open_mapping = [[<c-\>]],
+			direction = "float",
+			float_opts = {
+				border = "curved",
+			},
+		},
+	},
+
+	-- 프로젝트 관리
+	{
+		"ahmedkhalf/project.nvim",
+		config = function()
+			require("project_nvim").setup({
+				detection_methods = { "pattern" },
+				patterns = { ".git", "Makefile", "package.json" },
+				show_hidden = false,
+			})
+			require("telescope").load_extension("projects")
+		end,
+	},
 }

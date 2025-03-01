@@ -50,9 +50,9 @@ require("nvim-treesitter.configs").setup({
 	incremental_selection = {
 		enable = true,
 		keymaps = {
-			init_selection = "<C-n>", -- 초기 선택 (<CR> 대신 더 직관적인 키)
-			node_incremental = "<C-n>", -- 노드 확장
-			node_decremental = "<C-p>", -- 노드 축소
+			init_selection = "<C-space>", -- C-n 대신 C-space 사용 (vim-visual-multi와 충돌 방지)
+			node_incremental = "<C-space>", -- C-n 대신 C-space 사용
+			node_decremental = "<C-b>", -- 노드 축소
 			scope_incremental = "<C-s>", -- 범위 확장
 		},
 	},
