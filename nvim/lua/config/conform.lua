@@ -1,18 +1,35 @@
 require("conform").setup({
 	-- 파일 타입별 포매터 설정
 	formatters_by_ft = {
-		javascript = { "prettier" }, -- JavaScript 포매팅
-		typescript = { "prettier" }, -- TypeScript 포매팅
-		lua = { "stylua" }, -- Lua 포매팅
-		python = { "black" }, -- Python 포매팅
-		rust = { "rustfmt" }, -- Rust 포매팅
+		javascript = { "prettier" },
+		typescript = { "prettier" },
+		javascriptreact = { "prettier" },
+		typescriptreact = { "prettier" },
+		html = { "prettier" },
+		css = { "prettier" },
+		json = { "prettier" },
+		yaml = { "prettier" },
+		markdown = { "prettier" },
+		lua = { "stylua" },
+		python = { "black", "isort" },
+		rust = { "rustfmt" },
+		go = { "gofmt" },
 	},
 
 	-- 저장 시 자동 포매팅 설정
-	format_on_save = {
-		timeout_ms = 500, -- 포매팅 타임아웃 (ms)
-		lsp_fallback = true, -- LSP 포매팅으로 대체 (포매터 없을 경우)
-	},
+	format_on_save = function(bufnr)
+		-- 특정 파일 유형은 자동 포맷팅에서 제외
+		local exclude_filetypes = { "sql", "text" }
+		if vim.tbl_contains(exclude_filetypes, vim.bo[bufnr].filetype) then
+			return
+		end
+
+		return {
+			timeout_ms = 500,
+			lsp_fallback = true,
+			quiet = true, -- 포맷팅 메시지 숨김
+		}
+	end,
 
 	-- 포매터별 커스터마이징 (선택적)
 	formatters = {
@@ -27,14 +44,24 @@ require("conform").setup({
 			command = "black",
 			args = { "--quiet", "--fast", "-" },
 		},
+		isort = {
+			command = "isort",
+			args = { "--profile", "black", "-" },
+		},
 		rustfmt = {
 			command = "rustfmt", -- Rust 기본 포매터
 			args = { "--edition", "2024", "--emit", "stdout" }, -- Rust 2024 에디션 사용
 		},
+		gofmt = {
+			command = "gofmt",
+		},
 	},
 
-	-- 포매팅 로그 레벨 (디버깅용, 선택적)
-	log_level = vim.log.levels.ERROR, -- 오류만 표시
+	-- 포매팅 로그 레벨
+	log_level = vim.log.levels.WARN, -- 경고 레벨로 업그레이드
+
+	-- 노티피케이션 설정
+	notify_on_error = true, -- 오류 발생 시 알림
 })
 
 -- 수동 포매팅 명령 추가 (선택적)
@@ -50,3 +77,12 @@ end, { range = true, desc = "Format buffer or range" })
 vim.keymap.set("n", "<leader>f", function()
 	require("conform").format({ async = true, lsp_fallback = true })
 end, { silent = true, desc = "Format buffer" })
+
+-- 비주얼 모드에서 선택 영역만 포맷팅
+vim.keymap.set("v", "<leader>f", function()
+	require("conform").format({
+		async = true,
+		lsp_fallback = true,
+		range = { vim.fn.line("'<"), vim.fn.line("'>") },
+	})
+end, { silent = true, desc = "Format selected lines" })

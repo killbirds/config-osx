@@ -1,4 +1,6 @@
 require("nvim-treesitter.configs").setup({
+	modules = {},
+
 	-- 설치할 파서 목록 (필요한 언어 추가/제거 가능)
 	ensure_installed = {
 		"scala",
@@ -41,7 +43,7 @@ require("nvim-treesitter.configs").setup({
 	-- 들여쓰기 설정 (ident -> indent로 수정)
 	indent = {
 		enable = true, -- Treesitter 기반 들여쓰기 활성화
-		disable = { "python" }, -- Python은 기본 indent가 더 나을 수 있음
+		disable = { "yaml", "python" }, -- Python은 기본 indent가 더 나을 수 있음
 	},
 
 	-- 점진적 선택 설정
