@@ -22,7 +22,6 @@ require("conform").setup({
 		},
 		stylua = {
 			command = "stylua",
-			args = { "--search-parent-dirs", "$FILENAME" },
 		},
 		black = {
 			command = "black",
@@ -51,4 +50,3 @@ end, { range = true, desc = "Format buffer or range" })
 vim.keymap.set("n", "<leader>f", function()
 	require("conform").format({ async = true, lsp_fallback = true })
 end, { silent = true, desc = "Format buffer" })
-
