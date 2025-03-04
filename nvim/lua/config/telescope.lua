@@ -7,7 +7,7 @@ telescope.setup({
 		mappings = {
 			i = {
 				["<esc>"] = actions.close,
-				["<C-h>"] = "which_key",
+				["<C-h>"] = actions.which_key,
 				["<C-j>"] = actions.move_selection_next,
 				["<C-k>"] = actions.move_selection_previous,
 				["<C-o>"] = actions.select_default,
