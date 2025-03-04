@@ -134,13 +134,13 @@ return {
 		{
 			"MeanderingProgrammer/render-markdown.nvim",
 			opts = {
-				file_types = { "markdown", "Avante" },
+				file_types = { "Avante" },
 				highlight = {
 					code_blocks = true, -- 코드 블록 강조
 					headers = true, -- 헤더 강조
 				},
 			},
-			ft = { "markdown", "Avante" },
+			ft = { "Avante" },
 		},
 	},
 
