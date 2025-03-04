@@ -12,9 +12,11 @@ return {
 			anthropic = vim.env.ANTHROPIC_API_KEY,
 		}
 
+		local provider = vim.env.NVIM_AVANTE_PROVIDER or "copilot"
+
 		return {
 			-- 기본 제공자 설정
-			provider = "openai", -- 기본 AI 제공자
+			provider = provider, -- 기본 AI 제공자
 
 			-- 다양한 AI 모델 설정
 			openai = {
