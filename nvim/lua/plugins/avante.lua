@@ -45,7 +45,16 @@ return {
 				api_key = api_keys.anthropic,
 			},
 
-			file_selector = "telescope", -- telescope 사용
+			file_selector = {
+				type = "telescope",
+				options = {
+					previewer = true,
+					layout_config = {
+						width = 0.8,
+						height = 0.8,
+					},
+				},
+			},
 
 			-- 에디터 설정
 			editor = {
@@ -183,7 +192,7 @@ return {
 				-- Avante 버퍼에서 특정 설정 적용
 				vim.opt_local.wrap = true
 				vim.opt_local.linebreak = true
-				vim.opt_local.spell = true
+				vim.opt_local.spell = false
 				vim.opt_local.conceallevel = 2
 			end,
 		})
