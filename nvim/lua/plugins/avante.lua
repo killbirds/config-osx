@@ -35,8 +35,9 @@ return {
 
 			claude = {
 				endpoint = "https://api.anthropic.com",
-				model = "claude-3-5-sonnet-20241022",
+				model = "claude-3-7-sonnet-20250219",
 				models = {
+					{ name = "claude-3-7-sonnet-20250219", label = "Claude 3.7 Sonnet" },
 					{ name = "claude-3-5-sonnet-20241022", label = "Claude 3.5 Sonnet" },
 					{ name = "claude-3-opus-20240229", label = "Claude 3 Opus" },
 				},
@@ -55,6 +56,8 @@ return {
 					},
 				},
 			},
+
+			copilot = {},
 
 			-- 에디터 설정
 			editor = {
