@@ -14,7 +14,7 @@
   "vim.highlightedyank.enable": true,
   "vim.highlightedyank.duration": 300,
   "vim.history": 1000,
-  
+
   // Vim 모드 표시 설정
   "vim.statusBarColorControl": true,
   "vim.statusBarColors.normal": "#5f87af",
@@ -23,7 +23,7 @@
   "vim.statusBarColors.visualline": "#af875f",
   "vim.statusBarColors.visualblock": "#87af5f",
   "vim.statusBarColors.replace": "#af5f5f",
-  
+
   // 성능 관련 설정
   "vim.searchHighlightColor": "rgba(250, 250, 50, 0.3)",
   "vim.replaceWithRegister": true,
@@ -34,10 +34,10 @@
   "vim.cursorStylePerMode.visualline": "line-thin",
   "vim.cursorStylePerMode.visualblock": "block-outline",
   "vim.cursorStylePerMode.replace": "underline",
-  
+
   // 에디터 설정
   "editor.lineNumbers": "on",
-  
+
   // 탐색기 포커스 관련 설정
   "workbench.editor.enablePreview": false,
   "workbench.editor.revealIfOpen": true,
@@ -47,13 +47,13 @@
     "**/.git": true,
     "**/.DS_Store": true
   },
-  
+
   // EasyMotion 관련 설정
   "vim.easymotionMarkerFontFamily": "monospace",
   "vim.easymotionMarkerFontSize": "16",
   "vim.easymotionMarkerForegroundColorOneChar": "#ff0000",
   "vim.easymotionMarkerForegroundColorTwoChar": "#00ff00",
-  
+
   // 키 바인딩 설정
   "vim.handleKeys": {
     "<C-d>": true,
@@ -68,7 +68,7 @@
     "<C-k>": true,
     "<C-l>": true
   },
-  
+
   // 일반 모드 키 바인딩
   "vim.normalModeKeyBindingsNonRecursive": [
     // 파일 저장 및 종료
@@ -170,7 +170,7 @@
       "before": ["]", "d"],
       "commands": ["editor.action.marker.next"]
     },
-    
+
     // 파일 탐색
     {
       "before": ["<leader>", "ff"],
@@ -184,7 +184,7 @@
       "before": ["<leader>", "fb"],
       "commands": ["workbench.action.showAllEditors"]
     },
-    
+
     // 창 분할 관련 키 바인딩
     {
       "before": ["<leader>", "v"],
@@ -210,7 +210,7 @@
       "before": ["<leader>", "k"],
       "commands": ["workbench.action.focusAboveGroup"]
     },
-    
+
     // Ctrl + hjkl로 윈도우 이동
     {
       "before": ["<C-h>"],
@@ -228,7 +228,7 @@
       "before": ["<C-k>"],
       "commands": ["workbench.action.focusAboveGroup"]
     },
-    
+
     // 멀티 커서 관련 설정
     {
       "before": ["<C-n>"],
@@ -245,18 +245,24 @@
     // 스크롤 기능
     {
       "before": ["<C-d>"],
-      "commands": ["cursorMove", { "to": "down", "by": "halfPage", "select": false }]
+      "commands": [
+        "cursorMove",
+        { "to": "down", "by": "halfPage", "select": false }
+      ]
     },
     {
       "before": ["<C-u>"],
-      "commands": ["cursorMove", { "to": "up", "by": "halfPage", "select": false }]
+      "commands": [
+        "cursorMove",
+        { "to": "up", "by": "halfPage", "select": false }
+      ]
     },
     {
       "before": ["<C-a>"],
       "commands": ["editor.action.selectAll"]
     }
   ],
-  
+
   // 삽입 모드 키 바인딩
   "vim.insertModeKeyBindings": [
     // Esc 대체
@@ -265,7 +271,7 @@
       "after": ["<Esc>"]
     }
   ],
-  
+
   // 비주얼 모드 키 바인딩
   "vim.visualModeKeyBindingsNonRecursive": [
     // 선택 영역 이동
@@ -277,7 +283,7 @@
       "before": ["<A-k>"],
       "commands": ["editor.action.moveLinesUpAction"]
     },
-    
+
     // 시스템 클립보드
     {
       "before": ["<leader>", "y"],
@@ -295,17 +301,23 @@
       "before": ["<leader>", "P"],
       "after": ["\"+", "P"]
     },
-    
+
     // 스크롤 기능
     {
       "before": ["<C-d>"],
-      "commands": ["cursorMove", { "to": "down", "by": "halfPage", "select": true }]
+      "commands": [
+        "cursorMove",
+        { "to": "down", "by": "halfPage", "select": true }
+      ]
     },
     {
       "before": ["<C-u>"],
-      "commands": ["cursorMove", { "to": "up", "by": "halfPage", "select": true }]
+      "commands": [
+        "cursorMove",
+        { "to": "up", "by": "halfPage", "select": true }
+      ]
     },
-    
+
     // 멀티 커서 기능
     {
       "before": ["<C-n>"],
@@ -316,4 +328,5 @@
       "commands": ["editor.action.addSelectionToPreviousFindMatch"]
     }
   ]
-} 
+}
+

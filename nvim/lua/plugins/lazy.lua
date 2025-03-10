@@ -154,6 +154,15 @@ return {
 	-- Miscellaneous
 	"tpope/vim-repeat",
 
+	-- LSP 진행 상태 표시
+	{
+		"j-hui/fidget.nvim",
+		event = "LspAttach",
+		config = function()
+			require("config.fidget")
+		end,
+	},
+
 	-- 추가 플러그인
 
 	-- 인덴트 가이드

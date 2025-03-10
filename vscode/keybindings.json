@@ -5,11 +5,12 @@
     "command": "explorer.openAndPassFocus",
     "when": "explorerViewletVisible && filesExplorerFocus && !explorerResourceIsFolder && !inputFocus"
   },
-  
+
   // 탐색기에서 폴더를 'o' 키로 토글
   {
     "key": "o",
     "command": "list.toggleExpand",
     "when": "explorerViewletVisible && filesExplorerFocus && explorerResourceIsFolder && !inputFocus"
   }
-] 
+]
+
