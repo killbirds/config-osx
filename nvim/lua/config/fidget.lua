@@ -30,22 +30,22 @@ fidget.setup({
 			done_icon = "✓", -- 완료 아이콘
 			progress_ttl = math.huge, -- 진행 중 메시지 지속 시간
 			progress_icon = { pattern = "dots" }, -- 진행 중 아이콘
-			
+
 			-- 메시지 포맷 함수
 			format_message = function(msg)
 				return msg.message or ""
 			end,
-			
+
 			-- 진행 주석 포맷 방법
 			format_annote = function(msg)
 				return msg.title or ""
 			end,
-			
+
 			-- 진행 알림 그룹 이름 포맷 방법
 			format_group_name = function(group)
 				return tostring(group)
 			end,
-			
+
 			-- 기본 알림 구성에서 옵션 재정의
 			overrides = {
 				rust_analyzer = { name = "rust-analyzer" },
@@ -65,13 +65,13 @@ fidget.setup({
 		filter = vim.log.levels.INFO, -- 최소 알림 레벨
 		history_size = 128, -- 기록에 보관할 제거된 메시지 수
 		override_vim_notify = false, -- vim.notify() 자동 재정의
-		
+
 		-- 알림 텍스트 렌더링 관련 설정
 		view = {
 			stack_upwards = true, -- 아래에서 위로 알림 항목 표시
 			icon_separator = " ", -- 그룹 이름과 아이콘 사이 구분자
 			group_separator = "---", -- 알림 그룹 간 구분자
-			
+
 			-- 알림 메시지 렌더링 방법
 			render_message = function(msg, cnt)
 				return cnt == 1 and msg or string.format("(%dx) %s", cnt, msg)
@@ -81,7 +81,7 @@ fidget.setup({
 		-- 알림 창 및 버퍼 관련 설정
 		window = {
 			winblend = 0, -- 알림 창의 배경색 투명도
-			border = "rounded", -- 알림 창 테두리
+			border = "none", -- 알림 창 테두리
 			zindex = 45, -- 알림 창의 스택 우선순위
 			max_width = 0, -- 알림 창 최대 너비
 			max_height = 0, -- 알림 창 최대 높이
