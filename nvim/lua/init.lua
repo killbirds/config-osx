@@ -14,12 +14,12 @@ vim.opt.cursorline = true
 vim.opt.hidden = true
 
 -- UI 개선
-vim.opt.relativenumber = true -- 상대적 줄 번호 (현재 줄은 절대 번호)
+vim.opt.relativenumber = false -- 절대 번호
 vim.opt.signcolumn = "yes" -- 항상 사인 컬럼 표시 (LSP, Git 등)
 vim.opt.scrolloff = 8 -- 커서 위아래 최소 줄 수
 vim.opt.sidescrolloff = 8 -- 커서 좌우 최소 컬럼 수
 vim.opt.wrap = false -- 긴 줄 자동 줄바꿈 비활성화
-vim.opt.colorcolumn = "80" -- 80자 컬럼 표시
+vim.opt.colorcolumn = "120" -- 80자 컬럼 표시
 
 -- 리더 키 설정 (lazy.nvim과 공유)
 vim.g.mapleader = " "

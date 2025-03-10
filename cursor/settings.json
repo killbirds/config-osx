@@ -36,8 +36,17 @@
   "vim.cursorStylePerMode.replace": "underline",
   
   // 에디터 설정
-  "editor.lineNumbers": "relative",
-  "workbench.list.automaticKeyboardNavigation": false,
+  "editor.lineNumbers": "on",
+  
+  // 탐색기 포커스 관련 설정
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.revealIfOpen": true,
+  "explorer.autoReveal": true,
+  "explorer.compactFolders": false,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true
+  },
   
   // EasyMotion 관련 설정
   "vim.easymotionMarkerFontFamily": "monospace",
@@ -236,11 +245,11 @@
     // 스크롤 기능
     {
       "before": ["<C-d>"],
-      "commands": [{ "command": "editorScroll", "args": { "to": "down", "by": "halfPage" } }]
+      "commands": ["cursorMove", { "to": "down", "by": "halfPage", "select": false }]
     },
     {
       "before": ["<C-u>"],
-      "commands": [{ "command": "editorScroll", "args": { "to": "up", "by": "halfPage" } }]
+      "commands": ["cursorMove", { "to": "up", "by": "halfPage", "select": false }]
     },
     {
       "before": ["<C-a>"],
@@ -287,6 +296,16 @@
       "after": ["\"+", "P"]
     },
     
+    // 스크롤 기능
+    {
+      "before": ["<C-d>"],
+      "commands": ["cursorMove", { "to": "down", "by": "halfPage", "select": true }]
+    },
+    {
+      "before": ["<C-u>"],
+      "commands": ["cursorMove", { "to": "up", "by": "halfPage", "select": true }]
+    },
+    
     // 멀티 커서 기능
     {
       "before": ["<C-n>"],
@@ -295,15 +314,6 @@
     {
       "before": ["<C-p>"],
       "commands": ["editor.action.addSelectionToPreviousFindMatch"]
-    },
-    // 스크롤 기능
-    {
-      "before": ["<C-d>"],
-      "commands": [{ "command": "editorScroll", "args": { "to": "down", "by": "halfPage" } }]
-    },
-    {
-      "before": ["<C-u>"],
-      "commands": [{ "command": "editorScroll", "args": { "to": "up", "by": "halfPage" } }]
     }
   ]
 } 
