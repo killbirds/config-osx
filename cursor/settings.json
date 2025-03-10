@@ -1,0 +1,309 @@
+{
+  // Cursor의 Vim 플러그인 기본 설정
+  "vim.leader": " ",
+  "vim.hlsearch": true,
+  "vim.visualstar": true,
+  "vim.useSystemClipboard": false,
+  "vim.easymotion": true,
+  "vim.smartRelativeLine": true,
+  "vim.incsearch": true,
+  "vim.useCtrlKeys": true,
+  "vim.surround": true,
+  "vim.sneak": true,
+  "vim.sneakUseIgnorecaseAndSmartcase": true,
+  "vim.highlightedyank.enable": true,
+  "vim.highlightedyank.duration": 300,
+  "vim.history": 1000,
+  
+  // Vim 모드 표시 설정
+  "vim.statusBarColorControl": true,
+  "vim.statusBarColors.normal": "#5f87af",
+  "vim.statusBarColors.insert": "#5f5f87",
+  "vim.statusBarColors.visual": "#af5f87",
+  "vim.statusBarColors.visualline": "#af875f",
+  "vim.statusBarColors.visualblock": "#87af5f",
+  "vim.statusBarColors.replace": "#af5f5f",
+  
+  // 성능 관련 설정
+  "vim.searchHighlightColor": "rgba(250, 250, 50, 0.3)",
+  "vim.replaceWithRegister": true,
+  "vim.foldfix": true,
+  "vim.cursorStylePerMode.normal": "block",
+  "vim.cursorStylePerMode.insert": "line",
+  "vim.cursorStylePerMode.visual": "block-outline",
+  "vim.cursorStylePerMode.visualline": "line-thin",
+  "vim.cursorStylePerMode.visualblock": "block-outline",
+  "vim.cursorStylePerMode.replace": "underline",
+  
+  // 에디터 설정
+  "editor.lineNumbers": "relative",
+  "workbench.list.automaticKeyboardNavigation": false,
+  
+  // EasyMotion 관련 설정
+  "vim.easymotionMarkerFontFamily": "monospace",
+  "vim.easymotionMarkerFontSize": "16",
+  "vim.easymotionMarkerForegroundColorOneChar": "#ff0000",
+  "vim.easymotionMarkerForegroundColorTwoChar": "#00ff00",
+  
+  // 키 바인딩 설정
+  "vim.handleKeys": {
+    "<C-d>": true,
+    "<C-u>": true,
+    "<C-f>": true,
+    "<C-b>": true,
+    "<C-n>": true,
+    "<C-p>": true,
+    "<C-a>": true,
+    "<C-h>": true,
+    "<C-j>": true,
+    "<C-k>": true,
+    "<C-l>": true
+  },
+  
+  // 일반 모드 키 바인딩
+  "vim.normalModeKeyBindingsNonRecursive": [
+    // 파일 저장 및 종료
+    {
+      "before": ["<leader>", "w"],
+      "commands": [":write"]
+    },
+    {
+      "before": ["<leader>", "q"],
+      "commands": [":quit"]
+    },
+    {
+      "before": ["<leader>", "Q"],
+      "commands": [":qa!"]
+    },
+    {
+      "before": ["<leader>", "wq"],
+      "commands": [":wq"]
+    },
+
+    // 검색 하이라이트 제거
+    {
+      "before": ["<leader>", "<space>"],
+      "commands": [":nohlsearch"]
+    },
+
+    // 시스템 클립보드
+    {
+      "before": ["<leader>", "p"],
+      "after": ["\"+", "p"]
+    },
+    {
+      "before": ["<leader>", "P"],
+      "after": ["\"+", "P"]
+    },
+
+    // 버퍼 관리
+    {
+      "before": ["<leader>", "bn"],
+      "commands": [":bnext"]
+    },
+    {
+      "before": ["<leader>", "bp"],
+      "commands": [":bprevious"]
+    },
+    {
+      "before": ["<leader>", "bd"],
+      "commands": ["workbench.action.closeActiveEditor"]
+    },
+
+    // LSP 관련 키 바인딩
+    {
+      "before": ["g", "d"],
+      "commands": ["editor.action.revealDefinition"]
+    },
+    {
+      "before": ["g", "D"],
+      "commands": ["editor.action.goToDeclaration"]
+    },
+    {
+      "before": ["g", "i"],
+      "commands": ["editor.action.goToImplementation"]
+    },
+    {
+      "before": ["g", "r"],
+      "commands": ["editor.action.goToReferences"]
+    },
+    {
+      "before": ["g", "y"],
+      "commands": ["editor.action.goToTypeDefinition"]
+    },
+    {
+      "before": ["K"],
+      "commands": ["editor.action.showHover"]
+    },
+    {
+      "before": ["<leader>", "rn"],
+      "commands": ["editor.action.rename"]
+    },
+    {
+      "before": ["<leader>", "ca"],
+      "commands": ["editor.action.quickFix"]
+    },
+    {
+      "before": ["<leader>", "f"],
+      "commands": ["editor.action.formatDocument"]
+    },
+
+    // 진단 관련 키 바인딩
+    {
+      "before": ["<leader>", "e"],
+      "commands": ["editor.action.showHover"]
+    },
+    {
+      "before": ["[", "d"],
+      "commands": ["editor.action.marker.prev"]
+    },
+    {
+      "before": ["]", "d"],
+      "commands": ["editor.action.marker.next"]
+    },
+    
+    // 파일 탐색
+    {
+      "before": ["<leader>", "ff"],
+      "commands": ["workbench.action.quickOpen"]
+    },
+    {
+      "before": ["<leader>", "fg"],
+      "commands": ["workbench.action.findInFiles"]
+    },
+    {
+      "before": ["<leader>", "fb"],
+      "commands": ["workbench.action.showAllEditors"]
+    },
+    
+    // 창 분할 관련 키 바인딩
+    {
+      "before": ["<leader>", "v"],
+      "commands": ["workbench.action.splitEditorRight"]
+    },
+    {
+      "before": ["<leader>", "s"],
+      "commands": ["workbench.action.splitEditorDown"]
+    },
+    {
+      "before": ["<leader>", "h"],
+      "commands": ["workbench.action.focusLeftGroup"]
+    },
+    {
+      "before": ["<leader>", "l"],
+      "commands": ["workbench.action.focusRightGroup"]
+    },
+    {
+      "before": ["<leader>", "j"],
+      "commands": ["workbench.action.focusBelowGroup"]
+    },
+    {
+      "before": ["<leader>", "k"],
+      "commands": ["workbench.action.focusAboveGroup"]
+    },
+    
+    // Ctrl + hjkl로 윈도우 이동
+    {
+      "before": ["<C-h>"],
+      "commands": ["workbench.action.focusLeftGroup"]
+    },
+    {
+      "before": ["<C-l>"],
+      "commands": ["workbench.action.focusRightGroup"]
+    },
+    {
+      "before": ["<C-j>"],
+      "commands": ["workbench.action.focusBelowGroup"]
+    },
+    {
+      "before": ["<C-k>"],
+      "commands": ["workbench.action.focusAboveGroup"]
+    },
+    
+    // 멀티 커서 관련 설정
+    {
+      "before": ["<C-n>"],
+      "commands": ["editor.action.addSelectionToNextFindMatch"]
+    },
+    {
+      "before": ["<C-p>"],
+      "commands": ["editor.action.addSelectionToPreviousFindMatch"]
+    },
+    {
+      "before": ["g", "b"],
+      "commands": ["editor.action.selectHighlights"]
+    },
+    // 스크롤 기능
+    {
+      "before": ["<C-d>"],
+      "commands": [{ "command": "editorScroll", "args": { "to": "down", "by": "halfPage" } }]
+    },
+    {
+      "before": ["<C-u>"],
+      "commands": [{ "command": "editorScroll", "args": { "to": "up", "by": "halfPage" } }]
+    },
+    {
+      "before": ["<C-a>"],
+      "commands": ["editor.action.selectAll"]
+    }
+  ],
+  
+  // 삽입 모드 키 바인딩
+  "vim.insertModeKeyBindings": [
+    // Esc 대체
+    {
+      "before": ["j", "j"],
+      "after": ["<Esc>"]
+    }
+  ],
+  
+  // 비주얼 모드 키 바인딩
+  "vim.visualModeKeyBindingsNonRecursive": [
+    // 선택 영역 이동
+    {
+      "before": ["<A-j>"],
+      "commands": ["editor.action.moveLinesDownAction"]
+    },
+    {
+      "before": ["<A-k>"],
+      "commands": ["editor.action.moveLinesUpAction"]
+    },
+    
+    // 시스템 클립보드
+    {
+      "before": ["<leader>", "y"],
+      "after": ["\"+", "y"]
+    },
+    {
+      "before": ["<leader>", "d"],
+      "after": ["\"+", "d"]
+    },
+    {
+      "before": ["<leader>", "p"],
+      "after": ["\"+", "p"]
+    },
+    {
+      "before": ["<leader>", "P"],
+      "after": ["\"+", "P"]
+    },
+    
+    // 멀티 커서 기능
+    {
+      "before": ["<C-n>"],
+      "commands": ["editor.action.addSelectionToNextFindMatch"]
+    },
+    {
+      "before": ["<C-p>"],
+      "commands": ["editor.action.addSelectionToPreviousFindMatch"]
+    },
+    // 스크롤 기능
+    {
+      "before": ["<C-d>"],
+      "commands": [{ "command": "editorScroll", "args": { "to": "down", "by": "halfPage" } }]
+    },
+    {
+      "before": ["<C-u>"],
+      "commands": [{ "command": "editorScroll", "args": { "to": "up", "by": "halfPage" } }]
+    }
+  ]
+} 
