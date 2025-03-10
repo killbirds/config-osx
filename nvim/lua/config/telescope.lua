@@ -24,10 +24,22 @@ telescope.setup({
 			ignore_current_buffer = true,
 		},
 	},
+	extensions = {
+		["ui-select"] = {
+			require("telescope.themes").get_dropdown({
+				-- 추가 설정을 여기에 넣을 수 있습니다
+				width = 0.8,
+				previewer = false,
+			}),
+		},
+	},
 })
 
 -- Load fzf extension
 telescope.load_extension("fzf")
+
+-- Load ui-select extension
+telescope.load_extension("ui-select")
 
 -- Key mappings for Telescope
 local telescope_mappings = {
