@@ -130,6 +130,39 @@ return {
 
 자세한 설정은 `nvim/lua/config/vim-visual-multi.lua` 파일을 참조하세요.
 
+#### trouble.nvim (진단 및 참조 뷰어)
+
+[trouble.nvim](https://github.com/folke/trouble.nvim) 플러그인은 코드의 진단, 참조, 정의, 심볼 등을 보기 쉽게 표시해주는 도구입니다.
+
+주요 키 매핑:
+
+- `<leader>xx`: 진단 목록 표시
+- `<leader>xX`: 현재 버퍼의 진단 목록 표시
+- `<leader>xL`: 로케이션 리스트 표시
+- `<leader>xQ`: 퀵픽스 리스트 표시
+- `<leader>xl`: LSP 참조/정의/구현 결과 표시
+- `<leader>xs`: 문서 심볼 표시
+
+Telescope과의 연동:
+- Telescope로 검색 후 `<C-t>` 키를 누르면 결과가 Trouble 뷰에 표시됩니다.
+
+Trouble 뷰 내부 키 바인딩:
+- `o` 또는 `<CR>`: 항목 열기
+- `<C-x>`: 가로 분할로 항목 열기
+- `<C-v>`: 세로 분할로 항목 열기
+- `<tab>/<S-tab>`: 다음/이전 항목으로 이동
+- `q`: Trouble 뷰 닫기
+- `r`: 목록 새로고침
+- `p`: 미리보기 토글
+- `m`: 필터/검색 토글
+
+명령어 예제:
+- `:Trouble diagnostics`: 모든 파일의 진단 목록 표시
+- `:Trouble lsp_references`: 현재 심볼의 참조 표시
+- `:Trouble symbols`: 문서 심볼 목록 표시
+
+자세한 설정은 `nvim/lua/config/trouble.lua` 파일을 참조하세요.
+
 ## 설정 커스터마이징
 
 ### Neovim 설정 수정

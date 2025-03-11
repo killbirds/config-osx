@@ -1,5 +1,6 @@
 local actions = require("telescope.actions")
 local telescope = require("telescope")
+local open_with_trouble = require("trouble.sources.telescope").open
 
 telescope.setup({
 	defaults = {
@@ -11,6 +12,10 @@ telescope.setup({
 				["<C-j>"] = actions.move_selection_next,
 				["<C-k>"] = actions.move_selection_previous,
 				["<C-o>"] = actions.select_default,
+				["<C-t>"] = open_with_trouble,
+			},
+			n = {
+				["<C-t>"] = open_with_trouble,
 			},
 		},
 	},
