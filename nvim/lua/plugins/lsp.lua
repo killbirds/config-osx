@@ -61,12 +61,6 @@ return {
 		end,
 	},
 
-	-- 코드 액션 메뉴
-	{
-		"weilbith/nvim-code-action-menu",
-		cmd = "CodeActionMenu",
-	},
-
 	-- 린트 및 포맷팅
 	{
 		"mfussenegger/nvim-lint",
@@ -81,4 +75,3 @@ return {
 		end,
 	},
 }
-

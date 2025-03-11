@@ -52,6 +52,7 @@ local telescope_mappings = {
 	["<leader>ff"] = "<cmd>Telescope find_files<cr>",
 	["<leader>fg"] = "<cmd>Telescope live_grep<cr>",
 	["<leader>fb"] = "<cmd>Telescope buffers<cr>",
+	["<leader>fp"] = "<cmd>Telescope projects<cr>",
 	["<leader>fh"] = "<cmd>Telescope help_tags<cr>",
 	[",ag"] = "<cmd>Telescope live_grep<cr>",
 }
