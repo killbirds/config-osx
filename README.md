@@ -19,6 +19,26 @@ brew tap homebrew/cask-fonts
 brew install --cask font-meslo-lg-nerd-font
 ```
 
+### 한글 입력 지원 도구 설치
+
+```bash
+# macism 설치 (한글 입력 전환 도구)
+brew tap laishulu/homebrew
+brew install macism
+```
+
+macism은 Neovim에서 한글 입력 시 모드 전환을 자동으로 관리해주는 도구입니다.
+이 도구를 설치하면 노멀 모드로 전환 시 자동으로 영문 입력으로 전환됩니다.
+
+#### macism 권한 설정
+
+macism을 처음 사용할 때 macOS에서 접근성 권한이 필요합니다:
+
+1. macism을 한 번 실행해봅니다: `macism com.apple.keylayout.ABC`
+2. 시스템 환경설정 > 개인 정보 보호 및 보안 > 개인 정보 보호 > 손쉬운 사용에서 터미널(또는 사용 중인 앱)에 권한을 부여합니다.
+3. 키보드 단축키 설정에서 "이전 입력 소스 선택" 단축키가 활성화되어 있는지 확인합니다.
+   - 시스템 환경설정 > 키보드 > 단축키 > 입력 소스
+
 ### 기본 도구 설치
 
 #### Zsh 프레임워크 설치
@@ -144,9 +164,11 @@ return {
 - `<leader>xs`: 문서 심볼 표시
 
 Telescope과의 연동:
+
 - Telescope로 검색 후 `<C-t>` 키를 누르면 결과가 Trouble 뷰에 표시됩니다.
 
 Trouble 뷰 내부 키 바인딩:
+
 - `o` 또는 `<CR>`: 항목 열기
 - `<C-x>`: 가로 분할로 항목 열기
 - `<C-v>`: 세로 분할로 항목 열기
@@ -157,6 +179,7 @@ Trouble 뷰 내부 키 바인딩:
 - `m`: 필터/검색 토글
 
 명령어 예제:
+
 - `:Trouble diagnostics`: 모든 파일의 진단 목록 표시
 - `:Trouble lsp_references`: 현재 심볼의 참조 표시
 - `:Trouble symbols`: 문서 심볼 목록 표시
@@ -194,13 +217,16 @@ nvim --headless -c "Lazy sync" -c "qa"
 
 한글 입력 관련 문제가 있다면 다음 사항을 확인하세요:
 
-1. `nvim/lua/config/korean.lua` 파일에서 한글 입력 설정을 확인하세요.
-2. 자동 영문 전환 기능을 활성화하려면 해당 파일의 주석을 해제하고 [im-select](https://github.com/daipeihust/im-select) 도구를 설치하세요.
+1. macism 또는 im-select.nvim 플러그인이 올바르게 설정되었는지 확인하세요:
+   - `nvim/lua/config/im-select.lua` 파일에서 설정 확인
+   - 터미널에서 `macism` 명령어가 정상적으로 실행되는지 확인
+   - 시스템 환경설정에서 macism에 대한 접근성 권한이 부여되었는지 확인
+   - 시스템 환경설정에서 "이전 입력 소스 선택" 단축키가 활성화되어 있는지 확인
 
 ```bash
-# im-select 설치
-brew tap daipeihust/tap
-brew install im-select
+# macism 상태 확인
+macism  # 현재 입력 방식 확인
+macism com.apple.keylayout.ABC  # 영문 입력으로 전환
 ```
 
 ### 폰트 문제

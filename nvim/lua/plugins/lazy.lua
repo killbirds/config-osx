@@ -46,6 +46,14 @@ return {
 		end,
 	},
 
+	-- im-select.nvim for Korean input method management
+	{
+		"keaising/im-select.nvim",
+		config = function()
+			require("config.im-select")
+		end,
+	},
+
 	-- Trouble.nvim for diagnostics, references, etc.
 	{
 		"folke/trouble.nvim",
