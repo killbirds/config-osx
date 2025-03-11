@@ -37,14 +37,6 @@ M.on_attach = function(client, bufnr)
 	-- 코드 조작 관련 키맵
 	set_keymap(bufnr, "n", "<leader>rn", vim.lsp.buf.rename, "Rename Symbol")
 	set_keymap(bufnr, "n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
-	set_keymap(bufnr, "n", "<leader>f", function()
-		vim.lsp.buf.format({
-			async = true,
-			filter = function(c)
-				return c.name ~= "ts_ls"
-			end,
-		})
-	end, "Format Buffer")
 
 	-- 진단 관련 키맵 (추가)
 	set_keymap(bufnr, "n", "<leader>e", vim.diagnostic.open_float, "Show Line Diagnostics")

@@ -9,7 +9,6 @@ vim.keymap.set("n", "<Leader><Space>", ":nohlsearch<CR>", { noremap = true, desc
 vim.keymap.set("n", "<Leader>w", ":w<CR>", { noremap = true })
 vim.keymap.set("n", "<Leader>q", ":q<CR>", { noremap = true })
 vim.keymap.set("n", "<Leader>Q", ":qa!<CR>", { noremap = true, desc = "Quit all without saving" })
-vim.keymap.set("n", "<Leader>wq", ":wq<CR>", { noremap = true, desc = "Save and quit" })
 
 -- 시스템 클립보드 매핑 (+ 레지스터)
 vim.keymap.set("v", "<Leader>y", '"+y', { noremap = true })
