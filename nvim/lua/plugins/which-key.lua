@@ -5,4 +5,3 @@ return {
 		require("config.which-key")
 	end,
 }
-

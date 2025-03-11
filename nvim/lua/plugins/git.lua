@@ -8,4 +8,5 @@ return {
 			require("config.gitsigns")
 		end,
 	},
-} 
+}
+

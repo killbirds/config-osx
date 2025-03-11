@@ -45,4 +45,5 @@ return {
 			{ "<leader>xs", "<cmd>Trouble symbols toggle<cr>", desc = "문서 심볼" },
 		},
 	},
-} 
+}
+
