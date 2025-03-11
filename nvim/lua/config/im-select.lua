@@ -26,7 +26,7 @@ function M.setup()
 		-- 이전 입력 방식으로 돌아가는 이벤트
 		-- 빈 테이블이면 이전 입력 방법 복원 기능 비활성화 (항상 영문으로 시작)
 		-- 편집 모드 시작 시 이전 입력 방식으로 돌아가게 하려면 {"InsertEnter"} 설정
-		set_previous_events = { "InsertEnter" },
+		set_previous_events = {},
 
 		-- 실행 파일이 없을 때 경고 메시지 표시 여부
 		keep_quiet_on_no_binary = false,

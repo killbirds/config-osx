@@ -2,7 +2,8 @@
 vim.keymap.set("i", "jj", "<Esc>", { noremap = true })
 
 -- 검색 하이라이트 제거
-vim.keymap.set("n", "<Leader><Space>", ":nohlsearch<CR>", { noremap = true })
+-- init.lua에 <Esc>로 하이라이트 끄는 매핑이 있으므로, 여기서는 추가 옵션으로 제공
+vim.keymap.set("n", "<Leader><Space>", ":nohlsearch<CR>", { noremap = true, desc = "Clear search highlight" })
 
 -- 저장 및 종료
 vim.keymap.set("n", "<Leader>w", ":w<CR>", { noremap = true })

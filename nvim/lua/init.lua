@@ -121,10 +121,8 @@ map("n", "<C-j>", "<C-w>j", opts)
 map("n", "<C-k>", "<C-w>k", opts)
 map("n", "<C-l>", "<C-w>l", opts)
 
--- 버퍼 탐색
-map("n", "<leader>bn", ":bnext<CR>", opts)
-map("n", "<leader>bp", ":bprevious<CR>", opts)
-map("n", "<leader>bd", ":bdelete<CR>", opts)
+-- 버퍼 탐색 관련 키 매핑은 keys.lua로 통합되었습니다
+-- 중복 방지를 위해 제거됨
 
 -- ESC로 하이라이트 끄기
 map("n", "<Esc>", ":noh<CR>", opts)
@@ -133,6 +131,5 @@ map("n", "<Esc>", ":noh<CR>", opts)
 map("v", "<", "<gv", opts)
 map("v", ">", ">gv", opts)
 
--- 선택 영역 위/아래로 이동
-map("v", "J", ":m '>+1<CR>gv=gv", opts)
-map("v", "K", ":m '<-2<CR>gv=gv", opts)
+-- 선택 영역 이동 관련 키 매핑은 keys.lua로 통합되었습니다
+-- 중복 방지를 위해 제거됨

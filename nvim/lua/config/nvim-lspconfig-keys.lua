@@ -41,7 +41,7 @@ M.on_attach = function(client, bufnr)
 		vim.lsp.buf.format({
 			async = true,
 			filter = function(c)
-				return c.name ~= "tsserver"
+				return c.name ~= "ts_ls"
 			end,
 		})
 	end, "Format Buffer")

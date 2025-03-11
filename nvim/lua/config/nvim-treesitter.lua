@@ -30,7 +30,7 @@ require("nvim-treesitter.configs").setup({
 		disable = function(lang, buf)
 			-- 큰 파일에서 성능 문제 방지
 			local max_filesize = 100 * 1024 -- 100 KB
-			local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+			local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
 			if ok and stats and stats.size > max_filesize then
 				return true
 			end
@@ -40,7 +40,7 @@ require("nvim-treesitter.configs").setup({
 		additional_vim_regex_highlighting = false, -- Vim 기본 하이라이팅 비활성화 (충돌 방지)
 	},
 
-	-- 들여쓰기 설정 (ident -> indent로 수정)
+	-- 들여쓰기 설정
 	indent = {
 		enable = true, -- Treesitter 기반 들여쓰기 활성화
 		disable = { "yaml", "python" }, -- Python은 기본 indent가 더 나을 수 있음
