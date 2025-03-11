@@ -25,6 +25,10 @@ vim.opt.colorcolumn = "120" -- 80자 컬럼 표시
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- leader 키 응답 시간 설정 (which-key.nvim을 위한 최적화)
+vim.opt.timeout = true
+vim.opt.timeoutlen = 300  -- 기본값은 1000ms, 더 짧게 설정하면 더 빠르게 반응합니다
+
 -- 파일 관련 설정
 vim.opt.swapfile = false
 vim.opt.backup = false

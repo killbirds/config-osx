@@ -57,8 +57,6 @@ return {
 				},
 			},
 
-			copilot = {},
-
 			-- 에디터 설정
 			editor = {
 				buffer_height_ratio = 0.6, -- 버퍼 높이 비율
