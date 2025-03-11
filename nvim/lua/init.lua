@@ -27,7 +27,7 @@ vim.g.maplocalleader = " "
 
 -- leader 키 응답 시간 설정
 vim.opt.timeout = true
-vim.opt.timeoutlen = 300  -- 기본값은 1000ms, 더 짧게 설정하면 더 빠르게 반응합니다
+vim.opt.timeoutlen = 300 -- 기본값 1000ms보다 짧게 설정하여 더 빠른 응답
 
 -- 파일 관련 설정
 vim.opt.swapfile = false
@@ -37,7 +37,7 @@ vim.opt.writebackup = false
 -- 성능 최적화 설정
 vim.opt.lazyredraw = true -- 매크로 실행 중 화면을 다시 그리지 않음
 vim.opt.synmaxcol = 200 -- 긴 줄에서 구문 강조 제한 (성능 향상)
-vim.opt.updatetime = 300 -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리거 시간 (ms)
+vim.opt.updatetime = 100 -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리거 시간 (ms)
 
 -- 검색 설정 개선
 vim.opt.ignorecase = true -- 검색 시 대소문자 무시
@@ -107,3 +107,32 @@ vim.g.loaded_netrwPlugin = 1
 -- set termguicolors to enable highlight groups
 vim.opt.termguicolors = true
 vim.opt.background = "dark"
+
+-- 클립보드 설정 (시스템 클립보드와 통합)
+vim.opt.clipboard = "unnamedplus"
+
+-- 유용한 키 매핑
+local map = vim.keymap.set
+local opts = { noremap = true, silent = true }
+
+-- 창 이동 단축키
+map("n", "<C-h>", "<C-w>h", opts)
+map("n", "<C-j>", "<C-w>j", opts)
+map("n", "<C-k>", "<C-w>k", opts)
+map("n", "<C-l>", "<C-w>l", opts)
+
+-- 버퍼 탐색
+map("n", "<leader>bn", ":bnext<CR>", opts)
+map("n", "<leader>bp", ":bprevious<CR>", opts)
+map("n", "<leader>bd", ":bdelete<CR>", opts)
+
+-- ESC로 하이라이트 끄기
+map("n", "<Esc>", ":noh<CR>", opts)
+
+-- 비주얼 모드에서 들여쓰기 후 선택 유지
+map("v", "<", "<gv", opts)
+map("v", ">", ">gv", opts)
+
+-- 선택 영역 위/아래로 이동
+map("v", "J", ":m '>+1<CR>gv=gv", opts)
+map("v", "K", ":m '<-2<CR>gv=gv", opts)

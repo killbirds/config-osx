@@ -1,24 +1,6 @@
 -- jj로 <Esc> 대체
 vim.keymap.set("i", "jj", "<Esc>", { noremap = true })
 
--- 한글 입력 관련 키 매핑
--- 한글 상태에서 노멀 모드로 빠르게 전환하기 위한 매핑
-vim.keymap.set("i", "ㅓㅓ", "<Esc>", { noremap = true }) -- 한글 jj
-vim.keymap.set("i", "ㅏㅏ", "<Esc>", { noremap = true }) -- 한글 kk
-
--- 명령 모드에서 한글 상태 해제를 위한 매핑
-vim.keymap.set("c", "<CR>", function()
-	if vim.fn.mode() == "c" then
-		return "<CR>"
-	end
-end, { noremap = true, expr = true })
-
--- 한글 상태에서 방향키 매핑 (한글 상태에서 hjkl 사용 가능)
-vim.keymap.set("n", "ㅗ", "h", { noremap = true })
-vim.keymap.set("n", "ㅓ", "j", { noremap = true })
-vim.keymap.set("n", "ㅏ", "k", { noremap = true })
-vim.keymap.set("n", "ㅣ", "l", { noremap = true })
-
 -- 검색 하이라이트 제거
 vim.keymap.set("n", "<Leader><Space>", ":nohlsearch<CR>", { noremap = true })
 
