@@ -12,7 +12,7 @@ return {
 			anthropic = vim.env.ANTHROPIC_API_KEY,
 		}
 
-		local provider = vim.env.NVIM_AVANTE_PROVIDER or "copilot"
+		local provider = vim.env.NVIM_AVANTE_PROVIDER or "openai"
 
 		return {
 			-- 기본 제공자 설정
@@ -115,7 +115,7 @@ return {
 		"nvim-tree/nvim-web-devicons",
 
 		-- AI 통합
-		{ "zbirenbaum/copilot.lua", optional = true }, -- 선택적 의존성
+		{ "zbirenbaum/copilot.lua", optional = true },
 
 		-- 이미지 지원
 		{
@@ -145,10 +145,13 @@ return {
 			"MeanderingProgrammer/render-markdown.nvim",
 			opts = {
 				file_types = { "Avante" },
-				highlight = {
-					code_blocks = true, -- 코드 블록 강조
-					headers = true, -- 헤더 강조
+				code = {
+					enabled = true, -- 코드 블록 강조
 				},
+				heading = {
+					enabled = true, -- 헤더 강조
+				},
+				latex = { enabled = false },
 			},
 			ft = { "Avante" },
 		},
