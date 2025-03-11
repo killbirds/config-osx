@@ -5,11 +5,6 @@ vim.keymap.set("i", "jj", "<Esc>", { noremap = true })
 -- init.lua에 <Esc>로 하이라이트 끄는 매핑이 있으므로, 여기서는 추가 옵션으로 제공
 vim.keymap.set("n", "<Leader><Space>", ":nohlsearch<CR>", { noremap = true, desc = "Clear search highlight" })
 
--- 저장 및 종료
-vim.keymap.set("n", "<Leader>w", ":w<CR>", { noremap = true })
-vim.keymap.set("n", "<Leader>q", ":q<CR>", { noremap = true })
-vim.keymap.set("n", "<Leader>Q", ":qa!<CR>", { noremap = true, desc = "Quit all without saving" })
-
 -- 시스템 클립보드 매핑 (+ 레지스터)
 vim.keymap.set("v", "<Leader>y", '"+y', { noremap = true })
 vim.keymap.set("v", "<Leader>d", '"+d', { noremap = true })

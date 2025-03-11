@@ -53,8 +53,18 @@ local servers = {
 	rust_analyzer = {
 		settings = {
 			["rust-analyzer"] = {
-				cargo = { allFeatures = true }, -- 모든 Cargo 기능 활성화
-				checkOnSave = { command = "clippy" }, -- 저장 시 Clippy 실행
+				cargo = {
+					allFeatures = true, -- 모든 Cargo 기능 활성화
+				},
+				checkOnSave = true,
+				check = { command = "clippy" }, -- 저장 시 Clippy 실행
+				rustc = {
+					source = "discover", -- 러스트 소스 자동 탐색
+				},
+				rust = {
+					unstable_features = true,
+					edition = "2024", -- Rust Edition 2024 지정
+				},
 			},
 		},
 	},
