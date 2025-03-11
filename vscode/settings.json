@@ -1,9 +1,9 @@
 {
   // Cursor의 Vim 플러그인 기본 설정
-  "vim.leader": " ",
+  "vim.leader": "<space>",
   "vim.hlsearch": true,
   "vim.visualstar": true,
-  "vim.useSystemClipboard": false,
+  "vim.useSystemClipboard": true,
   "vim.easymotion": true,
   "vim.smartRelativeLine": true,
   "vim.incsearch": true,
@@ -14,6 +14,8 @@
   "vim.highlightedyank.enable": true,
   "vim.highlightedyank.duration": 300,
   "vim.history": 1000,
+  "vim.smartcase": true,
+  "vim.ignorecase": true,
 
   // Vim 모드 표시 설정
   "vim.statusBarColorControl": true,
@@ -53,6 +55,10 @@
   "vim.easymotionMarkerFontSize": "16",
   "vim.easymotionMarkerForegroundColorOneChar": "#ff0000",
   "vim.easymotionMarkerForegroundColorTwoChar": "#00ff00",
+  "vim.easymotionMarkerBackgroundColor": "#000000",
+  "vim.easymotionMarkerWidthPerChar": 8,
+  "vim.easymotionMarkerHeight": 24,
+  "vim.easymotionMarkerYOffset": 0,
 
   // 키 바인딩 설정
   "vim.handleKeys": {
@@ -260,6 +266,26 @@
     {
       "before": ["<C-a>"],
       "commands": ["editor.action.selectAll"]
+    },
+
+    // LSP 관련 키 바인딩
+    {
+      "before": ["g", "h"],
+      "commands": ["editor.action.showHover"]
+    },
+    
+    // 네비게이션 바인딩
+    {
+      "before": ["<leader>", "t"],
+      "commands": ["workbench.action.toggleSidebarVisibility"]
+    },
+    {
+      "before": ["<leader>", "fe"],
+      "commands": ["workbench.view.explorer"]
+    },
+    {
+      "before": ["<leader>", "/"],
+      "commands": ["workbench.action.findInFiles"]
     }
   ],
 
@@ -318,7 +344,7 @@
       ]
     },
 
-    // 멀티 커서 기능
+    // 멀티 커서 기능 (비주얼 모드 전용)
     {
       "before": ["<C-n>"],
       "commands": ["editor.action.addSelectionToNextFindMatch"]
