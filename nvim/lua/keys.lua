@@ -1,27 +1,37 @@
 -- jj로 <Esc> 대체
-vim.keymap.set("i", "jj", "<Esc>", { noremap = true })
+vim.keymap.set("i", "jj", "<Esc>", { noremap = true, desc = "Exit insert mode with jj" })
 
 -- 검색 하이라이트 제거
 -- init.lua에 <Esc>로 하이라이트 끄는 매핑이 있으므로, 여기서는 추가 옵션으로 제공
 vim.keymap.set("n", "<Leader><Space>", ":nohlsearch<CR>", { noremap = true, desc = "Clear search highlight" })
 
 -- 시스템 클립보드 매핑 (+ 레지스터)
-vim.keymap.set("v", "<Leader>y", '"+y', { noremap = true })
-vim.keymap.set("v", "<Leader>d", '"+d', { noremap = true })
-vim.keymap.set("n", "<Leader>p", '"+p', { noremap = true })
-vim.keymap.set("n", "<Leader>P", '"+P', { noremap = true })
-vim.keymap.set("v", "<Leader>p", '"+p', { noremap = true })
-vim.keymap.set("v", "<Leader>P", '"+P', { noremap = true })
+vim.keymap.set("v", "<Leader>y", '"+y', { noremap = true, desc = "Copy to system clipboard" })
+vim.keymap.set("v", "<Leader>d", '"+d', { noremap = true, desc = "Cut to system clipboard" })
+vim.keymap.set("n", "<Leader>p", '"+p', { noremap = true, desc = "Paste from system clipboard after cursor" })
+vim.keymap.set("n", "<Leader>P", '"+P', { noremap = true, desc = "Paste from system clipboard before cursor" })
+vim.keymap.set("v", "<Leader>p", '"+p', { noremap = true, desc = "Paste from system clipboard after cursor" })
+vim.keymap.set("v", "<Leader>P", '"+P', { noremap = true, desc = "Paste from system clipboard before cursor" })
 
 -- 선택 클립보드 매핑 (* 레지스터)
-vim.keymap.set("", "<Leader>Y", '"*y', { noremap = true })
-vim.keymap.set("", "<Leader>P", '"*p', { noremap = true })
+vim.keymap.set("", "<Leader>Y", '"*y', { noremap = true, desc = "Copy to selection clipboard" })
+vim.keymap.set("", "<Leader>P", '"*p', { noremap = true, desc = "Paste from selection clipboard" })
 
 -- 창 크기 조정
-vim.keymap.set("n", "<Up>", ":resize -5<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<Down>", ":resize +5<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<Left>", ":vertical resize -10<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<Right>", ":vertical resize +10<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<Up>", ":resize -5<CR>", { noremap = true, silent = true, desc = "Decrease window height" })
+vim.keymap.set("n", "<Down>", ":resize +5<CR>", { noremap = true, silent = true, desc = "Increase window height" })
+vim.keymap.set(
+	"n",
+	"<Left>",
+	":vertical resize -10<CR>",
+	{ noremap = true, silent = true, desc = "Decrease window width" }
+)
+vim.keymap.set(
+	"n",
+	"<Right>",
+	":vertical resize +10<CR>",
+	{ noremap = true, silent = true, desc = "Increase window width" }
+)
 
 -- 버퍼 탐색
 vim.keymap.set("n", "<Leader>bn", ":bnext<CR>", { noremap = true, silent = true, desc = "Next buffer" })
@@ -37,7 +47,7 @@ vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", { noremap = true, desc = "Move 
 vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", { noremap = true, desc = "Move selection up" })
 
 -- 터미널 모드
-vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { noremap = true })
+vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { noremap = true, desc = "Exit terminal mode" })
 vim.keymap.set(
 	"n",
 	"<Leader>tt",
