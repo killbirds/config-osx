@@ -38,8 +38,19 @@ local function update_quickfix()
 	-- LSP 기반 진단과 린터 결과 결합
 	local diagnostics = vim.diagnostic.get(0, { severity = { min = vim.diagnostic.severity.WARN } })
 	if #diagnostics > 0 then
-		vim.diagnostic.setqflist() -- Quickfix 목록 업데이트
-		vim.cmd("cwindow") -- Quickfix 창을 조건부로 열기 (이미 열려 있으면 유지)
+		-- 현재 윈도우 ID 저장
+		local current_win = vim.api.nvim_get_current_win()
+
+		-- pcall을 사용해 안전하게 quickfix 목록 업데이트
+		local ok, _ = pcall(function()
+			vim.diagnostic.setqflist() -- Quickfix 목록 업데이트
+			vim.cmd("cwindow")
+		end)
+
+		-- 에러가 없고 현재 윈도우가 여전히 유효할 경우에만 원래 윈도우로 포커스 돌려놓기
+		if ok and vim.api.nvim_win_is_valid(current_win) then
+			vim.api.nvim_set_current_win(current_win)
+		end
 	end
 end
 
@@ -66,6 +77,18 @@ vim.api.nvim_create_autocmd("BufEnter", {
 vim.api.nvim_create_autocmd("DiagnosticChanged", {
 	group = vim.api.nvim_create_augroup("DiagnosticQuickfix", { clear = true }),
 	callback = function()
+		-- vim.in_fast_event()로 빠른 이벤트 내에 있는지 확인
+		if vim.in_fast_event() then
+			return
+		end
+		
+		-- vim.api.nvim_get_mode()를 통해 현재 모드 확인
+		local mode = vim.api.nvim_get_mode().mode
+		if mode:find("c") or mode:find("t") then
+			-- 명령 모드나 터미널 모드에서는 실행하지 않음
+			return
+		end
+		
 		-- 현재 버퍼에 포커스가 있고 지원하는 파일 타입인 경우에만 업데이트
 		local ft = vim.bo.filetype
 		if
@@ -77,7 +100,8 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
 			or ft == "lua"
 			or ft == "rust"
 		then
-			update_quickfix()
+			-- pcall로 안전하게 실행
+			pcall(update_quickfix)
 		end
 	end,
 })
@@ -101,7 +125,7 @@ vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
 	group = vim.api.nvim_create_augroup("LintOnChange", { clear = true }),
 	callback = function()
 		-- 타이머를 사용하여 입력 후 일정 시간이 지나면 린팅 실행 (디바운싱)
-		local timer = vim.loop.new_timer()
+		local timer = vim.uv.new_timer()
 		if timer then
 			timer:start(
 				500,
