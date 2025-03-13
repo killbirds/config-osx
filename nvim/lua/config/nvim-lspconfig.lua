@@ -50,6 +50,22 @@ local servers = {
 	ts_ls = {
 		-- TypeScript/JavaScript 설정
 	},
+	eslint = {
+		settings = {
+			-- eslint 서버 설정
+			packageManager = "npm", -- 패키지 매니저 (npm, yarn, pnpm 중)
+			experimental = {
+				useFlatConfig = true, -- eslint.config.mjs와 같은 플랫 설정 파일 지원 활성화
+			},
+		},
+		handlers = {
+			["eslint/openDoc"] = function(_, result)
+				if result then
+					vim.fn.system({ "open", result.url })
+				end
+			end,
+		},
+	},
 	rust_analyzer = {
 		settings = {
 			["rust-analyzer"] = {

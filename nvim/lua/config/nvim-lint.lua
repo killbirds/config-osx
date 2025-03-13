@@ -16,6 +16,9 @@ lint.linters.eslint = {
 	args = { "--format", "json", "--stdin", "--stdin-filename", "%filepath" }, -- JSON 출력 설정
 	stream = "stdout", -- 출력 스트림
 	ignore_exitcode = true, -- 종료 코드 무시 (에러가 있어도 계속 진행)
+	env = {
+		ESLINT_USE_FLAT_CONFIG = "true", -- eslint.config.mjs 파일을 인식하기 위한 환경 변수
+	},
 }
 
 lint.linters.flake8 = {
