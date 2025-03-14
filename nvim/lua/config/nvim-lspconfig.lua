@@ -53,7 +53,7 @@ local servers = {
 	eslint = {
 		settings = {
 			-- eslint 서버 설정
-			packageManager = "npm", -- 패키지 매니저 (npm, yarn, pnpm 중)
+			packageManager = "yarn", -- 패키지 매니저 (npm, yarn, pnpm 중)
 			experimental = {
 				useFlatConfig = true, -- eslint.config.mjs와 같은 플랫 설정 파일 지원 활성화
 			},
