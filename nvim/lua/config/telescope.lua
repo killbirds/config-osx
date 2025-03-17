@@ -13,10 +13,20 @@ telescope.setup({
 				["<C-k>"] = actions.move_selection_previous,
 				["<C-o>"] = actions.select_default,
 				["<C-t>"] = open_with_trouble,
+				["<C-n>"] = actions.cycle_history_next,
+				["<C-p>"] = actions.cycle_history_prev,
 			},
 			n = {
 				["<C-t>"] = open_with_trouble,
 			},
+		},
+		history = {
+			path = vim.fn.stdpath("data") .. "/telescope_history.sqlite3",
+			limit = 100,
+		},
+		cache_picker = {
+			num_pickers = 10,
+			limit = 100,
 		},
 	},
 	pickers = {
@@ -27,6 +37,9 @@ telescope.setup({
 		buffers = {
 			sort_mru = true,
 			ignore_current_buffer = true,
+		},
+		live_grep = {
+			-- 기본 설정 유지
 		},
 	},
 	extensions = {
@@ -46,6 +59,9 @@ telescope.load_extension("fzf")
 -- Load ui-select extension
 telescope.load_extension("ui-select")
 
+-- Load smart-history extension
+telescope.load_extension("smart_history")
+
 -- Key mappings for Telescope
 local telescope_mappings = {
 	["<C-p>"] = "<cmd>Telescope find_files<cr>",
@@ -55,6 +71,10 @@ local telescope_mappings = {
 	["<leader>fp"] = "<cmd>Telescope projects<cr>",
 	["<leader>fh"] = "<cmd>Telescope help_tags<cr>",
 	[",ag"] = "<cmd>Telescope live_grep<cr>",
+	-- 이전 피커/검색 결과 다시 열기
+	["<leader>fr"] = "<cmd>Telescope resume<cr>",
+	-- 이전 피커 목록 보기
+	["<leader>fP"] = "<cmd>Telescope pickers<cr>",
 }
 
 -- Set key mappings in normal mode
