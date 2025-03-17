@@ -33,17 +33,43 @@ lint.linters.luacheck = {
 	stream = "stdout",
 }
 
--- 진단 결과를 quickfix에 표시하는 함수
+-- 진단 결과를 quickfix에 표시하는 함수 (현재 프로젝트의 진단만 표시)
 local function update_quickfix()
-	-- LSP 기반 진단과 린터 결과 결합
-	local diagnostics = vim.diagnostic.get(0, { severity = { min = vim.diagnostic.severity.WARN } })
-	if #diagnostics > 0 then
+	-- 현재 작업 디렉토리(프로젝트 루트) 가져오기
+	local cwd = vim.fn.getcwd()
+
+	-- 모든 열린 버퍼에서 진단 수집
+	local all_diagnostics = {}
+	local buffers = vim.api.nvim_list_bufs()
+
+	for _, buf in ipairs(buffers) do
+		if vim.api.nvim_buf_is_valid(buf) then
+			local buf_name = vim.api.nvim_buf_get_name(buf)
+
+			-- 파일이 현재 프로젝트 내에 있는지 확인
+			if buf_name and buf_name:find(cwd, 1, true) then
+				local buf_diagnostics = vim.diagnostic.get(buf, { severity = { min = vim.diagnostic.severity.WARN } })
+
+				for _, diag in ipairs(buf_diagnostics) do
+					table.insert(all_diagnostics, {
+						bufnr = buf,
+						lnum = diag.lnum + 1,
+						col = diag.col + 1,
+						text = diag.message .. " [" .. vim.fn.fnamemodify(buf_name, ":~:.") .. "]",
+						type = (diag.severity == vim.diagnostic.severity.ERROR and "E" or "W"),
+					})
+				end
+			end
+		end
+	end
+
+	if #all_diagnostics > 0 then
 		-- 현재 윈도우 ID 저장
 		local current_win = vim.api.nvim_get_current_win()
 
 		-- pcall을 사용해 안전하게 quickfix 목록 업데이트
 		local ok, _ = pcall(function()
-			vim.diagnostic.setqflist() -- Quickfix 목록 업데이트
+			vim.fn.setqflist(all_diagnostics) -- 필터링된 진단으로 Quickfix 목록 업데이트
 			vim.cmd("cwindow")
 		end)
 
@@ -81,14 +107,14 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
 		if vim.in_fast_event() then
 			return
 		end
-		
+
 		-- vim.api.nvim_get_mode()를 통해 현재 모드 확인
 		local mode = vim.api.nvim_get_mode().mode
 		if mode:find("c") or mode:find("t") then
 			-- 명령 모드나 터미널 모드에서는 실행하지 않음
 			return
 		end
-		
+
 		-- 현재 버퍼에 포커스가 있고 지원하는 파일 타입인 경우에만 업데이트
 		local ft = vim.bo.filetype
 		if
