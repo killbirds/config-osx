@@ -9,7 +9,7 @@ trouble.setup({
 	indent_lines = true,
 	auto_preview = true,
 	auto_fold = false,
-	auto_jump = {"lsp_definitions"},
+	auto_jump = { "lsp_definitions" },
 	use_diagnostic_signs = false,
 })
 
@@ -24,4 +24,4 @@ trouble.setup({
 -- { "<leader>xl", "<cmd>Trouble lsp toggle<cr>", desc = "LSP 참조/정의/구현" }
 -- { "<leader>xs", "<cmd>Trouble symbols toggle<cr>", desc = "문서 심볼" }
 
--- 추가적인 trouble.nvim 커스텀 설정을 여기에 추가할 수 있습니다 
+-- 추가적인 trouble.nvim 커스텀 설정을 여기에 추가할 수 있습니다
