@@ -85,6 +85,7 @@ local servers = {
 					includeInlayPropertyDeclarationTypeHints = true,
 					includeInlayFunctionLikeReturnTypeHints = true,
 					includeInlayEnumMemberValueHints = true,
+					includeInlayArrayIndexHints = false, -- 배열 인덱스 힌트 비활성화
 				},
 			},
 			javascript = {
@@ -96,6 +97,7 @@ local servers = {
 					includeInlayPropertyDeclarationTypeHints = true,
 					includeInlayFunctionLikeReturnTypeHints = true,
 					includeInlayEnumMemberValueHints = true,
+					includeInlayArrayIndexHints = false, -- 배열 인덱스 힌트 비활성화
 				},
 			},
 		},
@@ -137,6 +139,13 @@ local servers = {
 					closureReturnTypeHints = "always", -- 클로저 반환 유형 힌트
 					lifetimeElisionHints = { enable = true, useParameterNames = true },
 					reborrowHints = "always",
+					bindingModeHints = { enable = true },
+					chainingHints = { enable = true },
+					expressionAdjustmentHints = { enable = true },
+					typeHints = { enable = true },
+					parameterHints = { enable = true },
+					implicitDrops = { enable = true },
+					arrayIndexHints = { enable = false }, -- 배열 인덱스 힌트 비활성화
 				},
 			},
 		},
@@ -153,7 +162,7 @@ local servers = {
 				telemetry = { enable = false }, -- 텔레메트리 비활성화
 				hint = {
 					enable = true, -- lua_ls inlay hints 활성화
-					arrayIndex = "All", -- 배열 인덱스 힌트 표시
+					arrayIndex = "Disable", -- 배열 인덱스 힌트 비활성화
 					setType = true, -- 변수 유형 힌트 표시
 					paramName = "All", -- 매개변수 이름 힌트 표시
 					paramType = true, -- 매개변수 유형 힌트 표시
