@@ -4,13 +4,13 @@ require("lualine").setup({
 		theme = "catppuccin",
 		component_separators = { left = "", right = "" }, -- 좀 더 눈에 띄는 구분자 설정
 		section_separators = { left = "", right = "" },
-		disabled_filetypes = { "packer", "NvimTree" },
+		disabled_filetypes = { "Lazy", "NvimTree" },
 		always_divide_middle = true,
 		globalstatus = true, -- 모든 창에서 동일한 상태줄 사용
 		refresh = { -- 상태줄 갱신 주기 (성능 최적화)
-			statusline = 1000, -- 1초마다 갱신
-			tabline = 1000,
-			winbar = 1000,
+			statusline = 5000, -- 5초마다 갱신
+			tabline = 5000,
+			winbar = 5000,
 		},
 	},
 	sections = {
@@ -26,6 +26,7 @@ require("lualine").setup({
 			{ "branch", icon = "" }, -- Git 브랜치에 아이콘 추가
 			{
 				"diff",
+				source = { "gitsigns" }, -- gitsigns 캐시에서 diff 정보 가져오기
 				symbols = { added = "+", modified = "~", removed = "-" }, -- 심플한 diff 심볼
 				diff_color = {
 					added = { fg = "#98c379" }, -- 색상 커스터마이징 (catppuccin과 조화)
