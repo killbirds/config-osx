@@ -2,6 +2,17 @@
 
 이 저장소는 macOS에서 개발 환경을 빠르게 설정하기 위한 스크립트와 설정 파일을 제공합니다.
 
+## 목차
+- [주요 기능](#주요-기능)
+- [설치 전 준비사항](#설치-전-준비사항)
+- [설치 방법](#설치-방법)
+- [Neovim 설정](#neovim-설정)
+- [주요 플러그인 사용법](#주요-플러그인-사용법)
+- [설정 커스터마이징](#설정-커스터마이징)
+- [문제 해결](#문제-해결)
+- [디렉토리 구조](#디렉토리-구조)
+- [라이선스](#라이선스)
+
 ## 주요 기능
 
 - Neovim 설정 (플러그인, 테마, 한글 입력 지원 등)
@@ -102,11 +113,21 @@ brew install google-java-format
 - Git 글로벌 설정 적용
 - Neovim 플러그인 설치
 
-## Neovim 플러그인 관리
+업데이트를 수행하려면 다음 명령어를 실행하세요:
+
+```bash
+./install --update
+# 또는
+./install -u
+```
+
+## Neovim 설정
+
+### 플러그인 관리
 
 이 설정은 [lazy.nvim](https://github.com/folke/lazy.nvim)을 사용하여 Neovim 플러그인을 관리합니다.
 
-### 플러그인 설치 및 업데이트
+#### 플러그인 설치 및 업데이트
 
 Neovim을 실행한 후 다음 명령어를 사용하여 플러그인을 관리할 수 있습니다:
 
@@ -119,7 +140,7 @@ Neovim을 실행한 후 다음 명령어를 사용하여 플러그인을 관리�
 :Lazy profile     # 플러그인 로딩 성능 분석
 ```
 
-### 플러그인 추가 방법
+#### 플러그인 추가 방법
 
 새 플러그인을 추가하려면 `nvim/lua/plugins` 디렉토리에 Lua 파일을 생성하거나 수정하세요. 예시:
 
@@ -133,9 +154,50 @@ return {
 }
 ```
 
-### 주요 플러그인 사용법
+### 주요 Neovim 최신 기능
 
-#### vim-visual-multi (멀티 커서 편집)
+#### 프로젝트별 설정 (exrc)
+
+이 설정은 Neovim의 `exrc` 기능을 활용하여 프로젝트별 설정을 지원합니다. 프로젝트 디렉토리에 `.nvim.lua`, `.nvimrc`, `.exrc` 파일을 생성하면 해당 프로젝트에서 Neovim을 실행할 때 자동으로 로드됩니다.
+
+예시 (`.nvim.lua`):
+
+```lua
+-- 프로젝트별 설정
+vim.opt_local.shiftwidth = 4
+vim.opt_local.tabstop = 4
+
+-- 프로젝트별 키 매핑
+vim.keymap.set("n", "<leader>pb", ":echo 'Project-specific command'<CR>", { buffer = true })
+
+-- 프로젝트별 자동 명령
+local group = vim.api.nvim_create_augroup("ProjectSettings", { clear = true })
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group = group,
+  pattern = "*.js",
+  callback = function()
+    -- 파일 저장 시 작업
+  end,
+})
+```
+
+**참고**: 보안상의 이유로 `secure` 옵션이 활성화되어 있어 일부 명령어는 제한됩니다.
+
+#### Inlay Hints
+
+타입스크립트, 러스트, 루아 등의 언어에서 코드 내에 타입 정보를 인라인으로 표시하는 기능을 지원합니다. 이 기능은 Neovim 0.10.0 이상에서 사용할 수 있습니다.
+
+- `<leader>th`: Inlay Hints 토글
+- 기본적으로 지원되는 언어:
+  - TypeScript/JavaScript: 변수 타입, 함수 매개변수 및 반환 타입 표시
+  - Rust: 변수 타입, 함수 매개변수 및 반환 타입, 라이프타임, 리바운드 힌트 표시
+  - Lua: 배열 인덱스, 변수 타입, 매개변수 이름 및 타입 표시
+
+주의: 이 기능은 해당 LSP 서버가 지원해야만 동작합니다.
+
+## 주요 플러그인 사용법
+
+### vim-visual-multi (멀티 커서 편집)
 
 [vim-visual-multi](https://github.com/mg979/vim-visual-multi) 플러그인을 사용하면 여러 위치에서 동시에 텍스트를 편집할 수 있습니다.
 
@@ -150,7 +212,7 @@ return {
 
 자세한 설정은 `nvim/lua/config/vim-visual-multi.lua` 파일을 참조하세요.
 
-#### trouble.nvim (진단 및 참조 뷰어)
+### trouble.nvim (진단 및 참조 뷰어)
 
 [trouble.nvim](https://github.com/folke/trouble.nvim) 플러그인은 코드의 진단, 참조, 정의, 심볼 등을 보기 쉽게 표시해주는 도구입니다.
 

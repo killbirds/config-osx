@@ -1,8 +1,10 @@
 -- jj로 <Esc> 대체
 vim.keymap.set("i", "jj", "<Esc>", { noremap = true, desc = "Exit insert mode with jj" })
 
--- 검색 하이라이트 제거
--- init.lua에 <Esc>로 하이라이트 끄는 매핑이 있으므로, 여기서는 추가 옵션으로 제공
+-- ESC로 하이라이트 끄기 (init.lua에서 이동됨)
+vim.keymap.set("n", "<Esc>", ":noh<CR>", { noremap = true, silent = true, desc = "Clear search highlight" })
+
+-- 검색 하이라이트 제거 (추가 옵션)
 vim.keymap.set("n", "<Leader><Space>", ":nohlsearch<CR>", { noremap = true, desc = "Clear search highlight" })
 
 -- 시스템 클립보드 매핑 (+ 레지스터)

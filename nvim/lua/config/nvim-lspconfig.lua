@@ -11,10 +11,31 @@ local function setup_lsp(client, bufnr)
 	client.server_capabilities.documentFormattingProvider = true
 	client.server_capabilities.documentRangeFormattingProvider = true
 
+	-- Inlay Hints 설정 (Neovim 0.10.0+)
+	if vim.lsp.inlay_hint and client.server_capabilities.inlayHintProvider then
+		-- 버퍼별 inlay hint 활성화 (API 문서 기반 수정)
+		if vim.fn.has("nvim-0.10.0") == 1 then
+			vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+		end
+	end
+
 	-- 서버별 추가 설정 (선택적)
 	if client.name == "ts_ls" then
 		client.server_capabilities.documentFormattingProvider = false -- tsserver는 prettier에 위임 가능
 	end
+end
+
+-- Inlay Hints 키 매핑 설정
+local function setup_inlay_hints_keymaps()
+	local opts = { noremap = true, silent = true }
+	-- Inlay hints 토글 키 매핑 (API 문서 기반 수정)
+	vim.keymap.set("n", "<leader>th", function()
+		-- 현재 버퍼에서만 토글
+		local bufnr = vim.api.nvim_get_current_buf()
+		local filter = { bufnr = bufnr }
+		local enabled = vim.lsp.inlay_hint.is_enabled(filter)
+		vim.lsp.inlay_hint.enable(not enabled, filter)
+	end, vim.tbl_extend("force", opts, { desc = "Toggle Inlay Hints" }))
 end
 
 -- 공통 옵션 설정
@@ -43,12 +64,41 @@ local function setup_global_keymaps()
 		vim.diagnostic.setloclist,
 		vim.tbl_extend("force", opts, { desc = "Diagnostics to Loclist" })
 	)
+
+	-- Inlay Hints 키 매핑 설정 (최신 Neovim 버전 확인)
+	if vim.lsp.inlay_hint and vim.fn.has("nvim-0.10.0") == 1 then
+		setup_inlay_hints_keymaps()
+	end
 end
 
 -- LSP 서버별 설정
 local servers = {
 	ts_ls = {
 		-- TypeScript/JavaScript 설정
+		settings = {
+			typescript = {
+				inlayHints = {
+					includeInlayParameterNameHints = "all", -- 'none' | 'literals' | 'all'
+					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+					includeInlayFunctionParameterTypeHints = true,
+					includeInlayVariableTypeHints = true,
+					includeInlayPropertyDeclarationTypeHints = true,
+					includeInlayFunctionLikeReturnTypeHints = true,
+					includeInlayEnumMemberValueHints = true,
+				},
+			},
+			javascript = {
+				inlayHints = {
+					includeInlayParameterNameHints = "all",
+					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+					includeInlayFunctionParameterTypeHints = true,
+					includeInlayVariableTypeHints = true,
+					includeInlayPropertyDeclarationTypeHints = true,
+					includeInlayFunctionLikeReturnTypeHints = true,
+					includeInlayEnumMemberValueHints = true,
+				},
+			},
+		},
 	},
 	eslint = {
 		settings = {
@@ -81,6 +131,13 @@ local servers = {
 					unstable_features = true,
 					edition = "2024", -- Rust Edition 2024 지정
 				},
+				inlayHints = {
+					maxLength = 25, -- 힌트 최대 길이
+					closingBraceHints = true, -- 닫는 중괄호에 힌트 표시 여부
+					closureReturnTypeHints = "always", -- 클로저 반환 유형 힌트
+					lifetimeElisionHints = { enable = true, useParameterNames = true },
+					reborrowHints = "always",
+				},
 			},
 		},
 	},
@@ -94,6 +151,13 @@ local servers = {
 					checkThirdParty = false, -- 성능 최적화
 				},
 				telemetry = { enable = false }, -- 텔레메트리 비활성화
+				hint = {
+					enable = true, -- lua_ls inlay hints 활성화
+					arrayIndex = "All", -- 배열 인덱스 힌트 표시
+					setType = true, -- 변수 유형 힌트 표시
+					paramName = "All", -- 매개변수 이름 힌트 표시
+					paramType = true, -- 매개변수 유형 힌트 표시
+				},
 			},
 		},
 	},

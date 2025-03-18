@@ -21,6 +21,10 @@ vim.opt.sidescrolloff = 8 -- 커서 좌우 최소 컬럼 수
 vim.opt.wrap = false -- 긴 줄 자동 줄바꿈 비활성화
 vim.opt.colorcolumn = "120" -- 80자 컬럼 표시
 
+-- 프로젝트별 설정 지원 (exrc)
+vim.opt.exrc = true -- 프로젝트 디렉토리의 .nvim.lua, .nvimrc, .exrc 파일을 로드
+vim.opt.secure = true -- 보안을 위해 일부 명령어 제한 (exrc와 함께 사용 권장)
+
 -- 리더 키 설정 (lazy.nvim과 공유)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
@@ -111,25 +115,21 @@ vim.opt.background = "dark"
 -- 클립보드 설정 (시스템 클립보드와 통합)
 vim.opt.clipboard = "unnamedplus"
 
--- 유용한 키 매핑
+-- 창 이동 단축키
 local map = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
--- 창 이동 단축키
 map("n", "<C-h>", "<C-w>h", opts)
 map("n", "<C-j>", "<C-w>j", opts)
 map("n", "<C-k>", "<C-w>k", opts)
 map("n", "<C-l>", "<C-w>l", opts)
 
--- 버퍼 탐색 관련 키 매핑은 keys.lua로 통합되었습니다
--- 중복 방지를 위해 제거됨
-
--- ESC로 하이라이트 끄기
-map("n", "<Esc>", ":noh<CR>", opts)
-
 -- 비주얼 모드에서 들여쓰기 후 선택 유지
 map("v", "<", "<gv", opts)
 map("v", ">", ">gv", opts)
 
--- 선택 영역 이동 관련 키 매핑은 keys.lua로 통합되었습니다
--- 중복 방지를 위해 제거됨
+-- 참고: 다음 매핑들은 keys.lua로 이동되었습니다
+-- 1. ESC로 하이라이트 끄기
+-- 2. 버퍼 탐색 관련 키 매핑
+-- 3. 선택 영역 이동 관련 키 매핑
+-- 4. 클립보드 관련 추가 매핑
