@@ -42,6 +42,13 @@ return {
 			require("config.mason-lspconfig")
 		end,
 	},
+	{
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		dependencies = { "williamboman/mason.nvim" },
+		config = function()
+			require("config.mason-tool-installer")
+		end,
+	},
 
 	-- Treesitter
 	{

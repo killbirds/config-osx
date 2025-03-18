@@ -12,6 +12,7 @@ lint.linters_by_ft = {
 
 -- 커스텀 린터 설정 (선택적)
 lint.linters.eslint = {
+	name = "eslint", -- 린터 이름
 	cmd = "eslint", -- 실행 명령어
 	args = { "--format", "json", "--stdin", "--stdin-filename", "%filepath" }, -- JSON 출력 설정
 	stream = "stdout", -- 출력 스트림
@@ -22,12 +23,14 @@ lint.linters.eslint = {
 }
 
 lint.linters.flake8 = {
+	name = "flake8",
 	cmd = "flake8",
 	args = { "--format", "default", "--stdin-display-name", "%filepath", "-" },
 	stream = "stdout",
 }
 
 lint.linters.luacheck = {
+	name = "luacheck",
 	cmd = "luacheck",
 	args = { "--formatter", "plain", "--codes", "--ranges", "--filename", "%filepath", "-" },
 	stream = "stdout",
