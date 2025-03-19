@@ -138,9 +138,9 @@ local servers = {
 					closingBraceHints = true, -- 닫는 중괄호에 힌트 표시 여부
 					closureReturnTypeHints = "always", -- 클로저 반환 유형 힌트
 					lifetimeElisionHints = { enable = true, useParameterNames = true },
-					reborrowHints = "always",
+					reborrowHints = "never", -- 재대여 힌트 비활성화
 					bindingModeHints = { enable = true },
-					chainingHints = { enable = false }, -- 체인 메서드에서 타입 중복 표시 방지
+					chainingHints = { enable = true }, -- 체인 메서드 타입 힌트 활성화
 					expressionAdjustmentHints = { enable = true },
 					typeHints = { enable = true },
 					parameterHints = { enable = true },
