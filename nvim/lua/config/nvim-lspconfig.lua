@@ -15,7 +15,7 @@ local function setup_lsp(client, bufnr)
 	if vim.lsp.inlay_hint and client.server_capabilities.inlayHintProvider then
 		-- 버퍼별 inlay hint 활성화 (API 문서 기반 수정)
 		if vim.fn.has("nvim-0.10.0") == 1 then
-			vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+			vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
 		end
 	end
 
