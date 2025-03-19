@@ -140,7 +140,7 @@ local servers = {
 					lifetimeElisionHints = { enable = true, useParameterNames = true },
 					reborrowHints = "always",
 					bindingModeHints = { enable = true },
-					chainingHints = { enable = true },
+					chainingHints = { enable = false }, -- 체인 메서드에서 타입 중복 표시 방지
 					expressionAdjustmentHints = { enable = true },
 					typeHints = { enable = true },
 					parameterHints = { enable = true },

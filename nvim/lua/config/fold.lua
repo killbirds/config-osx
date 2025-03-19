@@ -137,7 +137,7 @@ function M.setup()
 	-- 일부 언어에서는 LSP가 제공하지 않는 세밀한 폴딩을 Treesitter로 보완
 	vim.keymap.set("n", "<leader>zh", function()
 		-- 현재 LSP 클라이언트 확인
-		local clients = vim.lsp.get_active_clients({ bufnr = 0 })
+		local clients = vim.lsp.get_clients({ bufnr = 0 })
 		local has_lsp_folding = false
 
 		for _, client in ipairs(clients) do
