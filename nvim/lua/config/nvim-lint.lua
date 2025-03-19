@@ -1,5 +1,104 @@
 local lint = require("lint")
 
+-- 사용자 설정 옵션
+local config = {
+	-- 지원하는 파일 타입
+	filetypes = {
+		"javascript",
+		"typescript",
+		"javascriptreact",
+		"typescriptreact",
+		"python",
+		"lua",
+		"rust",
+	},
+
+	-- 지원하는 파일 패턴
+	patterns = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.py", "*.lua", "*.rs" },
+
+	-- 디바운스 설정 (ms)
+	debounce = {
+		buffer_enter = 1000, -- 버퍼 진입 시 지연 시간
+		diagnostic_changed = 300, -- 진단 변경 시 지연 시간
+	},
+
+	-- Quickfix 설정
+	quickfix = {
+		auto_open = true, -- 자동으로 quickfix 창 열기 여부
+		min_severity = vim.diagnostic.severity.WARN, -- 최소 심각도 수준
+	},
+
+	-- 자동 실행 설정
+	auto_lint = {
+		on_enter = true, -- 버퍼 진입 시 린팅
+		on_save = true, -- 저장 시 린팅
+	},
+}
+
+-- 타이머 관리 모듈화
+local timers = {
+	buffer = {}, -- 버퍼별 타이머
+	diagnostic = nil, -- 진단 타이머
+}
+
+-- 타이머 생성 및 시작 헬퍼 함수
+function timers.start(timer_type, id, callback)
+	-- 기존 타이머 정리
+	timers.stop(timer_type, id)
+
+	-- 새 타이머 생성
+	local timer = vim.uv.new_timer()
+	if not timer then
+		return
+	end
+
+	-- 타이머 저장
+	if timer_type == "buffer" then
+		timers.buffer[id] = timer
+	else -- diagnostic
+		timers.diagnostic = timer
+	end
+
+	-- 타이머 시작
+	local debounce_time = timer_type == "buffer" and config.debounce.buffer_enter or config.debounce.diagnostic_changed
+
+	timer:start(
+		debounce_time,
+		0,
+		vim.schedule_wrap(function()
+			-- 콜백 실행
+			callback()
+
+			-- 타이머 정리
+			timers.stop(timer_type, id)
+		end)
+	)
+
+	return timer
+end
+
+-- 타이머 정지 및 정리 헬퍼 함수
+function timers.stop(timer_type, id)
+	local timer = nil
+
+	if timer_type == "buffer" then
+		timer = timers.buffer[id]
+		if timer then
+			timers.buffer[id] = nil
+		end
+	else -- diagnostic
+		timer = timers.diagnostic
+		if timer then
+			timers.diagnostic = nil
+		end
+	end
+
+	if timer and not timer:is_closing() then
+		timer:stop()
+		timer:close()
+	end
+end
+
 -- 파일 타입별 린터 설정
 lint.linters_by_ft = {
 	javascript = { "eslint" }, -- JavaScript 린팅
@@ -45,14 +144,23 @@ local function update_quickfix()
 	local all_diagnostics = {}
 	local buffers = vim.api.nvim_list_bufs()
 
+	-- 성능 최적화: 각 버퍼별로 진단 캐시
+	local diagnostic_cache = {}
+
 	for _, buf in ipairs(buffers) do
 		if vim.api.nvim_buf_is_valid(buf) then
 			local buf_name = vim.api.nvim_buf_get_name(buf)
 
 			-- 파일이 현재 프로젝트 내에 있는지 확인
 			if buf_name and buf_name:find(cwd, 1, true) then
-				local buf_diagnostics = vim.diagnostic.get(buf, { severity = { min = vim.diagnostic.severity.WARN } })
+				-- 진단이 변경되지 않았으면 캐시된 결과 사용
+				if not diagnostic_cache[buf] then
+					diagnostic_cache[buf] = vim.diagnostic.get(buf, {
+						severity = { min = config.quickfix.min_severity },
+					})
+				end
 
+				local buf_diagnostics = diagnostic_cache[buf]
 				for _, diag in ipairs(buf_diagnostics) do
 					table.insert(all_diagnostics, {
 						bufnr = buf,
@@ -71,10 +179,17 @@ local function update_quickfix()
 		local current_win = vim.api.nvim_get_current_win()
 
 		-- pcall을 사용해 안전하게 quickfix 목록 업데이트
-		local ok, _ = pcall(function()
+		local ok, err = pcall(function()
 			vim.fn.setqflist(all_diagnostics) -- 필터링된 진단으로 Quickfix 목록 업데이트
-			vim.cmd("cwindow")
+			if config.quickfix.auto_open then
+				vim.cmd("cwindow")
+			end
 		end)
+
+		-- 에러가 있을 경우 로그 출력
+		if not ok then
+			vim.notify("Quickfix 업데이트 오류: " .. tostring(err), vim.log.levels.ERROR)
+		end
 
 		-- 에러가 없고 현재 윈도우가 여전히 유효할 경우에만 원래 윈도우로 포커스 돌려놓기
 		if ok and vim.api.nvim_win_is_valid(current_win) then
@@ -84,37 +199,44 @@ local function update_quickfix()
 end
 
 -- 자동 린팅 및 Quickfix 출력 설정 - 파일 저장 시에만 실행
-vim.api.nvim_create_autocmd("BufWritePost", {
-	pattern = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.py", "*.lua", "*.rs" }, -- 지원 파일 확장자
-	group = vim.api.nvim_create_augroup("Linting", { clear = true }), -- 중복 방지를 위한 그룹
-	callback = function()
-		-- TSX 파일 타입 포함
-		lint.try_lint() -- 린팅 실행
-		update_quickfix()
-	end,
-})
+if config.auto_lint.on_save then
+	vim.api.nvim_create_autocmd("BufWritePost", {
+		pattern = config.patterns,
+		group = vim.api.nvim_create_augroup("Linting", { clear = true }),
+		callback = function()
+			lint.try_lint()
+			update_quickfix()
+		end,
+	})
+end
 
--- 버퍼 진입 시에 린팅 적용 (TSX 포함)
-vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.py", "*.lua", "*.rs" }, -- TSX 포함
-	group = vim.api.nvim_create_augroup("LintOnEnter", { clear = true }),
-	callback = function()
-		-- 파일이 닫혀 있으면 실행 중지
-		if not vim.api.nvim_buf_is_valid(0) then
-			return
-		end
+-- 버퍼 진입 시에 린팅 적용
+if config.auto_lint.on_enter then
+	vim.api.nvim_create_autocmd("BufEnter", {
+		pattern = config.patterns,
+		group = vim.api.nvim_create_augroup("LintOnEnter", { clear = true }),
+		callback = function()
+			local bufnr = vim.api.nvim_get_current_buf()
 
-		-- 일정 시간 후에 린팅 (지연 실행)
-		local timer = vim.uv.new_timer()
-		if timer then
-			timer:start(
-				1000, -- 1초 지연
-				0,
-				vim.schedule_wrap(function()
+			-- 파일이 닫혀 있으면 실행 중지
+			if not vim.api.nvim_buf_is_valid(bufnr) then
+				return
+			end
+
+			-- 타이머 생성 및 시작
+			timers.start("buffer", bufnr, function()
+				if vim.api.nvim_buf_is_valid(bufnr) then
 					lint.try_lint()
-				end)
-			)
-		end
+				end
+			end)
+		end,
+	})
+end
+
+-- 버퍼가 닫힐 때 타이머 정리
+vim.api.nvim_create_autocmd("BufDelete", {
+	callback = function(ev)
+		timers.stop("buffer", ev.buf)
 	end,
 })
 
@@ -134,20 +256,17 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
 			return
 		end
 
-		-- 현재 버퍼에 포커스가 있고 지원하는 파일 타입인 경우에만 업데이트
-		-- TSX 파일 타입 포함
+		-- 현재 버퍼 파일 타입 확인
 		local ft = vim.bo.filetype
-		if
-			ft == "javascript"
-			or ft == "typescript"
-			or ft == "javascriptreact"
-			or ft == "typescriptreact"
-			or ft == "python"
-			or ft == "lua"
-			or ft == "rust"
-		then
-			-- pcall로 안전하게 실행
-			pcall(update_quickfix)
+		if vim.tbl_contains(config.filetypes, ft) then
+			-- 타이머 생성 및 시작
+			timers.start("diagnostic", nil, function()
+				-- pcall로 안전하게 실행
+				local ok, err = pcall(update_quickfix)
+				if not ok then
+					vim.notify("진단 업데이트 오류: " .. tostring(err), vim.log.levels.ERROR)
+				end
+			end)
 		end
 	end,
 })
@@ -165,5 +284,61 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- TextChanged 이벤트 린팅은 비활성화 (성능 문제 해결)
--- 파일 저장 시에만 린팅 실행하도록 변경
+-- 편의 기능: 린팅 수동 실행 명령어 추가
+vim.api.nvim_create_user_command("Lint", function()
+	lint.try_lint()
+	update_quickfix()
+end, { desc = "수동으로 린팅 실행" })
+
+-- 상태 표시줄 함수 추가 (lualine 등에서 사용 가능)
+local function lint_status()
+	if vim.bo.buftype ~= "" or not vim.tbl_contains(config.filetypes, vim.bo.filetype) then
+		return ""
+	end
+
+	-- 현재 버퍼의 진단 정보 가져오기
+	local diagnostics = vim.diagnostic.get(0)
+	if #diagnostics == 0 then
+		return "✓" -- 이상 없음
+	end
+
+	-- 오류, 경고, 정보, 힌트 개수 집계
+	local counts = {
+		errors = 0,
+		warnings = 0,
+		info = 0,
+		hints = 0,
+	}
+
+	for _, diagnostic in ipairs(diagnostics) do
+		if diagnostic.severity == vim.diagnostic.severity.ERROR then
+			counts.errors = counts.errors + 1
+		elseif diagnostic.severity == vim.diagnostic.severity.WARN then
+			counts.warnings = counts.warnings + 1
+		elseif diagnostic.severity == vim.diagnostic.severity.INFO then
+			counts.info = counts.info + 1
+		elseif diagnostic.severity == vim.diagnostic.severity.HINT then
+			counts.hints = counts.hints + 1
+		end
+	end
+
+	-- 상태 문자열 만들기
+	local status = {}
+	if counts.errors > 0 then
+		table.insert(status, string.format("E:%d", counts.errors))
+	end
+	if counts.warnings > 0 then
+		table.insert(status, string.format("W:%d", counts.warnings))
+	end
+	if counts.info > 0 then
+		table.insert(status, string.format("I:%d", counts.info))
+	end
+	if counts.hints > 0 then
+		table.insert(status, string.format("H:%d", counts.hints))
+	end
+
+	return table.concat(status, " ")
+end
+
+-- 글로벌 함수로 노출 (lualine 등에서 사용 가능)
+_G.lint_status = lint_status

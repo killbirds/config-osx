@@ -4,7 +4,7 @@ if not ok then
 	return
 end
 
--- fidget.nvim 설정 (공식 예제 참조)
+-- fidget.nvim 설정 (최신 버전 기준 구성)
 fidget.setup({
 	-- LSP 진행 상태 관련 설정
 	progress = {
@@ -29,11 +29,17 @@ fidget.setup({
 			done_ttl = 3, -- 완료 후 메시지 지속 시간(초)
 			done_icon = "✓", -- 완료 아이콘
 			progress_ttl = math.huge, -- 진행 중 메시지 지속 시간
-			progress_icon = { pattern = "dots" }, -- 진행 중 아이콘
+			-- 개선: 다양한 진행 아이콘 패턴 제공
+			progress_icon = {
+				pattern = "dots_pulse", -- 더 눈에 띄는 패턴 사용 (dots, dots_pulse, dots_bounce, dots_snake)
+				period = 1, -- 아이콘 애니메이션 속도
+			},
 
 			-- 메시지 포맷 함수
 			format_message = function(msg)
-				return msg.message or ""
+				local message = msg.message or ""
+				local percentage = msg.percentage
+				return string.format("%s%s", message, percentage and string.format(" (%.0f%%)", percentage) or "")
 			end,
 
 			-- 진행 주석 포맷 방법
@@ -49,6 +55,8 @@ fidget.setup({
 			-- 기본 알림 구성에서 옵션 재정의
 			overrides = {
 				rust_analyzer = { name = "rust-analyzer" },
+				tsserver = { name = "typescript" },
+				lua_ls = { name = "lua" },
 			},
 		},
 
@@ -64,7 +72,7 @@ fidget.setup({
 		poll_rate = 10, -- 알림 업데이트 및 렌더링 빈도
 		filter = vim.log.levels.INFO, -- 최소 알림 레벨
 		history_size = 128, -- 기록에 보관할 제거된 메시지 수
-		override_vim_notify = false, -- vim.notify() 자동 재정의
+		override_vim_notify = true, -- vim.notify() 자동 재정의 활성화
 
 		-- 알림 텍스트 렌더링 관련 설정
 		view = {
@@ -80,8 +88,8 @@ fidget.setup({
 
 		-- 알림 창 및 버퍼 관련 설정
 		window = {
-			winblend = 0, -- 알림 창의 배경색 투명도
-			border = "none", -- 알림 창 테두리
+			winblend = 10, -- 알림 창의 배경색 투명도 추가
+			border = "none", -- 알림 창 테두리 스타일 변경
 			zindex = 45, -- 알림 창의 스택 우선순위
 			max_width = 0, -- 알림 창 최대 너비
 			max_height = 0, -- 알림 창 최대 높이
@@ -97,6 +105,9 @@ fidget.setup({
 		["nvim-tree"] = {
 			enable = true, -- nvim-tree.lua 통합 (설치된 경우)
 		},
+		["xcodebuild.nvim"] = {
+			enable = true, -- xcodebuild 통합 (설치된 경우)
+		},
 	},
 
 	-- 로깅 관련 설정
@@ -108,3 +119,13 @@ fidget.setup({
 		path = string.format("%s/fidget.nvim.log", vim.fn.stdpath("cache")),
 	},
 })
+
+-- 키 매핑 추가: 알림 히스토리 토글
+vim.keymap.set("n", "<leader>fh", function()
+	require("fidget.notification").show_history()
+end, { desc = "Fidget: 알림 히스토리 보기" })
+
+-- 키 매핑 추가: 알림 창 지우기
+vim.keymap.set("n", "<leader>fc", function()
+	require("fidget.notification").clear()
+end, { desc = "Fidget: 알림 지우기" })

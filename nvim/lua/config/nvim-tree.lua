@@ -11,7 +11,6 @@ local function on_attach(bufnr)
 	vim.keymap.set("n", "<C-]>", api.tree.change_root_to_node, opts("CD"))
 	vim.keymap.set("n", "<C-e>", api.node.open.replace_tree_buffer, opts("Open: In Place"))
 	vim.keymap.set("n", "<C-k>", api.node.show_info_popup, opts("Info"))
-	vim.keymap.set("n", "<C-r>", api.fs.rename_sub, opts("Rename: Omit Filename"))
 	vim.keymap.set("n", "<C-t>", api.node.open.tab, opts("Open: New Tab"))
 	vim.keymap.set("n", "<C-v>", api.node.open.vertical, opts("Open: Vertical Split"))
 	vim.keymap.set("n", "<C-x>", api.node.open.horizontal, opts("Open: Horizontal Split"))
@@ -72,13 +71,41 @@ require("nvim-tree").setup({
 	update_cwd = false,
 	view = {
 		adaptive_size = true,
+		width = 30,
+		side = "left",
+		signcolumn = "yes",
 	},
 	renderer = {
 		group_empty = true,
+		highlight_git = false,
+		full_name = false,
+		highlight_opened_files = "name",
+		root_folder_label = ":~:s?$?/..?",
+		indent_width = 2,
+		indent_markers = {
+			enable = true,
+			inline_arrows = true,
+		},
+		icons = {
+			show = {
+				file = true,
+				folder = true,
+				folder_arrow = true,
+				git = true,
+			},
+		},
+		special_files = { "Cargo.toml", "Makefile", "README.md", "readme.md" },
 	},
 	filters = {
-		dotfiles = true,
-		custom = { "node_modules" },
+		dotfiles = false,
+		custom = { "node_modules", ".git" },
+		exclude = {},
+	},
+	git = {
+		enable = true,
+		ignore = false,
+		show_on_dirs = true,
+		timeout = 400,
 	},
 	actions = {
 		change_dir = {
@@ -86,27 +113,60 @@ require("nvim-tree").setup({
 		},
 		open_file = {
 			quit_on_open = false,
+			resize_window = true,
 			window_picker = {
 				enable = false,
 			},
 		},
 	},
 	on_attach = on_attach,
+	diagnostics = {
+		enable = true,
+		show_on_dirs = true,
+	},
 })
 
 -- Keymap for toggling nvim-tree
 vim.keymap.set("n", "<F2>", function()
-	return require("nvim-tree.api").tree.toggle(true, true)
+	return require("nvim-tree.api").tree.toggle({ focus = true })
 end, { silent = true, desc = "toggle nvim-tree" })
 
 -- Keymap for finding file in nvim-tree
 vim.keymap.set("n", "<F3>", function()
-	return vim.cmd([[NvimTreeFindFile]])
+	require("nvim-tree.api").tree.find_file({ open = true, focus = true })
 end, { silent = true, desc = "find_file nvim-tree" })
 
+-- 추가 유용한 키 매핑
+vim.keymap.set("n", "<leader>tr", function()
+	require("nvim-tree.api").tree.reload()
+end, { silent = true, desc = "Reload nvim-tree" })
+
+vim.keymap.set("n", "<leader>tf", function()
+	local view = require("nvim-tree.view")
+	if view.is_visible() then
+		view.focus()
+	else
+		require("nvim-tree.api").tree.open({ find_file = true })
+	end
+end, { silent = true, desc = "Focus or Open nvim-tree with current file" })
+
 -- Open nvim-tree at startup
-local function open_nvim_tree()
-	require("nvim-tree.api").tree.open()
+local function open_nvim_tree(data)
+	-- 버퍼가 디렉토리인 경우에만 열기
+	local directory = vim.fn.isdirectory(data.file) == 1
+
+	-- 인자가 없는 경우 (일반적인 neovim 시작)
+	local no_name = data.file == "" and vim.bo[data.buf].buftype == ""
+
+	if directory or no_name then
+		-- 디렉토리를 열 때는 현재 디렉토리를 루트로 설정
+		if directory then
+			vim.cmd.cd(data.file)
+		end
+
+		-- nvim-tree 열기
+		require("nvim-tree.api").tree.open()
+	end
 end
 
 vim.api.nvim_create_autocmd({ "VimEnter" }, { callback = open_nvim_tree })

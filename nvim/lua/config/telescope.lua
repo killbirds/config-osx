@@ -62,6 +62,9 @@ telescope.load_extension("ui-select")
 -- Load smart-history extension
 telescope.load_extension("smart_history")
 
+-- Load projects
+telescope.load_extension("projects")
+
 -- Key mappings for Telescope
 local telescope_mappings = {
 	["<C-p>"] = "<cmd>Telescope find_files<cr>",

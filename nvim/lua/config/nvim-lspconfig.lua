@@ -23,6 +23,12 @@ local function setup_lsp(client, bufnr)
 	if client.name == "ts_ls" then
 		client.server_capabilities.documentFormattingProvider = false -- tsserver는 prettier에 위임 가능
 	end
+
+	-- 서버 연결 성공 알림
+	-- vim.notify(string.format("LSP 서버 '%s' 연결 성공", client.name), vim.log.levels.INFO, {
+	-- 	title = "LSP 연결",
+	-- 	timeout = 1500,
+	-- })
 end
 
 -- Inlay Hints 키 매핑 설정
@@ -72,33 +78,27 @@ local function setup_global_keymaps()
 end
 
 -- LSP 서버별 설정
+-- 공통 인레이 힌트 설정 테이블
+local common_js_ts_inlay_hints = {
+	includeInlayParameterNameHints = "all", -- 'none' | 'literals' | 'all'
+	includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+	includeInlayFunctionParameterTypeHints = true,
+	includeInlayVariableTypeHints = true,
+	includeInlayPropertyDeclarationTypeHints = true,
+	includeInlayFunctionLikeReturnTypeHints = true,
+	includeInlayEnumMemberValueHints = true,
+	includeInlayArrayIndexHints = false, -- 배열 인덱스 힌트 비활성화
+}
+
 local servers = {
 	ts_ls = {
 		-- TypeScript/JavaScript 설정
 		settings = {
 			typescript = {
-				inlayHints = {
-					includeInlayParameterNameHints = "all", -- 'none' | 'literals' | 'all'
-					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-					includeInlayFunctionParameterTypeHints = true,
-					includeInlayVariableTypeHints = true,
-					includeInlayPropertyDeclarationTypeHints = true,
-					includeInlayFunctionLikeReturnTypeHints = true,
-					includeInlayEnumMemberValueHints = true,
-					includeInlayArrayIndexHints = false, -- 배열 인덱스 힌트 비활성화
-				},
+				inlayHints = common_js_ts_inlay_hints,
 			},
 			javascript = {
-				inlayHints = {
-					includeInlayParameterNameHints = "all",
-					includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-					includeInlayFunctionParameterTypeHints = true,
-					includeInlayVariableTypeHints = true,
-					includeInlayPropertyDeclarationTypeHints = true,
-					includeInlayFunctionLikeReturnTypeHints = true,
-					includeInlayEnumMemberValueHints = true,
-					includeInlayArrayIndexHints = false, -- 배열 인덱스 힌트 비활성화
-				},
+				inlayHints = common_js_ts_inlay_hints,
 			},
 		},
 	},
@@ -119,6 +119,9 @@ local servers = {
 		},
 	},
 	rust_analyzer = {
+		-- init_options를 직접 설정하지 마세요.
+		-- rust-analyzer는 settings["rust-analyzer"]의 내용을 자동으로 init_options로 사용합니다.
+		-- 참고: https://github.com/rust-lang/rust-analyzer/blob/eb5da56d839ae0a9e9f50774fa3eb78eb0964550/docs/dev/lsp-extensions.md?plain=1#L26
 		settings = {
 			["rust-analyzer"] = {
 				cargo = {
@@ -151,23 +154,64 @@ local servers = {
 		},
 	},
 	lua_ls = {
-		settings = {
-			Lua = {
-				runtime = { version = "LuaJIT" }, -- Neovim의 LuaJIT 사용
-				diagnostics = { globals = { "vim" } }, -- vim 전역 변수 인식
-				workspace = {
-					library = vim.api.nvim_get_runtime_file("", true), -- Neovim 런타임 파일
-					checkThirdParty = false, -- 성능 최적화
+		on_init = function(client)
+			-- 프로젝트 설정 파일 존재 여부 확인
+			if client.workspace_folders then
+				local path = client.workspace_folders[1].name
+				-- Neovim 설정 폴더가 아니면서 자체 .luarc.json 파일이 있으면 기본 설정 유지
+				if
+					path ~= vim.fn.stdpath("config")
+					and (vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc"))
+				then
+					return
+				end
+			end
+
+			-- Neovim 특화 설정으로 확장
+			client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+				runtime = {
+					-- Neovim은 LuaJIT 사용
+					version = "LuaJIT",
+					-- 경로 설정
+					path = vim.split(package.path, ";"),
 				},
-				telemetry = { enable = false }, -- 텔레메트리 비활성화
+				workspace = {
+					-- 서드파티 라이브러리 검사 비활성화 (성능 향상)
+					checkThirdParty = false,
+					-- Neovim 런타임 라이브러리 인식
+					library = {
+						vim.env.VIMRUNTIME,
+						-- 추가적인 플러그인 경로가 필요하면 아래 주석을 해제하고 사용
+						-- "${3rd}/luv/library"
+						-- "${3rd}/busted/library",
+					},
+					-- 최대 preload 파일 수 (대규모 프로젝트 지원)
+					maxPreload = 2000,
+					preloadFileSize = 1000,
+				},
+				-- 향상된 진단 설정
+				diagnostics = {
+					globals = { "vim" }, -- vim 전역 변수 인식
+					disable = { "trailing-space" }, -- 불필요한 진단 비활성화
+				},
+				-- 텔레메트리 비활성화
+				telemetry = { enable = false },
+				-- 자동 완성 및 힌트 설정
+				completion = {
+					callSnippet = "Replace", -- 함수 호출 시 파라미터 스니펫 동작
+					keywordSnippet = "Replace", -- 키워드 자동 완성 동작
+				},
 				hint = {
-					enable = true, -- lua_ls inlay hints 활성화
+					enable = true, -- inlay hints 활성화
 					arrayIndex = "Disable", -- 배열 인덱스 힌트 비활성화
 					setType = true, -- 변수 유형 힌트 표시
 					paramName = "All", -- 매개변수 이름 힌트 표시
 					paramType = true, -- 매개변수 유형 힌트 표시
 				},
-			},
+			})
+		end,
+		settings = {
+			Lua = {},
 		},
 	},
 }
@@ -178,7 +222,43 @@ local function setup_lsp_servers()
 
 	-- 모든 서버에 대해 설정 적용
 	for server, config in pairs(servers) do
-		lspconfig[server].setup(vim.tbl_deep_extend("force", default_opts, config))
+		local merged_config = vim.tbl_deep_extend("force", default_opts, config)
+
+		-- 에러 핸들러 추가
+		merged_config.on_init = function(client, _)
+			vim.notify(string.format("LSP 서버 '%s' 초기화 중...", client.name), vim.log.levels.INFO, {
+				title = "LSP 초기화",
+				timeout = 1000,
+			})
+			return true
+		end
+
+		merged_config.on_exit = function(code, signal, client_id)
+			local client = vim.lsp.get_client_by_id(client_id)
+			local server_name = client and client.name or "알 수 없음"
+
+			if code ~= 0 or signal ~= 0 then
+				vim.notify(
+					string.format("LSP 서버 '%s' 비정상 종료 (code: %d, signal: %d)", server_name, code, signal),
+					vim.log.levels.ERROR,
+					{ title = "LSP 오류" }
+				)
+			end
+		end
+
+		-- 서버 시작 시도
+		local ok, err = pcall(function()
+			lspconfig[server].setup(merged_config)
+		end)
+
+		-- 설정 오류 처리
+		if not ok then
+			vim.notify(
+				string.format("LSP 서버 '%s' 설정 오류: %s", server, err),
+				vim.log.levels.ERROR,
+				{ title = "LSP 설정 오류" }
+			)
+		end
 	end
 end
 
@@ -190,9 +270,80 @@ vim.diagnostic.config({
 	severity_sort = true, -- 심각도순 정렬
 })
 
--- 모듈 실행
-setup_lsp_servers()
+-- 서버와 파일 유형 간의 매핑
+local server_filetype_map = {
+	ts_ls = { "typescript", "javascript", "typescriptreact", "javascriptreact", "typescript.tsx", "javascript.jsx" },
+	eslint = { "typescript", "javascript", "typescriptreact", "javascriptreact" },
+	rust_analyzer = { "rust" },
+	lua_ls = { "lua" },
+}
+
+-- 지연 로딩을 위한 함수
+local function setup_lazy_loading()
+	-- 전역 키맵은 항상 설정
+	setup_global_keymaps()
+
+	-- 사용자 정의 FileType 자동 명령 그룹 생성
+	local lsp_lazy_group = vim.api.nvim_create_augroup("LspLazyLoading", { clear = true })
+
+	-- 각 파일 유형에 대한 LSP 서버 설정
+	for server, filetypes in pairs(server_filetype_map) do
+		vim.api.nvim_create_autocmd("FileType", {
+			group = lsp_lazy_group,
+			pattern = filetypes,
+			callback = function()
+				-- 서버가 이미 시작되었는지 확인
+				local is_server_active = false
+				for _, client in ipairs(vim.lsp.get_clients()) do
+					if client.name == server then
+						is_server_active = true
+						break
+					end
+				end
+
+				-- 서버가 활성화되지 않은 경우에만 시작
+				if not is_server_active and servers[server] then
+					local merged_config = vim.tbl_deep_extend("force", default_opts, servers[server] or {})
+
+					-- 서버 시작 시도
+					local ok, err = pcall(function()
+						lspconfig[server].setup(merged_config)
+						-- 현재 버퍼에 즉시 연결 시도
+						vim.cmd("LspStart " .. server)
+					end)
+
+					-- 설정 오류 처리
+					if not ok then
+						vim.notify(
+							string.format("LSP 서버 '%s' 설정 오류: %s", server, err),
+							vim.log.levels.ERROR,
+							{ title = "LSP 설정 오류" }
+						)
+						-- else
+						-- 	vim.notify(
+						-- 		string.format(
+						-- 			"LSP 서버 '%s' 파일 유형 '%s'에 대해 로딩됨",
+						-- 			server,
+						-- 			vim.bo.filetype
+						-- 		),
+						-- 		vim.log.levels.INFO,
+						-- 		{ title = "LSP 지연 로딩" }
+						-- 	)
+					end
+				end
+			end,
+			desc = string.format("지연 로딩: %s LSP 서버", server),
+		})
+	end
+end
+
+-- 모듈 실행을 지연 로딩으로 변경
+setup_lazy_loading()
 
 return {
-	setup = setup_lsp_servers, -- 외부에서 재호출 가능
+	setup = setup_lsp_servers, -- 기존 즉시 로딩 방식 (호환성 유지)
+	setup_lazy = setup_lazy_loading, -- 새 지연 로딩 방식
+	get_servers = function()
+		return servers
+	end, -- 설정된 서버 목록 반환
 }

@@ -19,6 +19,7 @@ return {
 				"nvim-telescope/telescope-smart-history.nvim",
 				dependencies = { "kkharji/sqlite.lua" },
 			},
+			"ahmedkhalf/project.nvim",
 		},
 		config = function()
 			require("config.telescope")
@@ -38,7 +39,6 @@ return {
 				scope_chdir = "global",
 				datapath = vim.fn.stdpath("data"),
 			})
-			require("telescope").load_extension("projects")
 		end,
 	},
 }
