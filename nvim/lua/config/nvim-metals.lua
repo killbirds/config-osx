@@ -193,24 +193,10 @@ metals_config.root_patterns = { ".git", "build.sbt", "build.sc", "project" }
 
 -- Scala 및 SBT 파일에서 Metals 초기화 (지연 로딩 방식)
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "scala", "sbt", "java" }, -- Java도 추가 (Scala 프로젝트에서 유용)
+	pattern = { "scala", "sbt" },
 	group = nvim_metals_group,
 	callback = function(opts)
-		-- 명시적 초기화 명령 추가
-		vim.api.nvim_buf_create_user_command(opts.buf, "MetalsStart", function()
-			initialize_metals_lazy(opts.buf)
-		end, { desc = "Start Metals server" })
-
-		-- 사용자가 명시적으로 시작하도록 안내
-		vim.notify(
-			"Scala 파일이 감지되었습니다. :MetalsStart 명령으로 Metals를 시작하세요.",
-			vim.log.levels.INFO,
-			{ title = "Metals", timeout = 3000 }
-		)
-
-		-- 자동 시작 (선택적으로 활성화)
-		-- 주석을 해제하면 자동으로 시작됨
-		-- initialize_metals_lazy(opts.buf)
+		metals.initialize_or_attach(metals_config)
 	end,
 	desc = "Initialize Metals for Scala/SBT files",
 })
