@@ -4,8 +4,7 @@ local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
 -- ========== 설정 변수 ========== --
 -- 개발/프로덕션 환경에 따른 조건부 설정
-local DEV_MODE = false -- 개발 모드 활성화 여부 (true = 개발 모드, false = 프로덕션 모드)
-local ENABLE_VERBOSE_LOGGING = false -- 상세 로그 활성화 여부
+local DEV_MODE = true -- 개발 모드 활성화 여부 (true = 개발 모드, false = 프로덕션 모드)
 local ENABLE_AUTO_FORMATTING = true -- 자동 포맷팅 활성화 여부
 local AUTO_START_METALS = true -- Metals 자동 시작 활성화 여부
 
@@ -26,10 +25,22 @@ local function configure_metals_settings()
 		serverVersion = "1.5.1", -- Metals 서버 버전 고정
 		showImplicitArguments = true, -- 암묵적 인수 표시
 		ammoniteJvmProperties = { "-Xmx2G" }, -- Ammonite JVM 메모리 설정
-		bloopSbtAlreadyInstalled = true, -- Bloop과 SBT 설치 가정
+		bloopSbtAlreadyInstalled = false, -- Bloop과 SBT 설치를 자동으로 진행하도록 변경
+		fallbackScalaVersion = "2.13.15", -- 빌드 타겟을 찾지 못할 경우 사용할 스칼라 버전
 		excludedPackages = { -- LSP에서 제외할 패키지 목록
 			"akka.actor.typed.javadsl",
 			"com.github.swagger.akka.javadsl",
+		},
+		-- Java 홈 디렉토리 설정 (환경 변수에서 가져오기)
+		javaHome = vim.fn.expand("$JAVA_HOME"),
+		-- 엄격한 null 체크 (타입 안전성 향상)
+		strictMode = true,
+		-- 서버 속성 설정 (JVM 옵션)
+		serverProperties = {
+			"-Xms1G",
+			"-Xmx4G",
+			"-XX:+UseG1GC",
+			"-XX:+UseStringDeduplication",
 		},
 	}
 
@@ -41,10 +52,6 @@ local function configure_metals_settings()
 	-- 개발자 모드 전용 설정
 	if DEV_MODE then
 		settings.enableSemanticHighlighting = true -- 시맨틱 하이라이팅 (개발 모드에서만)
-		settings.statistics = {
-			didFocus = true,
-			didChange = true,
-		} -- 통계 수집 (디버깅용)
 	end
 
 	return settings
@@ -52,54 +59,23 @@ end
 
 -- 에러 처리 핸들러 설정
 local function setup_error_handlers()
-	-- Metals 연결 실패 핸들러
-	metals_config.init_options.onConnectFailure = function(err)
-		vim.notify(string.format("Metals 연결 실패: %s", err), vim.log.levels.ERROR, { title = "Metals 오류" })
-	end
-
-	-- Metals 초기화 실패 핸들러
-	metals_config.init_options.onInitializationFailure = function(err)
-		vim.notify(string.format("Metals 초기화 실패: %s", err), vim.log.levels.ERROR, { title = "Metals 오류" })
-	end
-
-	-- 로깅 및 디버깅 설정
-	if ENABLE_VERBOSE_LOGGING then
-		metals_config.settings.customLogging = true
-		metals_config.settings.logLevel = "debug" -- 디버그 로그 활성화
-	end
-
-	-- 시스템 환경 확인
-	metals_config.init_options.systemCheck = function()
-		-- Java 버전 확인
-		local java_version = vim.fn.system("java -version 2>&1 | head -n 1")
-		if java_version:match("java version") == nil and java_version:match("openjdk version") == nil then
-			vim.notify(
-				"Java not found or incorrect version. Metals requires Java 8 or higher.",
-				vim.log.levels.WARN,
-				{ title = "Metals 환경 확인" }
-			)
-			return false
-		end
-		return true
-	end
+	-- Metals 연결 및 초기화 실패 이벤트는 직접 핸들러로 등록하지 않고
+	-- handlers 필드를 통해 처리합니다
 end
 
--- 디버깅 설정 함수
-local function configure_debug_options()
-	-- 개발 모드에서만 HTTP 인터페이스 및 디버깅 기능 활성화
-	if DEV_MODE then
-		return {
-			statusBarProvider = "show-message", -- 상태 표시줄을 메시지로 표시 (더 가볍게)
-			isHttpEnabled = true, -- HTTP 인터페이스 활성화 (디버깅용)
-			debuggingProvider = true, -- DAP 디버깅 활성화
-		}
-	else
-		return {
-			statusBarProvider = "show-message", -- 상태 표시줄을 메시지로 표시 (더 가볍게)
-			isHttpEnabled = false, -- 프로덕션에서는 HTTP 인터페이스 비활성화
-			debuggingProvider = false, -- 프로덕션에서는 디버깅 비활성화
-		}
+-- 시스템 환경 확인 함수 (초기화 전에 직접 실행)
+local function check_system_requirements()
+	-- Java 버전 확인
+	local java_version = vim.fn.system("java -version 2>&1 | head -n 1")
+	if java_version:match("java version") == nil and java_version:match("openjdk version") == nil then
+		vim.notify(
+			"Java not found or incorrect version. Metals requires Java 8 or higher.",
+			vim.log.levels.WARN,
+			{ title = "Metals 환경 확인" }
+		)
+		return false
 	end
+	return true
 end
 
 -- 지연 로딩 처리 함수
@@ -113,36 +89,49 @@ local function initialize_metals_lazy(bufnr)
 		end
 	end
 
-	-- 서버 시작 시도
-	local ok, err = pcall(function()
-		metals.initialize_or_attach(metals_config)
-	end)
-
-	-- 에러 처리
-	if not ok then
+	-- 먼저 시스템 요구사항 확인
+	if not check_system_requirements() then
 		vim.notify(
-			string.format("Metals 초기화 실패: %s", err),
+			"시스템 요구사항이 충족되지 않아 Metals 초기화를 중단합니다.",
 			vim.log.levels.ERROR,
 			{ title = "Metals 초기화 오류" }
 		)
-	else
-		-- 초기화 성공 시 BufWritePre 이벤트 설정 (자동 포맷팅)
-		if ENABLE_AUTO_FORMATTING then
-			vim.api.nvim_create_autocmd("BufWritePre", {
-				buffer = bufnr,
-				group = nvim_metals_group,
-				callback = function()
-					vim.lsp.buf.format({
-						timeout_ms = 3000, -- 포맷팅 타임아웃 3초
-						filter = function(c)
-							return c.name == "metals"
-						end, -- Metals만 대상
-					})
-				end,
-				desc = "Format Scala/SBT buffer on save",
-			})
-		end
+		return
 	end
+
+	-- 서버 시작 전 잠시 지연 (파일 시스템 안정화 대기)
+	vim.defer_fn(function()
+		-- 서버 시작 시도
+		local ok, err = pcall(function()
+			metals.initialize_or_attach(metals_config)
+		end)
+
+		-- 에러 처리
+		if not ok then
+			vim.notify(
+				string.format("Metals 초기화 실패: %s", err),
+				vim.log.levels.ERROR,
+				{ title = "Metals 초기화 오류" }
+			)
+		else
+			-- 초기화 성공 시 BufWritePre 이벤트 설정 (자동 포맷팅)
+			if ENABLE_AUTO_FORMATTING then
+				vim.api.nvim_create_autocmd("BufWritePre", {
+					buffer = bufnr,
+					group = nvim_metals_group,
+					callback = function()
+						vim.lsp.buf.format({
+							timeout_ms = 3000, -- 포맷팅 타임아웃 3초
+							filter = function(c)
+								return c.name == "metals"
+							end, -- Metals만 대상
+						})
+					end,
+					desc = "Format Scala/SBT buffer on save",
+				})
+			end
+		end
+	end, 100) -- 100ms 지연
 end
 
 -- Scala 프로젝트 감지 함수
@@ -153,15 +142,15 @@ local function is_scala_project()
 		"project/build.properties",
 		"project/plugins.sbt",
 		".scala-build",
-		"project/metals.sbt"
+		"project/metals.sbt",
 	}
-	
+
 	for _, file in ipairs(project_files) do
 		if vim.fn.filereadable(file) == 1 then
 			return true
 		end
 	end
-	
+
 	-- 디렉토리 내 Scala 파일 확인
 	local scala_files = vim.fn.glob("**/*.scala", false, true)
 	return #scala_files > 0
@@ -169,8 +158,10 @@ end
 
 -- Metals 자동 시작 설정
 local function setup_auto_start()
-	if not AUTO_START_METALS then return end
-	
+	if not AUTO_START_METALS then
+		return
+	end
+
 	-- Scala/SBT 파일 타입 감지 시 Metals 초기화
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = { "scala", "sbt" },
@@ -182,7 +173,7 @@ local function setup_auto_start()
 		end,
 		desc = "Initialize Metals for Scala/SBT files",
 	})
-	
+
 	-- 디렉토리 변경 시 Metals 초기화
 	vim.api.nvim_create_autocmd("DirChanged", {
 		group = nvim_metals_group,
@@ -208,37 +199,22 @@ end
 
 -- ========== 설정 적용 ========== --
 -- Metals 설정 적용
-metals_config.settings = configure_metals_settings()
+metals_config.settings = {
+	metals = configure_metals_settings(),
+}
+
+-- trace 설정 추가
+metals_config.settings.trace = {
+	server = "verbose",
+}
 
 -- 자동 시작 설정 적용
 setup_auto_start()
 
 -- 공통 LSP 설정 적용
 metals_config.on_attach = function(client, bufnr)
-	-- LSP 키맵 설정
-	local opts = { noremap = true, silent = true, buffer = bufnr }
-	
-	-- 정의로 이동
-	vim.keymap.set('n', '<leader>gd', vim.lsp.buf.definition, opts)
-	vim.keymap.set('n', '<leader>gr', vim.lsp.buf.references, opts)
-	vim.keymap.set('n', '<leader>gi', vim.lsp.buf.implementation, opts)
-	vim.keymap.set('n', '<leader>go', vim.lsp.buf.type_definition, opts)
-	vim.keymap.set('n', '<leader>gs', vim.lsp.buf.signature_help, opts)
-	vim.keymap.set('n', '<leader>gD', vim.lsp.buf.declaration, opts)
-	vim.keymap.set('n', '<leader>ga', vim.lsp.buf.code_action, opts)
-	vim.keymap.set('n', '<leader>ge', vim.diagnostic.open_float, opts)
-	vim.keymap.set('n', '<leader>gE', vim.diagnostic.setloclist, opts)
-	vim.keymap.set('n', '<leader>gK', vim.lsp.buf.hover, opts)
-	vim.keymap.set('n', '<leader>gR', vim.lsp.buf.rename, opts)
-	vim.keymap.set('n', '<leader>gS', vim.lsp.buf.workspace_symbol, opts)
-	vim.keymap.set('n', '<leader>gW', vim.lsp.buf.workspace_symbol, { noremap = true, silent = true, buffer = bufnr, query = '' })
-	vim.keymap.set('n', '<leader>gD', vim.lsp.buf.declaration, opts)
-	vim.keymap.set('n', '<leader>gT', vim.lsp.buf.type_definition, opts)
-	vim.keymap.set('n', '<leader>gI', vim.lsp.buf.implementation, opts)
-	vim.keymap.set('n', '<leader>gR', vim.lsp.buf.rename, opts)
-	vim.keymap.set('n', '<leader>gF', vim.lsp.buf.format, opts)
-	vim.keymap.set('n', '<leader>gC', vim.lsp.buf.incoming_calls, opts)
-	vim.keymap.set('n', '<leader>gO', vim.lsp.buf.outgoing_calls, opts)
+	-- 공통 LSP 키맵 설정 적용
+	keys.on_attach(client, bufnr)
 
 	-- Metals 특화 명령어 추가
 	vim.api.nvim_buf_create_user_command(bufnr, "MetalsRestart", function()
@@ -256,7 +232,7 @@ metals_config.on_attach = function(client, bufnr)
 
 	-- 연결 성공 알림
 	vim.notify(
-		string.format("Metals 서버 연결됨 (버전: %s)", metals_config.settings.serverVersion),
+		string.format("Metals 서버 연결됨 (버전: %s)", metals_config.settings.metals.serverVersion),
 		vim.log.levels.INFO,
 		{ title = "Metals", timeout = 2000 }
 	)
@@ -265,7 +241,22 @@ end
 metals_config.capabilities = cmp_nvim_lsp.default_capabilities() -- nvim-cmp 통합
 
 -- 디버깅 설정 적용
-metals_config.init_options = configure_debug_options()
+metals_config.init_options = {
+	-- 기본 설정
+	statusBarProvider = "off",
+	compilerOptions = {
+		snippetAutoIndent = false,
+	},
+	-- 디버깅 관련 설정 (개발 모드에서만 활성화)
+	debuggingProvider = DEV_MODE,
+	isHttpEnabled = DEV_MODE,
+}
+
+-- LSP 디버깅 활성화
+metals_config.flags = {
+	allow_incremental_sync = true,
+	debounce_text_changes = 150,
+}
 
 -- 에러 핸들러 설정
 setup_error_handlers()
@@ -306,7 +297,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
 		end
 
 		-- Bloop 확인 (선택적)
-		if vim.fn.executable("bloop") == 0 and metals_config.settings.bloopSbtAlreadyInstalled then
+		if vim.fn.executable("bloop") == 0 and metals_config.settings.metals.bloopSbtAlreadyInstalled then
 			table.insert(missing_tools, "bloop")
 		end
 
