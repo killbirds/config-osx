@@ -55,12 +55,4 @@ return {
 			},
 		},
 	},
-
-	-- tmux 네비게이션
-	{
-		"alexghergh/nvim-tmux-navigation",
-		config = function()
-			require("config.nvim-tmux-navigation")
-		end,
-	},
 }

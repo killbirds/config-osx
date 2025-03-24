@@ -31,10 +31,6 @@ create_backup() {
     cp -r "$HOME/.config/nvim" "$backup_dir/"
   fi
 
-  if [ -f "$HOME/.tmux.conf" ]; then
-    cp "$HOME/.tmux.conf" "$backup_dir/"
-  fi
-
   echo -e "${GREEN}백업 완료: $backup_dir${NC}"
 }
 

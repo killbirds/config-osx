@@ -9,6 +9,7 @@
 - [Neovim 설정](#neovim-설정)
 - [주요 플러그인 사용법](#주요-플러그인-사용법)
 - [설정 커스터마이징](#설정-커스터마이징)
+- [iTerm2 설정](#iterm2-설정)
 - [문제 해결](#문제-해결)
 - [디렉토리 구조](#디렉토리-구조)
 - [라이선스](#라이선스)
@@ -16,7 +17,6 @@
 ## 주요 기능
 
 - Neovim 설정 (플러그인, 테마, 한글 입력 지원 등)
-- tmux 설정
 - 개발 도구 설정 (SBT, Scala, Java 등)
 - 유용한 유틸리티 스크립트
 
@@ -72,9 +72,6 @@ curl -s "https://get.sdkman.io" | bash
 brew install node
 brew install nvm
 brew install yarn
-
-# 터미널 멀티플렉서
-brew install tmux
 
 # 텍스트 에디터
 brew install vim
@@ -260,9 +257,42 @@ Neovim 설정은 다음 파일들에서 관리됩니다:
 - `nvim/lua/config/`: 각 플러그인 설정
 - `nvim/lua/plugins/`: 플러그인 정의
 
-### tmux 설정 수정
+## iTerm2 설정
 
-tmux 설정은 `settings/.tmux.conf` 파일에서 관리됩니다.
+### vim 스타일 복사 모드 활성화
+
+iTerm2에서는 키보드만으로 텍스트를 선택하고 복사할 수 있는 vim 스타일의 복사 모드를 제공합니다.
+
+#### 설정 방법
+
+1. 다음 명령어를 실행하여 vim 스타일 복사 모드를 활성화합니다:
+   ```bash
+   defaults write com.googlecode.iterm2 DeprecatedCopyMode -bool true
+   ```
+
+2. iTerm2를 완전히 종료하고 다시 실행합니다 (Command+Q로 종료 후 재실행).
+
+#### 사용 방법
+
+1. 복사 모드 진입:
+   - `Cmd+Shift+C` 단축키 사용
+   - 또는 메뉴에서 Edit > Copy Mode 선택
+
+2. vim 스타일 키 바인딩:
+   - 기본 이동: `h`, `j`, `k`, `l`
+   - 선택 모드: `v`(문자 단위), `V`(라인 단위), `Ctrl+v`(사각형 선택)
+   - 이동 명령어: `w`, `b`, `0`, `$`, `G` 등
+   - 복사: `y` 또는 `Ctrl+k`
+   - 종료: `Esc`, `q`, `Ctrl+c`, `Ctrl+g`
+
+3. 추가 명령어:
+   - `Ctrl+space`: 선택 중지
+   - `o`: 커서와 선택 끝점 위치 교환
+   - 단어 이동: `w`(다음 단어), `b`(이전 단어)
+   - 화면 이동: `H`(화면 상단), `M`(화면 중앙), `L`(화면 하단)
+   - 페이지 이동: `Ctrl+f`(페이지 다운), `Ctrl+b`(페이지 업)
+
+복사 모드 중에는 터미널 내용이 업데이트되지 않으며, 키보드만으로 효율적으로 텍스트를 선택하고 복사할 수 있습니다.
 
 ## 문제 해결
 

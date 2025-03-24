@@ -2,7 +2,7 @@ diff --git a/runcoms/zpreztorc b/runcoms/zpreztorc
 index ab26ff8..d820f6a 100644
 --- a/runcoms/zpreztorc
 +++ b/runcoms/zpreztorc
-@@ -31,7 +31,14 @@ zstyle ':prezto:load' pmodule \
+@@ -31,7 +31,13 @@ zstyle ':prezto:load' pmodule \
    'directory' \
    'spectrum' \
    'utility' \
@@ -13,11 +13,10 @@ index ab26ff8..d820f6a 100644
 +  'node' \
 +  'syntax-highlighting' \
 +  'history-substring-search' \
-+  'tmux' \
    'prompt'
  
  #
-@@ -46,7 +53,8 @@ zstyle ':prezto:load' pmodule \
+@@ -46,7 +52,8 @@ zstyle ':prezto:load' pmodule \
  #
  
  # Set the key mapping style to 'emacs' or 'vi'.
@@ -27,7 +26,7 @@ index ab26ff8..d820f6a 100644
  
  # Auto convert .... to ../..
  # zstyle ':prezto:module:editor' dot-expansion 'yes'
-@@ -116,7 +124,7 @@ zstyle ':prezto:module:prompt' theme 'sorin'
+@@ -116,7 +122,7 @@ zstyle ':prezto:module:prompt' theme 'sorin'
  #
  
  # Set the SSH identities to load into the agent.
@@ -36,7 +35,7 @@ index ab26ff8..d820f6a 100644
  
  #
  # Syntax Highlighting
-@@ -124,14 +132,14 @@ zstyle ':prezto:module:prompt' theme 'sorin'
+@@ -124,14 +130,14 @@ zstyle ':prezto:module:prompt' theme 'sorin'
  
  # Set syntax highlighters.
  # By default, only the main highlighter is enabled.
@@ -59,12 +58,12 @@ index ab26ff8..d820f6a 100644
  # Set syntax highlighting styles.
  # zstyle ':prezto:module:syntax-highlighting' styles \
  #   'builtin' 'bg=blue' \
-@@ -165,4 +173,4 @@ zstyle ':prezto:module:prompt' theme 'sorin'
+@@ -165,4 +171,4 @@ zstyle ':prezto:module:prompt' theme 'sorin'
  # zstyle ':prezto:module:tmux:auto-start' remote 'yes'
  
  # Integrate with iTerm2.
 -# zstyle ':prezto:module:tmux:iterm' integrate 'yes'
-+zstyle ':prezto:module:tmux:iterm' integrate 'yes'
++
 diff --git a/runcoms/zprofile b/runcoms/zprofile
 index 052d5f9..ead9b4d 100644
 --- a/runcoms/zprofile
