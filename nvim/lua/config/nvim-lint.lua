@@ -174,27 +174,33 @@ local function update_quickfix()
 		end
 	end
 
-	if #all_diagnostics > 0 then
-		-- 현재 윈도우 ID 저장
-		local current_win = vim.api.nvim_get_current_win()
+	-- 현재 윈도우 ID 저장
+	local current_win = vim.api.nvim_get_current_win()
 
-		-- pcall을 사용해 안전하게 quickfix 목록 업데이트
-		local ok, err = pcall(function()
-			vim.fn.setqflist(all_diagnostics) -- 필터링된 진단으로 Quickfix 목록 업데이트
+	-- pcall을 사용해 안전하게 quickfix 목록 업데이트
+	local ok, err = pcall(function()
+		-- 무조건 목록 초기화 (진단이 없는 경우에도)
+		vim.fn.setqflist(all_diagnostics)
+
+		if #all_diagnostics > 0 then
+			-- 진단이 있으면 quickfix 창 열기
 			if config.quickfix.auto_open then
 				vim.cmd("cwindow")
 			end
-		end)
-
-		-- 에러가 있을 경우 로그 출력
-		if not ok then
-			vim.notify("Quickfix 업데이트 오류: " .. tostring(err), vim.log.levels.ERROR)
+		else
+			-- 진단이 없으면 quickfix 창 닫기
+			vim.cmd("cclose")
 		end
+	end)
 
-		-- 에러가 없고 현재 윈도우가 여전히 유효할 경우에만 원래 윈도우로 포커스 돌려놓기
-		if ok and vim.api.nvim_win_is_valid(current_win) then
-			vim.api.nvim_set_current_win(current_win)
-		end
+	-- 에러가 있을 경우 로그 출력
+	if not ok then
+		vim.notify("Quickfix 업데이트 오류: " .. tostring(err), vim.log.levels.ERROR)
+	end
+
+	-- 에러가 없고 현재 윈도우가 여전히 유효할 경우에만 원래 윈도우로 포커스 돌려놓기
+	if ok and vim.api.nvim_win_is_valid(current_win) then
+		vim.api.nvim_set_current_win(current_win)
 	end
 end
 
@@ -204,8 +210,19 @@ if config.auto_lint.on_save then
 		pattern = config.patterns,
 		group = vim.api.nvim_create_augroup("Linting", { clear = true }),
 		callback = function()
-			lint.try_lint()
-			update_quickfix()
+			local bufnr = vim.api.nvim_get_current_buf()
+			local ft = vim.bo.filetype
+
+			-- 지원되는 파일 타입에 대해서만 타이머 생성
+			if vim.tbl_contains(config.filetypes, ft) then
+				-- 타이머 생성 및 시작 (저장 후 지연된 린팅 실행)
+				timers.start("buffer", bufnr, function()
+					if vim.api.nvim_buf_is_valid(bufnr) then
+						lint.try_lint()
+						update_quickfix()
+					end
+				end)
+			end
 		end,
 	})
 end
