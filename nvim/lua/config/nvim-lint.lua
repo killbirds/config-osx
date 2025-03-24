@@ -11,10 +11,11 @@ local config = {
 		"python",
 		"lua",
 		"rust",
+		"scala",
 	},
 
 	-- 지원하는 파일 패턴
-	patterns = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.py", "*.lua", "*.rs" },
+	patterns = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.py", "*.lua", "*.rs", "*.scala" },
 
 	-- 디바운스 설정 (ms)
 	debounce = {
@@ -168,10 +169,47 @@ local function update_quickfix()
 						col = diag.col + 1,
 						text = diag.message .. " [" .. vim.fn.fnamemodify(buf_name, ":~:.") .. "]",
 						type = (diag.severity == vim.diagnostic.severity.ERROR and "E" or "W"),
+						severity = diag.severity, -- 정렬을 위해 원래 심각도 저장
 					})
 				end
 			end
 		end
+	end
+
+	-- 심각도에 따라 정렬 (ERROR가 WARN보다 위에 표시)
+	table.sort(all_diagnostics, function(a, b)
+		-- 현재 열려있는 파일 우선 (현재 버퍼 가져오기)
+		local current_buf = vim.api.nvim_get_current_buf()
+		if a.bufnr == current_buf and b.bufnr ~= current_buf then
+			return true
+		elseif a.bufnr ~= current_buf and b.bufnr == current_buf then
+			return false
+		end
+
+		-- 먼저 심각도로 정렬 (ERROR가 WARN보다 우선)
+		if a.severity ~= b.severity then
+			return a.severity < b.severity
+		end
+
+		-- 같은 심각도일 경우 파일명으로 정렬
+		if a.bufnr ~= b.bufnr then
+			local a_name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(a.bufnr), ":~:.")
+			local b_name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(b.bufnr), ":~:.")
+			return a_name < b_name
+		end
+
+		-- 같은 파일 내에서는 줄 번호로 정렬
+		if a.lnum ~= b.lnum then
+			return a.lnum < b.lnum
+		end
+
+		-- 같은 줄이면 열 번호로 정렬
+		return a.col < b.col
+	end)
+
+	-- 정렬 후 severity 필드 제거 (quickfix에서 사용하지 않음)
+	for _, item in ipairs(all_diagnostics) do
+		item.severity = nil
 	end
 
 	-- 현재 윈도우 ID 저장
