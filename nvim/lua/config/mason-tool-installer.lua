@@ -4,14 +4,12 @@ require("mason-tool-installer").setup({
 		"luacheck", -- Lua
 		"eslint_d", -- JavaScript/TypeScript
 		"flake8", -- Python
-		"shellcheck", -- Shell
 		"yamllint", -- YAML
 		"jsonlint", -- JSON
 
 		-- 포매터만 포함
 		"stylua", -- Lua
 		"prettier", -- JavaScript/TypeScript/HTML/CSS/JSON
-		"shfmt", -- Shell
 		"black", -- Python
 		"clang-format", -- C/C++
 		"gofumpt", -- Go

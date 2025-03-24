@@ -8,4 +8,4 @@ addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")
 
 //addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.16")
 
-addSbtPlugin("ch.epfl.scala" % "sbt-bloop" % "1.5.17")
+addSbtPlugin("ch.epfl.scala" % "sbt-bloop" % "2.0.9")

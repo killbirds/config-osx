@@ -7,6 +7,7 @@ local cmp_nvim_lsp = require("cmp_nvim_lsp")
 local DEV_MODE = false -- 개발 모드 활성화 여부 (true = 개발 모드, false = 프로덕션 모드)
 local ENABLE_VERBOSE_LOGGING = false -- 상세 로그 활성화 여부
 local ENABLE_AUTO_FORMATTING = true -- 자동 포맷팅 활성화 여부
+local AUTO_START_METALS = true -- Metals 자동 시작 활성화 여부
 
 -- 전역 설정 조정
 vim.opt_global.shortmess:remove("F") -- API 메시지 표시 활성화
@@ -125,12 +126,6 @@ local function initialize_metals_lazy(bufnr)
 			{ title = "Metals 초기화 오류" }
 		)
 	else
-		vim.notify(
-			"Metals 서버가 성공적으로 초기화되었습니다.",
-			vim.log.levels.INFO,
-			{ title = "Metals" }
-		)
-
 		-- 초기화 성공 시 BufWritePre 이벤트 설정 (자동 포맷팅)
 		if ENABLE_AUTO_FORMATTING then
 			vim.api.nvim_create_autocmd("BufWritePre", {
@@ -150,13 +145,100 @@ local function initialize_metals_lazy(bufnr)
 	end
 end
 
+-- Scala 프로젝트 감지 함수
+local function is_scala_project()
+	local project_files = {
+		"build.sbt",
+		"build.sc",
+		"project/build.properties",
+		"project/plugins.sbt",
+		".scala-build",
+		"project/metals.sbt"
+	}
+	
+	for _, file in ipairs(project_files) do
+		if vim.fn.filereadable(file) == 1 then
+			return true
+		end
+	end
+	
+	-- 디렉토리 내 Scala 파일 확인
+	local scala_files = vim.fn.glob("**/*.scala", false, true)
+	return #scala_files > 0
+end
+
+-- Metals 자동 시작 설정
+local function setup_auto_start()
+	if not AUTO_START_METALS then return end
+	
+	-- Scala/SBT 파일 타입 감지 시 Metals 초기화
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = { "scala", "sbt" },
+		group = nvim_metals_group,
+		callback = function(opts)
+			if is_scala_project() then
+				initialize_metals_lazy(opts.buf)
+			end
+		end,
+		desc = "Initialize Metals for Scala/SBT files",
+	})
+	
+	-- 디렉토리 변경 시 Metals 초기화
+	vim.api.nvim_create_autocmd("DirChanged", {
+		group = nvim_metals_group,
+		callback = function()
+			if is_scala_project() then
+				initialize_metals_lazy(0)
+			end
+		end,
+		desc = "Initialize Metals when entering Scala project directory",
+	})
+
+	-- Vim 시작 시 Scala 프로젝트 확인
+	vim.api.nvim_create_autocmd("VimEnter", {
+		group = nvim_metals_group,
+		callback = function()
+			if is_scala_project() then
+				initialize_metals_lazy(0)
+			end
+		end,
+		desc = "Initialize Metals on VimEnter if in Scala project",
+	})
+end
+
 -- ========== 설정 적용 ========== --
 -- Metals 설정 적용
 metals_config.settings = configure_metals_settings()
 
+-- 자동 시작 설정 적용
+setup_auto_start()
+
 -- 공통 LSP 설정 적용
 metals_config.on_attach = function(client, bufnr)
-	keys.on_attach(client, bufnr) -- 기존 키맵 설정 호출
+	-- LSP 키맵 설정
+	local opts = { noremap = true, silent = true, buffer = bufnr }
+	
+	-- 정의로 이동
+	vim.keymap.set('n', '<leader>gd', vim.lsp.buf.definition, opts)
+	vim.keymap.set('n', '<leader>gr', vim.lsp.buf.references, opts)
+	vim.keymap.set('n', '<leader>gi', vim.lsp.buf.implementation, opts)
+	vim.keymap.set('n', '<leader>go', vim.lsp.buf.type_definition, opts)
+	vim.keymap.set('n', '<leader>gs', vim.lsp.buf.signature_help, opts)
+	vim.keymap.set('n', '<leader>gD', vim.lsp.buf.declaration, opts)
+	vim.keymap.set('n', '<leader>ga', vim.lsp.buf.code_action, opts)
+	vim.keymap.set('n', '<leader>ge', vim.diagnostic.open_float, opts)
+	vim.keymap.set('n', '<leader>gE', vim.diagnostic.setloclist, opts)
+	vim.keymap.set('n', '<leader>gK', vim.lsp.buf.hover, opts)
+	vim.keymap.set('n', '<leader>gR', vim.lsp.buf.rename, opts)
+	vim.keymap.set('n', '<leader>gS', vim.lsp.buf.workspace_symbol, opts)
+	vim.keymap.set('n', '<leader>gW', vim.lsp.buf.workspace_symbol, { noremap = true, silent = true, buffer = bufnr, query = '' })
+	vim.keymap.set('n', '<leader>gD', vim.lsp.buf.declaration, opts)
+	vim.keymap.set('n', '<leader>gT', vim.lsp.buf.type_definition, opts)
+	vim.keymap.set('n', '<leader>gI', vim.lsp.buf.implementation, opts)
+	vim.keymap.set('n', '<leader>gR', vim.lsp.buf.rename, opts)
+	vim.keymap.set('n', '<leader>gF', vim.lsp.buf.format, opts)
+	vim.keymap.set('n', '<leader>gC', vim.lsp.buf.incoming_calls, opts)
+	vim.keymap.set('n', '<leader>gO', vim.lsp.buf.outgoing_calls, opts)
 
 	-- Metals 특화 명령어 추가
 	vim.api.nvim_buf_create_user_command(bufnr, "MetalsRestart", function()
@@ -190,16 +272,6 @@ setup_error_handlers()
 
 -- 프로젝트 루트 탐지 패턴
 metals_config.root_patterns = { ".git", "build.sbt", "build.sc", "project" }
-
--- Scala 및 SBT 파일에서 Metals 초기화 (지연 로딩 방식)
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "scala", "sbt" },
-	group = nvim_metals_group,
-	callback = function(opts)
-		metals.initialize_or_attach(metals_config)
-	end,
-	desc = "Initialize Metals for Scala/SBT files",
-})
 
 -- Metals 로그 설정 (디버깅용, 선택적)
 metals_config.handlers = {
