@@ -110,6 +110,15 @@ require("gitsigns").setup({
 			gs.diffthis("~")
 		end, { desc = "HEAD와 diff 비교" })
 		map("n", "<leader>td", gs.toggle_deleted, { desc = "삭제된 줄 토글" })
+
+		-- 버퍼가 닫힐 때 안전하게 정리
+		vim.api.nvim_buf_attach(bufnr, false, {
+			on_detach = function()
+				if vim.api.nvim_buf_is_valid(bufnr) then
+					gs.detach(bufnr)
+				end
+			end,
+		})
 	end,
 	-- 성능 최적화 설정
 	_threaded_diff = true, -- 쓰레드로 diff 계산

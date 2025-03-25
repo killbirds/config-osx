@@ -16,8 +16,8 @@ vim.opt.hidden = true
 -- UI 개선
 vim.opt.relativenumber = false -- 절대 번호
 vim.opt.signcolumn = "yes" -- 항상 사인 컬럼 표시 (LSP, Git 등)
-vim.opt.scrolloff = 8 -- 커서 위아래 최소 줄 수
-vim.opt.sidescrolloff = 8 -- 커서 좌우 최소 컬럼 수
+vim.opt.scrolloff = 5 -- 커서 위아래 최소 줄 수
+vim.opt.sidescrolloff = 5 -- 커서 좌우 최소 컬럼 수
 vim.opt.wrap = false -- 긴 줄 자동 줄바꿈 비활성화
 vim.opt.colorcolumn = "120" -- 80자 컬럼 표시
 
@@ -39,7 +39,7 @@ vim.opt.backup = false
 vim.opt.writebackup = false
 
 -- 성능 최적화 설정
-vim.opt.lazyredraw = true -- 매크로 실행 중 화면을 다시 그리지 않음
+vim.opt.lazyredraw = false -- 매크로 실행 중 화면을 다시 그리지 않음
 vim.opt.synmaxcol = 200 -- 긴 줄에서 구문 강조 제한 (성능 향상)
 vim.opt.updatetime = 100 -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리거 시간 (ms)
 

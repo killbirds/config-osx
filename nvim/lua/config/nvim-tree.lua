@@ -66,6 +66,27 @@ local function on_attach(bufnr)
 	vim.keymap.set("n", "<C-r>", api.tree.reload, opts("Refresh"))
 end
 
+-- 하이라이트 그룹 정의
+local function setup_nvim_tree_highlights()
+	vim.api.nvim_set_hl(0, "NvimTreeGitDirty", { fg = "#f1c40f" }) -- 변경된 파일 (노란색)
+	vim.api.nvim_set_hl(0, "NvimTreeGitStaged", { fg = "#2ecc71" }) -- 스테이징된 파일 (녹색)
+	vim.api.nvim_set_hl(0, "NvimTreeGitMerge", { fg = "#3498db" }) -- 머지 충돌 (파란색)
+	vim.api.nvim_set_hl(0, "NvimTreeGitRenamed", { fg = "#e67e22" }) -- 이름 변경 (주황색)
+	vim.api.nvim_set_hl(0, "NvimTreeGitNew", { fg = "#95a5a6" }) -- 새 파일 (회색)
+	vim.api.nvim_set_hl(0, "NvimTreeGitDeleted", { fg = "#e74c3c" }) -- 삭제된 파일 (빨간색)
+end
+
+-- 하이라이트 설정 적용
+setup_nvim_tree_highlights()
+
+-- 컬러 스키마 변경 시 하이라이트 다시 적용
+vim.api.nvim_create_autocmd("ColorScheme", {
+	pattern = "*",
+	callback = function()
+		setup_nvim_tree_highlights()
+	end,
+})
+
 require("nvim-tree").setup({
 	sort_by = "name",
 	update_cwd = false,
@@ -77,13 +98,12 @@ require("nvim-tree").setup({
 	},
 	renderer = {
 		group_empty = true,
-		highlight_git = false,
+		highlight_git = true,
 		full_name = false,
-		highlight_opened_files = "name",
 		root_folder_label = ":~:s?$?/..?",
 		indent_width = 2,
 		indent_markers = {
-			enable = true,
+			enable = false,
 			inline_arrows = true,
 		},
 		icons = {
@@ -105,7 +125,7 @@ require("nvim-tree").setup({
 		enable = true,
 		ignore = false,
 		show_on_dirs = true,
-		timeout = 400,
+		timeout = 100,
 	},
 	actions = {
 		change_dir = {

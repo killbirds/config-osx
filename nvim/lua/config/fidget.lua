@@ -105,9 +105,6 @@ fidget.setup({
 		["nvim-tree"] = {
 			enable = true, -- nvim-tree.lua 통합 (설치된 경우)
 		},
-		["xcodebuild.nvim"] = {
-			enable = true, -- xcodebuild 통합 (설치된 경우)
-		},
 	},
 
 	-- 로깅 관련 설정

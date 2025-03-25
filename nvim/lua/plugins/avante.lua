@@ -46,6 +46,13 @@ return {
 				api_key = api_keys.anthropic,
 			},
 
+			copilot = {
+				model = "github-copilot",
+				temperature = 0,
+				max_tokens = 8192,
+				enabled = true,
+			},
+
 			file_selector = {
 				type = "telescope",
 				options = {
@@ -115,7 +122,7 @@ return {
 		"nvim-tree/nvim-web-devicons",
 
 		-- AI 통합
-		{ "zbirenbaum/copilot.lua", optional = true },
+		{ "zbirenbaum/copilot.lua", optional = false }, -- Copilot을 필수 의존성으로 변경
 
 		-- 이미지 지원
 		{

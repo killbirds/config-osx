@@ -2,7 +2,6 @@ require("mason-tool-installer").setup({
 	ensure_installed = {
 		-- 린터만 포함
 		"luacheck", -- Lua
-		"eslint_d", -- JavaScript/TypeScript
 		"flake8", -- Python
 		"yamllint", -- YAML
 		"jsonlint", -- JSON
@@ -11,9 +10,7 @@ require("mason-tool-installer").setup({
 		"stylua", -- Lua
 		"prettier", -- JavaScript/TypeScript/HTML/CSS/JSON
 		"black", -- Python
-		"clang-format", -- C/C++
 		"gofumpt", -- Go
-		"rustfmt", -- Rust
 	},
 	auto_update = true,
 	run_on_start = true,
