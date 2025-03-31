@@ -40,12 +40,16 @@ M.on_attach = function(client, bufnr)
 
 	-- 진단 관련 키맵 (추가)
 	set_keymap(bufnr, "n", "<leader>e", vim.diagnostic.open_float, "Show Line Diagnostics")
-	set_keymap(bufnr, "n", "[d", vim.diagnostic.goto_prev, "Go to Previous Diagnostic")
-	set_keymap(bufnr, "n", "]d", vim.diagnostic.goto_next, "Go to Next Diagnostic")
-	set_keymap(bufnr, "n", "<leader>q", vim.diagnostic.setloclist, "Set Loclist with Diagnostics")
+	set_keymap(bufnr, "n", "[d", function()
+		vim.diagnostic.jump({ count = -1, float = true })
+	end, "Go to Previous Diagnostic")
+	set_keymap(bufnr, "n", "]d", function()
+		vim.diagnostic.jump({ count = 1, float = true })
+	end, "Go to Next Diagnostic")
+	set_keymap(bufnr, "n", "<leader>q", vim.diagnostic.setqflist, "Set Quickfix List with Diagnostics")
 
 	-- 서버별 조건부 설정 (예시)
-	if client.server_capabilities.documentFormattingProvider then
+	if client:supports_method("textDocument/formatting") then
 		vim.api.nvim_buf_create_user_command(bufnr, "Format", function()
 			vim.lsp.buf.format({ async = true })
 		end, { desc = "Format current buffer with LSP" })

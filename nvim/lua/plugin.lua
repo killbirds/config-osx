@@ -28,4 +28,24 @@ require("lazy").setup({
 	install = { colorscheme = { "catppuccin" } },
 	-- automatically check for plugin updates
 	checker = { enabled = true },
+	-- Neovim 0.11+ ui 개선 사항 적용
+	ui = {
+		border = "rounded", -- 0.10 이상에서 테두리 스타일 지원 개선
+		title = "Lazy Plugin Manager", -- 창 제목 설정
+		backdrop = 80, -- 0.11 이상에서 배경 어둡게 설정 (0-100)
+	},
+	performance = {
+		-- 0.11 권장 성능 최적화 설정
+		rtp = {
+			reset = false, -- 필수 플러그인만 로드하지 않음
+			disabled_plugins = {
+				"tohtml",
+				"gzip",
+				"matchit",
+				"zipPlugin",
+				"netrwPlugin",
+				"tarPlugin",
+			}, -- 사용하지 않는 기본 플러그인 비활성화
+		},
+	},
 })

@@ -62,13 +62,17 @@ local function setup_global_keymaps()
 		vim.diagnostic.open_float,
 		vim.tbl_extend("force", opts, { desc = "Show Line Diagnostics" })
 	)
-	vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, vim.tbl_extend("force", opts, { desc = "Previous Diagnostic" }))
-	vim.keymap.set("n", "]d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Next Diagnostic" }))
+	vim.keymap.set("n", "[d", function()
+		vim.diagnostic.jump({ count = -1, float = true })
+	end, vim.tbl_extend("force", opts, { desc = "Previous Diagnostic" }))
+	vim.keymap.set("n", "]d", function()
+		vim.diagnostic.jump({ count = 1, float = true })
+	end, vim.tbl_extend("force", opts, { desc = "Next Diagnostic" }))
 	vim.keymap.set(
 		"n",
 		"<leader>q",
-		vim.diagnostic.setloclist,
-		vim.tbl_extend("force", opts, { desc = "Diagnostics to Loclist" })
+		vim.diagnostic.setqflist,
+		vim.tbl_extend("force", opts, { desc = "Diagnostics to Quickfix List" })
 	)
 
 	-- Inlay Hints 키 매핑 설정 (최신 Neovim 버전 확인)
@@ -161,7 +165,7 @@ local servers = {
 				-- Neovim 설정 폴더가 아니면서 자체 .luarc.json 파일이 있으면 기본 설정 유지
 				if
 					path ~= vim.fn.stdpath("config")
-					and (vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc"))
+					and (vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc"))
 				then
 					return
 				end

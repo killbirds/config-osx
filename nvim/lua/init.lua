@@ -4,7 +4,9 @@ vim.opt.number = true
 vim.opt.history = 1000
 vim.opt.showcmd = true
 vim.opt.showmode = true
-vim.opt.guicursor = "a:blinkon0"
+-- 0.11에서 개선된 커서 설정
+vim.opt.guicursor =
+	"n-v-c-sm:block-blinkwait300-blinkon200-blinkoff150,i-ci-ve:ver25-blinkwait300-blinkon200-blinkoff150,r-cr-o:hor20"
 vim.opt.visualbell = true
 vim.opt.autoread = true
 vim.opt.autowrite = true
@@ -39,7 +41,8 @@ vim.opt.backup = false
 vim.opt.writebackup = false
 
 -- 성능 최적화 설정
-vim.opt.lazyredraw = false -- 매크로 실행 중 화면을 다시 그리지 않음
+-- vim.opt.lazyredraw 옵션은 0.9.0에서 제거됨, 대신 새로운 방식 사용
+vim.opt.redrawtime = 1500 -- 구문 강조 처리 시간 제한 (ms)
 vim.opt.synmaxcol = 200 -- 긴 줄에서 구문 강조 제한 (성능 향상)
 vim.opt.updatetime = 100 -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리거 시간 (ms)
 
@@ -48,6 +51,9 @@ vim.opt.ignorecase = true -- 검색 시 대소문자 무시
 vim.opt.smartcase = true -- 대문자가 포함되면 대소문자 구분
 vim.opt.incsearch = true -- 타이핑하는 동안 검색
 vim.opt.hlsearch = true -- 검색 결과 강조
+
+-- 0.11 개선된 splitkeep 설정
+vim.opt.splitkeep = "screen" -- 화면 분할 시 커서 위치 유지 (0.9 이상)
 
 -- 유용한 자동 명령
 local augroup = vim.api.nvim_create_augroup("UserAutoCommands", { clear = true })
@@ -72,6 +78,17 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 		local save_cursor = vim.fn.getpos(".")
 		vim.cmd([[%s/\s\+$//e]])
 		vim.fn.setpos(".", save_cursor)
+	end,
+})
+
+-- 0.11 이상에서 사용 가능한 vim.defer_fn으로 변경
+vim.api.nvim_create_autocmd("TextYankPost", {
+	group = augroup,
+	pattern = "*",
+	callback = function()
+		vim.defer_fn(function()
+			vim.highlight.on_yank({ higroup = "IncSearch", timeout = 250 })
+		end, 1)
 	end,
 })
 

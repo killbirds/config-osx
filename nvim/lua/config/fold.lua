@@ -47,32 +47,24 @@ function M.setup()
 		end,
 	})
 
-	-- 안전하게 LSP 문서 심볼 기반 폴딩 적용 함수
+	-- Neovim 0.11에 최적화된 LSP 문서 심볼 기반 폴딩 적용 함수
 	local function apply_lsp_folding(buffer, nestingLevel)
 		nestingLevel = nestingLevel or 2
 
-		-- document_fold 함수가 존재하는지 확인
-		if vim.lsp.buf.document_fold then
-			-- 커서 위치 저장
-			local cursor_pos = vim.api.nvim_win_get_cursor(0)
+		-- 커서 위치 저장
+		local cursor_pos = vim.api.nvim_win_get_cursor(0)
 
-			-- 문서 폴딩 실행
-			vim.lsp.buf.document_fold({
-				nestingLevel = nestingLevel,
-			})
+		-- 0.11 이상에서는 document_fold 함수가 항상 사용 가능
+		vim.lsp.buf.document_fold({
+			nestingLevel = nestingLevel,
+		})
 
-			-- 커서 위치 복원
-			vim.api.nvim_win_set_cursor(0, cursor_pos)
-			return true
-		else
-			-- 대체 방법: 문서 심볼 사용하여 접기 (Neovim의 document_fold 함수가 없는 경우)
-			vim.lsp.buf.document_symbol()
-			vim.cmd("normal! zx") -- 폴딩 리프레시
-			return false
-		end
+		-- 커서 위치 복원
+		vim.api.nvim_win_set_cursor(0, cursor_pos)
+		return true
 	end
 
-	-- LSP 문서 폴딩 설정 (Neovim 0.10.0+)
+	-- LSP 문서 폴딩 설정 (Neovim 0.11+)
 	vim.api.nvim_create_autocmd("LspAttach", {
 		group = augroup,
 		callback = function(args)
@@ -83,15 +75,8 @@ function M.setup()
 			if client and client.server_capabilities.documentSymbolProvider then
 				-- LSP 기반 폴딩 키 매핑 추가
 				vim.keymap.set("n", "<leader>zl", function()
-					local success = apply_lsp_folding(buffer)
-					if success then
-						vim.notify("LSP 기반 폴딩이 적용되었습니다.", vim.log.levels.INFO)
-					else
-						vim.notify(
-							"document_fold 함수를 사용할 수 없어 대체 방법을 사용했습니다.",
-							vim.log.levels.INFO
-						)
-					end
+					apply_lsp_folding(buffer)
+					vim.notify("LSP 기반 폴딩이 적용되었습니다.", vim.log.levels.INFO)
 				end, { buffer = buffer, noremap = true, desc = "Apply LSP-based folding" })
 			end
 		end,
@@ -116,16 +101,9 @@ function M.setup()
 
 			-- 폴딩 키 매핑 재정의 (언어별 최적화)
 			vim.keymap.set("n", "<leader>zL", function()
-				if vim.lsp.buf.server_ready and vim.lsp.buf.server_ready() then
-					local success = apply_lsp_folding(0, nestingLevels[ft] or 2)
-					if success then
-						vim.notify(
-							ft .. " 언어에 최적화된 폴딩이 적용되었습니다.",
-							vim.log.levels.INFO
-						)
-					else
-						vim.notify("대체 폴딩 방법이 적용되었습니다.", vim.log.levels.INFO)
-					end
+				if vim.lsp.get_clients({ bufnr = 0 })[1] then
+					apply_lsp_folding(0, nestingLevels[ft] or 2)
+					vim.notify(ft .. " 언어에 최적화된 폴딩이 적용되었습니다.", vim.log.levels.INFO)
 				else
 					vim.notify("LSP 서버가 준비되지 않았습니다.", vim.log.levels.WARN)
 				end
@@ -149,12 +127,8 @@ function M.setup()
 
 		-- LSP 폴딩 사용 가능하면 LSP 기반 폴딩 적용, 아니면 Treesitter 폴딩으로 대체
 		if has_lsp_folding then
-			local success = apply_lsp_folding(0, 2)
-			if success then
-				vim.notify("LSP 기반 폴딩이 적용되었습니다.", vim.log.levels.INFO)
-			else
-				vim.notify("LSP 대체 폴딩이 적용되었습니다.", vim.log.levels.INFO)
-			end
+			apply_lsp_folding(0, 2)
+			vim.notify("LSP 기반 폴딩이 적용되었습니다.", vim.log.levels.INFO)
 		else
 			-- Treesitter 폴딩 적용
 			vim.opt_local.foldmethod = "expr"
