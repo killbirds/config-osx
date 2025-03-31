@@ -14,6 +14,8 @@ require("nvim-treesitter.configs").setup({
 		"lua", -- Lua 추가 (Neovim 설정에 유용)
 		"query", -- Treesitter 쿼리 언어 (플레이그라운드용)
 		"vimdoc", -- Neovim 문서 파서 (0.11에서 개선됨)
+		"markdown", -- 0.11에서 개선된 마크다운 지원
+		"markdown_inline", -- 마크다운 인라인 요소 지원
 	},
 
 	-- 동기 설치 여부 (ensure_installed에만 적용)
@@ -28,6 +30,16 @@ require("nvim-treesitter.configs").setup({
 	-- 구문 강조 설정
 	highlight = {
 		enable = true, -- Treesitter 기반 하이라이팅 활성화
+
+		-- 0.11 성능 최적화: 비동기 하이라이팅
+		additional_vim_regex_highlighting = false, -- Vim 기본 하이라이팅 비활성화 (충돌 방지)
+
+		-- 마크다운 개선 (0.11 새 기능)
+		-- 코드 블록 펜스 라인 수직 숨김
+		conceals = {
+			enable = true, -- 콘실 기능 활성화
+		},
+
 		disable = function(lang, buf)
 			-- 큰 파일에서 성능 문제 방지
 			local max_filesize = 100 * 1024 -- 100 KB
@@ -35,10 +47,8 @@ require("nvim-treesitter.configs").setup({
 			if ok and stats and stats.size > max_filesize then
 				return true
 			end
-			-- 특정 언어 제외
-			return vim.tbl_contains({ "lua", "rust" }, lang)
+			return false
 		end,
-		additional_vim_regex_highlighting = false, -- Vim 기본 하이라이팅 비활성화 (충돌 방지)
 	},
 
 	-- 들여쓰기 설정
@@ -58,10 +68,18 @@ require("nvim-treesitter.configs").setup({
 		},
 	},
 
-	-- 코드 접기 설정
+	-- 코드 접기 설정 (0.11에서 비동기 처리됨)
 	fold = {
 		enable = true, -- Treesitter 기반 접기 활성화
-		disable = { "markdown", "text" }, -- 접기 비활성화 언어
+		disable = { "text" }, -- 접기 비활성화 언어
+	},
+
+	-- 주석 설정 (0.11 개선)
+	-- 0.11에서는 JSX 등에서 더 세밀한 주석 처리 지원
+	comment = {
+		enable = true,
+		-- JSX에서 주석 설정
+		jsx_brackets = true, -- JSX 대괄호 내 주석 처리
 	},
 
 	-- 추가 모듈 설정 (선택적)
@@ -86,13 +104,34 @@ require("nvim-treesitter.configs").setup({
 				["if"] = "@function.inner", -- 함수 내부 선택
 				["ac"] = "@class.outer", -- 클래스 외부 선택
 				["ic"] = "@class.inner", -- 클래스 내부 선택
+				-- 0.11에서 추가된 텍스트 객체
+				["aa"] = "@parameter.outer", -- 파라미터 외부 선택
+				["ia"] = "@parameter.inner", -- 파라미터 내부 선택
+				["ab"] = "@block.outer", -- 블록 외부 선택
+				["ib"] = "@block.inner", -- 블록 내부 선택
 			},
 		},
-	},
-
-	-- 0.11 추가 기능: 문법 트리 시각화 개선
-	tree_docs = {
-		enable = true, -- 문서화 지원 활성화
+		-- 0.11에서 개선된 이동 기능
+		move = {
+			enable = true,
+			set_jumps = true, -- 점프 리스트 갱신
+			goto_next_start = {
+				["]m"] = "@function.outer",
+				["]]"] = "@class.outer",
+			},
+			goto_next_end = {
+				["]M"] = "@function.outer",
+				["]["] = "@class.outer",
+			},
+			goto_previous_start = {
+				["[m"] = "@function.outer",
+				["[["] = "@class.outer",
+			},
+			goto_previous_end = {
+				["[M"] = "@function.outer",
+				["[]"] = "@class.outer",
+			},
+		},
 	},
 
 	-- 0.11 추가 기능: 자동 태그 닫기
@@ -121,7 +160,22 @@ if has_context then
 	})
 end
 
--- 새로운 파서 퍼포먼스 설정 (Neovim 0.11+ 지원)
--- 0.11에서는 이러한 설정이 더 세밀하게 가능
-vim.g.ts_slow_file_size = 1024 * 1024 -- 1MB 이상은 느린 파일로 처리
-vim.g.ts_highlight_timeout = 200 -- 하이라이팅 시간 제한 (ms)
+-- 0.11 Treesitter 비동기 처리 설정
+if vim.fn.has("nvim-0.11") == 1 then
+	-- 비동기 파싱 활성화 (성능 향상을 위해)
+	vim.g._ts_force_sync_parsing = false
+
+	-- 마크다운 파일에서 코드 블록 펜스 라인을 수직으로 숨기는 설정
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = "markdown",
+		callback = function()
+			vim.wo.conceallevel = 2 -- 콘실 레벨 설정
+		end,
+	})
+
+	-- 비동기 인젝션 쿼리 활성화 (대규모 버퍼에서 성능 향상)
+	vim.g.ts_enable_async_injections = true
+
+	-- 쿼리 캐싱 활성화 (성능 향상)
+	vim.g.ts_enable_query_caching = true
+end

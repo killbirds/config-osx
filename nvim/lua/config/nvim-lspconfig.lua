@@ -51,6 +51,19 @@ local default_opts = {
 		debounce_text_changes = 150, -- 텍스트 변경 후 지연 시간 (ms)
 	},
 	on_attach = setup_lsp,
+	-- LSP 타임아웃 및 성능 관련 설정 추가
+	handlers = {
+		["textDocument/definition"] = function(err, result, ctx, config)
+			config = config or {}
+			config.timeout = 2000 -- 정의 요청 타임아웃 2초로 설정
+			vim.lsp.handlers["textDocument/definition"](err, result, ctx, config)
+		end,
+		["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded", timeout = 2000 }),
+		["textDocument/signatureHelp"] = vim.lsp.with(
+			vim.lsp.handlers.signature_help,
+			{ border = "rounded", timeout = 2000 }
+		),
+	},
 }
 
 -- 전역 진단 키맵 설정
@@ -272,7 +285,21 @@ vim.diagnostic.config({
 	signs = true,
 	update_in_insert = false, -- 삽입 모드 업데이트 비활성화 (성능 개선)
 	severity_sort = true, -- 심각도순 정렬
+	float = {
+		focusable = false,
+		style = "minimal",
+		border = "rounded",
+		source = "always",
+		header = "",
+		prefix = "",
+	},
 })
+
+-- LSP 성능 문제 추적을 위한 로깅 설정
+vim.lsp.set_log_level("off") -- 일반적으로는 'off'로 설정, 문제 해결 시 'info' 또는 'debug'로 변경
+
+-- LSP 요청 타임아웃 설정
+vim.lsp.buf.request_timeout = 3000 -- 모든 LSP 요청 타임아웃을 3초로 설정
 
 -- 서버와 파일 유형 간의 매핑
 local server_filetype_map = {
