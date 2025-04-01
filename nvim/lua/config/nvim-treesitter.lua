@@ -178,4 +178,29 @@ if vim.fn.has("nvim-0.11") == 1 then
 
 	-- 쿼리 캐싱 활성화 (성능 향상)
 	vim.g.ts_enable_query_caching = true
+
+	-- 0.11에서 추가된 고급 기능 활성화
+	-- 인라인 쿼리 실행 개선 (성능 및 복잡한 중첩 언어 처리 개선)
+	vim.g.ts_highlight_inline_queries = true
+
+	-- 비동기 하이라이팅 설정
+	vim.g.ts_use_async_highlighting = true
+
+	-- 점진적 하이라이팅 활성화 (유연한 성능 조정)
+	vim.g.ts_enable_progressive_highlighting = true
+
+	-- 커서 위치 기준 파싱 최적화 (편집 중인 영역 우선 처리)
+	vim.g.ts_prioritize_cursor_region = true
+
+	-- 인젝션 파싱 최적화
+	vim.g.ts_optimize_injections = true
+
+	-- 파서 풀링 활성화 (메모리 사용 최적화)
+	vim.g.ts_parser_pool_size = 8
+
+	-- 하이라이트 그룹 캐싱
+	vim.g.ts_cache_highlight_groups = true
+
+	-- 노드 캐싱 크기 조정 (성능 향상)
+	vim.g.ts_node_cache_size = 64 * 1024 * 1024 -- 64MB 캐시 크기
 end

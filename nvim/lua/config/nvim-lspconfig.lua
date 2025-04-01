@@ -51,19 +51,7 @@ local default_opts = {
 		debounce_text_changes = 150, -- 텍스트 변경 후 지연 시간 (ms)
 	},
 	on_attach = setup_lsp,
-	-- LSP 타임아웃 및 성능 관련 설정 추가
-	handlers = {
-		["textDocument/definition"] = function(err, result, ctx, config)
-			config = config or {}
-			config.timeout = 2000 -- 정의 요청 타임아웃 2초로 설정
-			vim.lsp.handlers["textDocument/definition"](err, result, ctx, config)
-		end,
-		["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded", timeout = 2000 }),
-		["textDocument/signatureHelp"] = vim.lsp.with(
-			vim.lsp.handlers.signature_help,
-			{ border = "rounded", timeout = 2000 }
-		),
-	},
+	-- LSP 타임아웃 및 성능 관련 설정 추가 (0.13에서 핸들러 API 변경으로 제거)
 }
 
 -- 전역 진단 키맵 설정
@@ -289,7 +277,7 @@ vim.diagnostic.config({
 		focusable = false,
 		style = "minimal",
 		border = "rounded",
-		source = "always",
+		source = true,
 		header = "",
 		prefix = "",
 	},

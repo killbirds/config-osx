@@ -93,6 +93,7 @@ fidget.setup({
 			-- Neovim 0.11 전용 설정
 			focusable = false, -- 포커스 가능 여부
 			backdrop = 80, -- 배경 어둡게 설정 (0-100)
+			normal_hl = "Comment", -- 기본 하이라이트 그룹
 		},
 
 		-- Neovim 0.11에서 개선된 알림 표시 설정
@@ -124,7 +125,10 @@ fidget.setup({
 		-- 기본 알림 구성에서 옵션 재정의
 		configs = {
 			-- 기본 설정
-			default = vim.deepcopy(fidget.notification.default_config),
+			default = {
+				annote = "nvim",
+				no_cursor_change = true,
+			},
 		},
 	},
 
@@ -172,36 +176,3 @@ end, { desc = "Fidget: 알림 히스토리 보기" })
 vim.keymap.set("n", "<leader>fc", function()
 	require("fidget.notification").clear()
 end, { desc = "Fidget: 알림 지우기" })
-
--- 0.11 전용 추가 설정 (버전 체크)
-if vim.fn.has("nvim-0.11") == 1 then
-	-- Neovim 0.11 알림 시스템 개선된 설정
-	fidget.notification.opts({
-		-- 알림 표시 방식 설정
-		view = {
-			stack_upwards = false, -- 아래로 쌓기
-		},
-
-		-- 향상된 알림 창 설정
-		window = {
-			winblend = 10, -- 약간의 투명도
-			border = "rounded", -- 둥근 테두리
-			zindex = 50, -- 알림 창 z-index
-			max_width = 80, -- 알림 창 최대 너비
-		},
-
-		-- 0.11 전용 설정: 키보드로 알림 제어
-		keymaps = {
-			-- 알림 창 닫기
-			close = "q",
-			-- 알림 창 기록 보기
-			history = "h",
-		},
-	})
-
-	-- 개선된, 커서 모양 변경 없는 알림 시스템
-	fidget.notification.set_group_config("default", {
-		no_cursor_change = true, -- 커서 모양 유지
-		annote = "nvim", -- 주석
-	})
-end

@@ -6,22 +6,22 @@ local protected_filetypes = {
 	"NvimTree",
 	"dashboard",
 	"Avante",
-	"help",          -- 도움말 문서
-	"qf",            -- Quickfix 목록
-	"terminal",      -- 내장 터미널
-	"prompt",        -- 프롬프트 입력
+	"help", -- 도움말 문서
+	"qf", -- Quickfix 목록
+	"terminal", -- 내장 터미널
+	"prompt", -- 프롬프트 입력
 	"TelescopePrompt", -- Telescope 검색
-	"lazy",          -- Lazy 플러그인 관리자
-	"lspinfo",       -- LSP 정보 창
-	"toggleterm",    -- ToggleTerm 터미널
-	"alpha",         -- Alpha 시작 화면
+	"lazy", -- Lazy 플러그인 관리자
+	"lspinfo", -- LSP 정보 창
+	"toggleterm", -- ToggleTerm 터미널
+	"alpha", -- Alpha 시작 화면
 	"DiffviewFiles", -- Diffview 파일 목록
 	-- 필요에 따라 더 추가할 수 있습니다
 }
 
 vim.keymap.set("n", "<C-c>", function()
 	local ft = vim.bo.filetype
-	
+
 	-- 보호된 파일 타입인지 확인
 	local is_protected = false
 	for _, protected_ft in ipairs(protected_filetypes) do
@@ -30,7 +30,7 @@ vim.keymap.set("n", "<C-c>", function()
 			break
 		end
 	end
-	
+
 	if not is_protected then
 		local ok, err = pcall(require("bufdelete").bufdelete, 0, true)
 		if not ok then

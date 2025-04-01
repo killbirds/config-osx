@@ -62,10 +62,49 @@ return {
 	-- LSP 진행 상태 표시
 	{
 		"j-hui/fidget.nvim",
+		-- tag = "v1.2.0",
 		event = "LspAttach",
-		config = function()
-			require("config.fidget")
-		end,
+		opts = {
+			progress = {
+				poll_rate = 0,
+				suppress_on_insert = false,
+				ignore_done_already = false,
+				ignore_empty_message = false,
+				display = {
+					render_limit = 16,
+					done_ttl = 3,
+					done_icon = "✓",
+					done_style = "Constant",
+					progress_icon = { "dots" },
+					progress_style = "WarningMsg",
+					group_style = "Title",
+					icon_style = "Question",
+					priority = 30,
+					skip_history = true,
+				},
+			},
+			notification = {
+				poll_rate = 10,
+				filter = vim.log.levels.INFO,
+				override_vim_notify = false,
+				window = {
+					winblend = 0,
+					border = "rounded",
+					zindex = 45,
+					max_width = 0,
+					max_height = 0,
+					x_padding = 1,
+					y_padding = 0,
+					align = "bottom",
+					relative = "editor",
+				},
+			},
+			integration = {
+				["nvim-tree"] = {
+					enable = true,
+				},
+			},
+		},
 	},
 
 	-- 린트 및 포맷팅
@@ -77,8 +116,15 @@ return {
 	},
 	{
 		"stevearc/conform.nvim",
+		-- tag = "v5.5.1", -- 특정 태그 사용 권장
+		event = { "BufWritePre" }, -- 저장 시 포맷팅을 위한 트리거
+		cmd = { "ConformInfo" }, -- lazy 로딩 최적화
+		-- opts 테이블 삭제
+		-- config 함수 복원
 		config = function()
 			require("config.conform")
 		end,
+		-- 기존 0.11 최적화 설정 (필요시 config/conform.lua 내부에서 관리)
+		-- opts = { ... }
 	},
 }

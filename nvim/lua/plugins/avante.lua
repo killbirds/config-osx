@@ -7,9 +7,29 @@ return {
 	lazy = false,
 	version = false, -- Set this to "*" to always pull the latest release version, or set it to false to update to the latest code changes.
 	opts = function()
+		-- API 키 관리 개선 - 보안 강화
+		local function get_api_key(env_var, config_path)
+			-- 1. 환경 변수에서 먼저 확인
+			local key = vim.env[env_var]
+			if key and key ~= "" then
+				return key
+			end
+
+			-- 2. 설정 파일에서 확인 (더 안전한 방식)
+			local config_file = vim.fn.expand(config_path)
+			if vim.fn.filereadable(config_file) == 1 then
+				local content = vim.fn.readfile(config_file)
+				if content and #content > 0 then
+					return content[1]:gsub("%s+", "")
+				end
+			end
+
+			return nil
+		end
+
 		local api_keys = {
-			openai = vim.env.OPENAI_API_KEY, -- 환경 변수에서 API 키 가져오기
-			anthropic = vim.env.ANTHROPIC_API_KEY,
+			openai = get_api_key("OPENAI_API_KEY", "~/.config/nvim/openai_key"),
+			anthropic = get_api_key("ANTHROPIC_API_KEY", "~/.config/nvim/anthropic_key"),
 		}
 
 		local provider = vim.env.NVIM_AVANTE_PROVIDER or "openai"
@@ -78,6 +98,8 @@ return {
 				markdown_rendering = true, -- 마크다운 렌더링
 				code_actions = true, -- 코드 액션 활성화
 				image_support = true, -- 이미지 지원 활성화
+				backdrop = true, -- Neovim 0.11 backdrop 사용 활성화
+				floating_window_centering = true, -- 0.11 부동 창 중앙 정렬 개선
 			},
 
 			-- 키매핑 설정
@@ -89,7 +111,7 @@ return {
 				toggle_diff = "<leader>ad", -- 차이점 토글
 			},
 
-			-- UI 설정
+			-- UI 설정 (0.11 최적화)
 			ui = {
 				border = "rounded", -- 둥근 테두리
 				width = 0.8, -- 너비 비율
@@ -100,6 +122,16 @@ return {
 					spinner = "dots", -- 로딩 스피너 스타일
 				},
 				theme = "auto", -- 자동 테마
+				backdrop = 80, -- 0.11 backdrop 투명도 (0-100)
+				statuscolumn = true, -- 0.11 statuscolumn 지원 활성화
+			},
+
+			-- Neovim 0.11 특정 최적화
+			nvim_0_11 = {
+				enabled = vim.fn.has("nvim-0.11") == 1,
+				floating_centering = true, -- 0.11의 개선된 부동 창 중앙 정렬 활용
+				backdrop_blur = true, -- 0.11에서 지원되는 배경 블러 효과
+				statuscolumn_integration = true, -- statuscolumn과 통합
 			},
 		}
 	end,
@@ -188,6 +220,47 @@ return {
 					table.insert(models, model.name)
 				end
 				return table.concat(models, "\n")
+			end,
+		})
+
+		-- API 키 설정 명령어 추가 (0.11 UI 개선 활용)
+		vim.api.nvim_create_user_command("AvanteSetApiKey", function(args)
+			if not args.args or args.args == "" then
+				vim.notify("사용법: AvanteSetApiKey [openai|anthropic]", vim.log.levels.ERROR)
+				return
+			end
+
+			local provider = args.args
+			if provider ~= "openai" and provider ~= "anthropic" then
+				vim.notify("지원되는 제공자: openai, anthropic", vim.log.levels.ERROR)
+				return
+			end
+
+			-- 0.11 개선된 입력 UI 사용
+			vim.ui.input({
+				prompt = provider .. " API 키를 입력하세요: ",
+				default = "",
+				completion = "",
+				hide_text = true, -- 0.11 비밀번호 숨김 기능
+			}, function(key)
+				if not key or key == "" then
+					return
+				end
+
+				-- 키를 파일에 저장
+				local config_file = vim.fn.expand("~/.config/nvim/" .. provider .. "_key")
+				vim.fn.writefile({ key }, config_file)
+				vim.fn.system("chmod 600 " .. config_file) -- 권한 설정
+				vim.notify(provider .. " API 키가 성공적으로 설정되었습니다.", vim.log.levels.INFO)
+
+				-- Avante 다시 로드
+				require("avante").reload()
+			end)
+		end, {
+			nargs = 1,
+			desc = "Set API Key for Avante",
+			complete = function()
+				return "openai\nanthropic"
 			end,
 		})
 
