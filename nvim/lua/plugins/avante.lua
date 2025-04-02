@@ -67,7 +67,6 @@ return {
 			},
 
 			copilot = {
-				model = "github-copilot",
 				temperature = 0,
 				max_tokens = 8192,
 				enabled = true,
