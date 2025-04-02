@@ -58,18 +58,6 @@ vim.opt.splitkeep = "screen" -- 화면 분할 시 커서 위치 유지 (0.9 이�
 -- 유용한 자동 명령
 local augroup = vim.api.nvim_create_augroup("UserAutoCommands", { clear = true })
 
--- 마지막으로 편집한 위치로 이동
-vim.api.nvim_create_autocmd("BufReadPost", {
-	group = augroup,
-	pattern = "*",
-	callback = function()
-		local line = vim.fn.line("'\"")
-		if line > 1 and line <= vim.fn.line("$") then
-			vim.cmd("normal! g'\"")
-		end
-	end,
-})
-
 -- 파일 저장 시 트레일링 공백 제거
 vim.api.nvim_create_autocmd("BufWritePre", {
 	group = augroup,
