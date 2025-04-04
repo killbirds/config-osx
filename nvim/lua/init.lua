@@ -58,17 +58,6 @@ vim.opt.splitkeep = "screen" -- 화면 분할 시 커서 위치 유지 (0.9 이�
 -- 유용한 자동 명령
 local augroup = vim.api.nvim_create_augroup("UserAutoCommands", { clear = true })
 
--- 파일 저장 시 트레일링 공백 제거
-vim.api.nvim_create_autocmd("BufWritePre", {
-	group = augroup,
-	pattern = "*",
-	callback = function()
-		local save_cursor = vim.fn.getpos(".")
-		vim.cmd([[%s/\s\+$//e]])
-		vim.fn.setpos(".", save_cursor)
-	end,
-})
-
 -- 0.11 이상에서 사용 가능한 vim.defer_fn으로 변경
 vim.api.nvim_create_autocmd("TextYankPost", {
 	group = augroup,

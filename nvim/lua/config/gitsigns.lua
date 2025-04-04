@@ -37,7 +37,7 @@ require("gitsigns").setup({
 		follow_files = true, -- 파일 이름 변경 감지
 	},
 	attach_to_untracked = true, -- 추적되지 않는 파일에도 연결 (개선)
-	current_line_blame = true, -- 현재 줄 blame 활성화 (개선)
+	current_line_blame = false, -- 현재 줄 blame 비활성화
 	current_line_blame_opts = {
 		virt_text = true,
 		virt_text_pos = "eol", -- 줄 끝에 표시
