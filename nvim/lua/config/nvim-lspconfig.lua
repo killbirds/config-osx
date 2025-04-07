@@ -141,6 +141,18 @@ local servers = {
 					unstable_features = true,
 					edition = "2024", -- Rust Edition 2024 지정
 				},
+				-- 파일 시스템 스캔 제외 설정 추가
+				files = {
+					excludeDirs = {
+						"data/.cache",
+						".cache",
+						"target",
+						"node_modules",
+						"dist",
+						".git",
+					},
+					watcher = "client", -- 파일 시스템 감시를 클라이언트(Neovim)에 위임
+				},
 				inlayHints = {
 					maxLength = 25, -- 힌트 최대 길이
 					closingBraceHints = true, -- 닫는 중괄호에 힌트 표시 여부
