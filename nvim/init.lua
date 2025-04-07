@@ -2,6 +2,9 @@
 require("init")
 require("keys")
 
+-- 캐시 관리자 로드 (성능 최적화)
+require("cache_manager").setup()
+
 -- plugin manager
 require("plugin")
 

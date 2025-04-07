@@ -51,7 +51,23 @@ local default_opts = {
 		debounce_text_changes = 150, -- 텍스트 변경 후 지연 시간 (ms)
 	},
 	on_attach = setup_lsp,
-	-- LSP 타임아웃 및 성능 관련 설정 추가 (0.13에서 핸들러 API 변경으로 제거)
+	-- LSP 타임아웃 및 성능 관련 설정 추가
+	settings = {
+		-- 모든 LSP 서버에 적용될 기본 설정
+		workspace = {
+			-- 무시할 디렉토리 및 파일 패턴
+			ignoredFolders = {
+				"${workspaceFolder}/.cache",
+				"${workspaceFolder}/node_modules",
+				"${workspaceFolder}/.git",
+				"${workspaceFolder}/target",
+				"${workspaceFolder}/dist",
+				"${workspaceFolder}/.svelte-kit",
+				"${workspaceFolder}/.next",
+			},
+			maxFileSizeInMegabytes = 5, -- 5MB 이상 파일 LSP 분석 제외
+		},
+	},
 }
 
 -- 전역 진단 키맵 설정
@@ -150,6 +166,13 @@ local servers = {
 						"node_modules",
 						"dist",
 						".git",
+						".svelte-kit",
+						".next",
+						"build",
+						"out",
+						"coverage",
+						".yarn",
+						".pnpm",
 					},
 					watcher = "client", -- 파일 시스템 감시를 클라이언트(Neovim)에 위임
 				},
