@@ -287,7 +287,7 @@ vim.diagnostic.config({
 vim.lsp.set_log_level("off") -- 일반적으로는 'off'로 설정, 문제 해결 시 'info' 또는 'debug'로 변경
 
 -- LSP 요청 타임아웃 설정
-vim.lsp.buf.request_timeout = 3000 -- 모든 LSP 요청 타임아웃을 3초로 설정
+vim.lsp.buf.request_timeout = 5000 -- 모든 LSP 요청 타임아웃을 5초로 설정 (3초에서 5초로 증가)
 
 -- 서버와 파일 유형 간의 매핑
 local server_filetype_map = {
@@ -324,31 +324,30 @@ local function setup_lazy_loading()
 				if not is_server_active and servers[server] then
 					local merged_config = vim.tbl_deep_extend("force", default_opts, servers[server] or {})
 
-					-- 서버 시작 시도
-					local ok, err = pcall(function()
-						lspconfig[server].setup(merged_config)
-						-- 현재 버퍼에 즉시 연결 시도
-						vim.cmd("LspStart " .. server)
-					end)
-
-					-- 설정 오류 처리
-					if not ok then
-						vim.notify(
-							string.format("LSP 서버 '%s' 설정 오류: %s", server, err),
-							vim.log.levels.ERROR,
-							{ title = "LSP 설정 오류" }
-						)
-						-- else
-						-- 	vim.notify(
-						-- 		string.format(
-						-- 			"LSP 서버 '%s' 파일 유형 '%s'에 대해 로딩됨",
-						-- 			server,
-						-- 			vim.bo.filetype
-						-- 		),
-						-- 		vim.log.levels.INFO,
-						-- 		{ title = "LSP 지연 로딩" }
-						-- 	)
+					-- 초기화 알림 제거
+					merged_config.on_init = function(client, _)
+						-- 불필요한 알림 제거
+						return true
 					end
+
+					-- 비동기로 서버 시작 (지연시간 추가)
+					vim.defer_fn(function()
+						-- 서버 시작 시도
+						local ok, err = pcall(function()
+							lspconfig[server].setup(merged_config)
+							-- 현재 버퍼에 즉시 연결 시도
+							vim.cmd("LspStart " .. server)
+						end)
+
+						-- 설정 오류 처리 (중요 오류만 표시)
+						if not ok then
+							vim.notify(
+								string.format("LSP 서버 '%s' 설정 오류: %s", server, err),
+								vim.log.levels.ERROR,
+								{ title = "LSP 설정 오류" }
+							)
+						end
+					end, 100 * vim.loop.hrtime() % 700) -- 서버마다 시작 시간 분산 (0-700ms)
 				end
 			end,
 			desc = string.format("지연 로딩: %s LSP 서버", server),

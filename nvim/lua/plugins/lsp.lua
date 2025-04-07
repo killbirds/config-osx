@@ -67,25 +67,25 @@ return {
 		opts = {
 			progress = {
 				poll_rate = 0,
-				suppress_on_insert = false,
-				ignore_done_already = false,
-				ignore_empty_message = false,
+				suppress_on_insert = true,
+				ignore_done_already = true,
+				ignore_empty_message = true,
 				display = {
-					render_limit = 16,
-					done_ttl = 3,
+					render_limit = 5,
+					done_ttl = 2,
 					done_icon = "✓",
 					done_style = "Constant",
-					progress_icon = { "dots" },
+					progress_icon = { "dots_bounce", rate = 0.5 },
 					progress_style = "WarningMsg",
 					group_style = "Title",
 					icon_style = "Question",
-					priority = 30,
+					priority = 40,
 					skip_history = true,
 				},
 			},
 			notification = {
 				poll_rate = 10,
-				filter = vim.log.levels.INFO,
+				filter = vim.log.levels.WARN,
 				override_vim_notify = false,
 				window = {
 					winblend = 0,
@@ -103,6 +103,11 @@ return {
 				["nvim-tree"] = {
 					enable = true,
 				},
+			},
+			logger = {
+				level = vim.log.levels.WARN,
+				float_precision = 0.01,
+				path = string.format("%s/fidget.nvim.log", vim.fn.stdpath("cache")),
 			},
 		},
 	},
