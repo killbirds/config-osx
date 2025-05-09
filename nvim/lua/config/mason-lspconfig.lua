@@ -18,6 +18,7 @@ require("mason-lspconfig").setup({
 		-- "gopls", -- Go
 	},
 	automatic_installation = false, -- 자동 설치는 비활성화하고 필요할 때만 수동으로 설치
+	automatic_enable = false,
 	max_concurrent_installers = 2, -- 동시에 설치할 수 있는 서버 수 제한
 	handlers = {
 		-- LSP 서버 지연 로딩을 위한 핸들러
