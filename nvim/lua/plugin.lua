@@ -51,6 +51,9 @@ require("lazy").setup({
 				"netrwPlugin",
 				"tarPlugin",
 				"tutor", -- 0.11에서 권장하는 추가 비활성화 플러그인
+				"matchparen",
+				"health",
+				"man",
 			}, -- 사용하지 않는 기본 플러그인 비활성화
 		},
 	},
@@ -65,17 +68,17 @@ require("lazy").setup({
 if vim.fn.has("nvim-0.11") == 1 then
 	-- Treesitter 비동기 하이라이팅 활성화 (기본값이지만 명시적으로 설정)
 	vim.g._ts_force_sync_parsing = false
-	
+
 	-- 터미널 개선 기능 활용
 	-- OSC 52 클립보드 지원 활성화 (기본값)
 	vim.g.termfeatures = { osc52 = true }
-	
+
 	-- 진단 설정 개선
 	vim.diagnostic.config({
 		virtual_text = true, -- 0.11에서 기본 비활성화됨, 필요시 활성화
 		severity_sort = true, -- 심각도별 정렬
 	})
-	
+
 	-- LSP 기본 키매핑은 Neovim 0.11에서 자동 설정됨
 	-- (grn, grr, gri, gO, gra, CTRL-S 등)
 end

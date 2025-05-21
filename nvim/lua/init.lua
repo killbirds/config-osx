@@ -21,10 +21,10 @@ vim.opt.signcolumn = "yes" -- 항상 사인 컬럼 표시 (LSP, Git 등)
 vim.opt.scrolloff = 5 -- 커서 위아래 최소 줄 수
 vim.opt.sidescrolloff = 5 -- 커서 좌우 최소 컬럼 수
 vim.opt.wrap = false -- 긴 줄 자동 줄바꿈 비활성화
-vim.opt.colorcolumn = "120" -- 80자 컬럼 표시
+vim.opt.colorcolumn = "120" -- 120자 컬럼 표시
 
 -- 프로젝트별 설정 지원 (exrc)
-vim.opt.exrc = true -- 프로젝트 디렉토리의 .nvim.lua, .nvimrc, .exrc 파일을 로드
+vim.opt.exrc = false -- 프로젝트 디렉토리의 .nvim.lua, .nvimrc, .exrc 파일을 로드
 vim.opt.secure = true -- 보안을 위해 일부 명령어 제한 (exrc와 함께 사용 권장)
 
 -- 리더 키 설정 (lazy.nvim과 공유)
@@ -60,13 +60,7 @@ end
 -- vim.opt.lazyredraw 옵션은 0.9.0에서 제거됨, 대신 새로운 방식 사용
 vim.opt.redrawtime = 1500 -- 구문 강조 처리 시간 제한 (ms)
 vim.opt.synmaxcol = 200 -- 긴 줄에서 구문 강조 제한 (성능 향상)
-vim.opt.updatetime = 100 -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리거 시간 (ms)
-
--- 파일 스캐닝 최적화
--- 많은 수의 파일이 있는 디렉토리에서의 성능 개선
-vim.opt.fsync = false -- fsync() 호출 비활성화 (파일 쓰기 성능 향상, 단 크래시 시 데이터 손실 가능성 있음)
-vim.opt.hidden = true -- 버퍼 숨김 활성화
-vim.opt.shadafile = "NONE" -- shada 파일 사용 안 함 (시작 시간 향상)
+vim.opt.updatetime = 250 -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리거 시간 (ms)
 
 -- LSP 성능 최적화
 vim.lsp.set_log_level("ERROR") -- LSP 로그 레벨 설정 (ERROR, WARN, INFO, DEBUG, TRACE)
