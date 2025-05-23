@@ -326,6 +326,27 @@ vim.lsp.set_log_level("off") -- 일반적으로는 'off'로 설정, 문제 해�
 -- LSP 요청 타임아웃 설정
 vim.lsp.buf.request_timeout = 5000 -- 모든 LSP 요청 타임아웃을 5초로 설정 (3초에서 5초로 증가)
 
+-- LSP 핸들러 성능 최적화
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+	border = "rounded",
+	max_width = 80,
+	max_height = 20,
+})
+
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+	border = "rounded",
+	max_width = 80,
+	max_height = 15,
+})
+
+-- LSP 진단 성능 최적화
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+	-- 삽입 모드에서 진단 업데이트 비활성화
+	update_in_insert = false,
+	-- 진단 디바운싱
+	debounce_text_changes = 200,
+})
+
 -- 서버와 파일 유형 간의 매핑
 local server_filetype_map = {
 	ts_ls = { "typescript", "javascript", "typescriptreact", "javascriptreact", "typescript.tsx", "javascript.jsx" },

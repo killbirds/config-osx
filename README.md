@@ -118,79 +118,128 @@ brew install google-java-format
 ./install -u
 ```
 
-## Neovim 설정
+## Neovim 설정 (0.11 기반)
 
-### 플러그인 관리
+### 주요 특징
 
-이 설정은 [lazy.nvim](https://github.com/folke/lazy.nvim)을 사용하여 Neovim 플러그인을 관리합니다.
+- **Neovim 0.11 기반**: 모든 최신 기능과 성능 개선을 표준으로 활용
+- **비동기 처리 최적화**: Treesitter, LSP, 진단 등 모든 주요 기능이 비동기로 처리
+- **향상된 LSP 통합**: 0.11의 새로운 LSP 기능과 기본 매핑 활용
+- **지능형 캐시 관리**: 대용량 파일과 프로젝트에 최적화된 메모리 관리
+- **성능 모니터링**: 선택적 성능 추적 및 최적화
 
-#### 플러그인 설치 및 업데이트
+### 0.11 핵심 기능 활용
 
-Neovim을 실행한 후 다음 명령어를 사용하여 플러그인을 관리할 수 있습니다:
+#### LSP 향상
+- 기본 LSP 매핑: `grn` (rename), `grr` (references), `gri` (implementation), `gO` (symbols), `gra` (code action)
+- 내장 자동완성 지원 (`vim.lsp.completion.enable()`)
+- 개선된 hover 문서화 (마크다운 하이라이팅 포함)
+- 새로운 LSP 구성 방식 (`vim.lsp.config()`, `vim.lsp.enable()`)
+
+#### 진단 개선
+- Virtual lines 진단 표시 (기본 활성화)
+- Virtual text는 선택적 활성화 (성능을 위해 기본 비활성화)
+- 개선된 진단 정렬 및 필터링
+
+#### UI/UX 개선
+- 새로운 기본 매핑들: quickfix (`[q`, `]q`), buffer (`[b`, `]b`), 빈 줄 추가 (`[<Space>`, `]<Space>`)
+- fuzzy 완성 지원
+- 개선된 터미널 기능 (reflow, OSC 52 클립보드, 커서 제어)
+- 향상된 윈도우 테두리 처리
+
+#### 성능 최적화
+- Treesitter 비동기 하이라이팅 및 접기
+- 강화된 쿼리 캐싱
+- 개선된 autocommand 처리 (flat vector 저장)
+- 메모리 효율적인 대용량 파일 처리
+
+### 설정 구조
 
 ```
-:Lazy             # 플러그인 관리 UI 열기
-:Lazy sync        # 플러그인 설치/업데이트
-:Lazy update      # 플러그인 업데이트
-:Lazy clean       # 사용하지 않는 플러그인 제거
-:Lazy restore     # 이전 플러그인 상태로 복원
-:Lazy profile     # 플러그인 로딩 성능 분석
+nvim/
+├── init.lua                 # 0.11 최적화된 메인 설정
+├── lua/
+│   ├── init.lua            # 핵심 설정 (0.11 기능 활용)
+│   ├── keys.lua            # 키매핑 (0.11 기본 매핑과 호환)
+│   ├── plugin.lua          # lazy.nvim 플러그인 관리자
+│   ├── utils.lua           # 유틸리티 함수
+│   ├── cache_manager.lua   # 0.11 최적화된 캐시 관리
+│   ├── config/             # 플러그인별 설정
+│   └── plugins/            # 플러그인 정의
 ```
 
-#### 플러그인 추가 방법
+### 설치 및 사용
 
-새 플러그인을 추가하려면 `nvim/lua/plugins` 디렉토리에 Lua 파일을 생성하거나 수정하세요. 예시:
+1. **Neovim 0.11 이상 설치 확인**
+   ```bash
+   nvim --version  # v0.11.0 이상이어야 함
+   ```
 
-```lua
--- nvim/lua/plugins/example.lua
-return {
-  "username/plugin-name",
-  config = function()
-    -- 플러그인 설정
-  end
-}
+2. **기존 설정 백업 (선택사항)**
+   ```bash
+   mv ~/.config/nvim ~/.config/nvim.backup
+   ```
+
+3. **설정 파일 복사**
+   ```bash
+   cp -r nvim ~/.config/
+   ```
+
+4. **Neovim 실행 및 플러그인 설치**
+   ```bash
+   nvim
+   # lazy.nvim이 자동으로 플러그인을 설치합니다
+   ```
+
+### 환경 변수 옵션
+
+성능 최적화 및 디버깅을 위한 환경 변수:
+
+```bash
+# 성능 모니터링 활성화
+export NVIM_PERF_MONITOR=1
+
+# 캐시 디버그 정보 표시
+export NVIM_CACHE_DEBUG=1
+
+# Treesitter 디버그 정보
+export NVIM_TS_DEBUG=1
+
+# 프로파일링 활성화
+export NVIM_PROFILE=1
 ```
 
-### 주요 Neovim 최신 기능
+### 주요 키매핑
 
-#### 프로젝트별 설정 (exrc)
+#### 0.11 기본 매핑 (자동 제공)
+- `grn`: LSP 이름 변경
+- `grr`: LSP 참조 찾기
+- `gri`: LSP 구현 찾기
+- `gO`: 문서 심볼
+- `gra`: 코드 액션
+- `<C-S>` (삽입 모드): 시그니처 도움말
 
-이 설정은 Neovim의 `exrc` 기능을 활용하여 프로젝트별 설정을 지원합니다. 프로젝트 디렉토리에 `.nvim.lua`, `.nvimrc`, `.exrc` 파일을 생성하면 해당 프로젝트에서 Neovim을 실행할 때 자동으로 로드됩니다.
+#### 추가 최적화 매핑
+- `<Leader>dl`: Virtual lines 진단 토글
+- `<Leader>lc`: LSP 자동완성 토글
+- `<Leader>df`: 진단 플로팅 창 표시
+- `jj`: 삽입 모드 빠져나오기
 
-예시 (`.nvim.lua`):
+### 성능 특징
 
-```lua
--- 프로젝트별 설정
-vim.opt_local.shiftwidth = 4
-vim.opt_local.tabstop = 4
+- **시작 시간**: lazy loading과 비동기 처리로 빠른 시작
+- **메모리 사용량**: 지능형 버퍼 관리로 메모리 효율성
+- **응답성**: 모든 주요 작업이 비동기로 처리되어 UI 차단 최소화
+- **대용량 파일 지원**: 5MB 이상 파일에 대한 특별 최적화
 
--- 프로젝트별 키 매핑
-vim.keymap.set("n", "<leader>pb", ":echo 'Project-specific command'<CR>", { buffer = true })
+### 호환성
 
--- 프로젝트별 자동 명령
-local group = vim.api.nvim_create_augroup("ProjectSettings", { clear = true })
-vim.api.nvim_create_autocmd("BufWritePre", {
-  group = group,
-  pattern = "*.js",
-  callback = function()
-    -- 파일 저장 시 작업
-  end,
-})
-```
+- **최소 버전**: Neovim 0.11.0
+- **권장 버전**: 최신 stable 버전
 
-**참고**: 보안상의 이유로 `secure` 옵션이 활성화되어 있어 일부 명령어는 제한됩니다.
+---
 
-#### Inlay Hints
-
-타입스크립트, 러스트, 루아 등의 언어에서 코드 내에 타입 정보를 인라인으로 표시하는 기능을 지원합니다. 이 기능은 Neovim 0.10.0 이상에서 사용할 수 있습니다.
-
-- `<leader>th`: Inlay Hints 토글
-- 기본적으로 지원되는 언어:
-  - TypeScript/JavaScript: 변수 타입, 함수 매개변수 및 반환 타입 표시
-  - Rust: 변수 타입, 함수 매개변수 및 반환 타입, 라이프타임, 리바운드 힌트 표시
-  - Lua: 배열 인덱스, 변수 타입, 매개변수 이름 및 타입 표시
-
-주의: 이 기능은 해당 LSP 서버가 지원해야만 동작합니다.
+이 설정은 Neovim 0.11의 모든 최신 기능을 표준으로 활용하여 개발 생산성을 극대화하도록 최적화되었습니다.
 
 ## 주요 플러그인 사용법
 
@@ -335,3 +384,17 @@ macism com.apple.keylayout.ABC  # 영문 입력으로 전환
 ## 라이선스
 
 이 프로젝트는 MIT 라이선스 하에 배포됩니다.
+
+## 기타 설정
+
+### SBT 설정
+Scala 빌드 도구 설정
+
+### VSCode 설정
+Visual Studio Code 사용자 설정
+
+### zprezto.patch
+Zsh 프레임워크 패치
+
+### 설치 스크립트
+macOS 개발 환경 자동 설정을 위한 스크립트들

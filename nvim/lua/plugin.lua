@@ -17,7 +17,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- 참고: mapleader와 maplocalleader는 init.lua에서 설정됩니다.
 
--- Setup lazy.nvim
+-- Setup lazy.nvim with 0.11 optimizations
 require("lazy").setup({
 	spec = {
 		-- import your plugins
@@ -27,58 +27,106 @@ require("lazy").setup({
 	-- colorscheme that will be used when installing plugins.
 	install = { colorscheme = { "catppuccin" } },
 	-- automatically check for plugin updates
-	checker = { enabled = true },
+	checker = {
+		enabled = true,
+		frequency = 86400, -- check once a day (0.11 최적화)
+	},
 	-- Neovim 0.11+ ui 개선 사항 적용
 	ui = {
-		border = "rounded", -- 0.10 이상에서 테두리 스타일 지원 개선
-		title = "Lazy Plugin Manager", -- 창 제목 설정
-		backdrop = 80, -- 0.11 이상에서 배경 어둡게 설정 (0-100)
+		border = "rounded", -- 0.11에서 winborder와 일관성 유지
+		title = "Lazy Plugin Manager",
+		backdrop = 80, -- 배경 어둡게 설정 (0-100)
+		-- 0.11에서 개선된 아이콘 지원
 		icons = {
-			-- 0.11에서 아이콘 개선을 위한 설정
 			loaded = "●",
 			not_loaded = "○",
+			cmd = " ",
+			config = "",
+			event = "",
+			ft = " ",
+			init = " ",
+			keys = " ",
+			plugin = " ",
+			runtime = " ",
+			require = "󰢱 ",
+			source = " ",
+			start = "",
+			task = "✔ ",
+			lazy = "󰒲 ",
 		},
 	},
 	performance = {
 		-- 0.11 권장 성능 최적화 설정
+		cache = {
+			enabled = true,
+			path = vim.fn.stdpath("cache") .. "/lazy/cache",
+			-- 캐시 수명 연장 (기본 7일 -> 30일)
+			ttl = 86400 * 30,
+		},
+		reset_packpath = true, -- 패키지 경로 재설정으로 성능 향상
 		rtp = {
-			reset = false, -- 필수 플러그인만 로드하지 않음
+			reset = false,
 			disabled_plugins = {
-				"tohtml",
 				"gzip",
 				"matchit",
-				"zipPlugin",
+				"matchparen", -- 0.11에서 권장하는 비활성화
 				"netrwPlugin",
 				"tarPlugin",
-				"tutor", -- 0.11에서 권장하는 추가 비활성화 플러그인
-				"matchparen",
-				"health",
-				"man",
-			}, -- 사용하지 않는 기본 플러그인 비활성화
+				"tohtml",
+				"tutor",
+				"zipPlugin",
+				-- 0.11 추가 권장 비활성화 플러그인
+				"2html_plugin",
+				"getscript",
+				"getscriptPlugin",
+				"logipat",
+				"rrhelper",
+				"spellfile_plugin",
+				"vimball",
+				"vimballPlugin",
+			},
 		},
 	},
-	-- 0.11 호환성 설정 추가
+	-- 0.11 호환성 및 최적화 설정
 	change_detection = {
-		-- 파일 변경 감지 개선
-		notify = true, -- 변경 감지 시 알림 표시
+		enabled = true,
+		notify = false, -- 성능을 위해 알림 비활성화
+	},
+	-- 0.11 새로운 기능 활용
+	dev = {
+		path = "~/projects", -- 개발 플러그인 경로
+		patterns = {}, -- 개발 모드에서 로드할 패턴
+		fallback = false, -- fallback 비활성화로 성능 향상
 	},
 })
 
--- Neovim 0.11 전용 추가 설정
-if vim.fn.has("nvim-0.11") == 1 then
-	-- Treesitter 비동기 하이라이팅 활성화 (기본값이지만 명시적으로 설정)
-	vim.g._ts_force_sync_parsing = false
+-- Neovim 0.11 추가 최적화 (분기 불필요)
+-- 새로운 LSP 설정 방식 활용
+-- 기본 LSP 구성은 config/nvim-lspconfig.lua에서 처리
 
-	-- 터미널 개선 기능 활용
-	-- OSC 52 클립보드 지원 활성화 (기본값)
-	vim.g.termfeatures = { osc52 = true }
+-- 진단 성능 최적화
+vim.diagnostic.config({
+	-- 0.11에서 개선된 진단 처리
+	signs = {
+		severity = { min = vim.diagnostic.severity.HINT },
+	},
+	float = {
+		border = "rounded", -- winborder와 일관성
+		source = "always",
+		header = "",
+		prefix = "",
+	},
+})
 
-	-- 진단 설정 개선
-	vim.diagnostic.config({
-		virtual_text = true, -- 0.11에서 기본 비활성화됨, 필요시 활성화
-		severity_sort = true, -- 심각도별 정렬
-	})
+-- Treesitter 비동기 처리 확인
+vim.g._ts_force_sync_parsing = false
 
-	-- LSP 기본 키매핑은 Neovim 0.11에서 자동 설정됨
-	-- (grn, grr, gri, gO, gra, CTRL-S 등)
+-- 새로운 snippet 기능 활용 (0.11 기본 매핑)
+-- <Tab>과 <S-Tab>은 기본적으로 매핑됨
+
+-- 성능 모니터링을 위한 설정
+if vim.env.NVIM_PROFILE then
+	vim.cmd("profile start /tmp/nvim-profile.log")
+	vim.cmd("profile file *")
+	vim.cmd("profile func *")
 end

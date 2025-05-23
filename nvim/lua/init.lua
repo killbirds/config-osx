@@ -4,6 +4,7 @@ vim.opt.number = true
 vim.opt.history = 1000
 vim.opt.showcmd = true
 vim.opt.showmode = true
+
 -- 0.11에서 개선된 커서 설정
 vim.opt.guicursor =
 	"n-v-c-sm:block-blinkwait300-blinkon200-blinkoff150,i-ci-ve:ver25-blinkwait300-blinkon200-blinkoff150,r-cr-o:hor20"
@@ -47,6 +48,9 @@ vim.opt.wildignore:append({
 	"**/node_modules/*",
 	"**/target/*",
 	"**/.DS_Store",
+	"**/.vscode/*",
+	"**/dist/*",
+	"**/build/*",
 })
 
 -- 그립(grep) 관련 성능 설정
@@ -56,14 +60,18 @@ if vim.fn.executable("rg") == 1 then
 	vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m"
 end
 
--- 성능 최적화 설정
--- vim.opt.lazyredraw 옵션은 0.9.0에서 제거됨, 대신 새로운 방식 사용
-vim.opt.redrawtime = 1500 -- 구문 강조 처리 시간 제한 (ms)
-vim.opt.synmaxcol = 200 -- 긴 줄에서 구문 강조 제한 (성능 향상)
-vim.opt.updatetime = 250 -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리거 시간 (ms)
+-- 0.11 향상된 성능 최적화 설정
+vim.opt.redrawtime = 2000 -- 구문 강조 처리 시간 제한 증가 (ms)
+vim.opt.synmaxcol = 300 -- 긴 줄에서 구문 강조 제한 증가
+vim.opt.updatetime = 200 -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리거 시간 단축 (ms)
+
+-- 추가 성능 최적화 설정
+vim.opt.maxmempattern = 5000000 -- 패턴 매칭 메모리 제한 증가 (5MB)
+vim.opt.ttimeoutlen = 5 -- 키 코드 대기 시간 단축 (빠른 응답)
+vim.opt.ttyfast = true -- 빠른 터미널 연결 가정
 
 -- LSP 성능 최적화
-vim.lsp.set_log_level("ERROR") -- LSP 로그 레벨 설정 (ERROR, WARN, INFO, DEBUG, TRACE)
+vim.lsp.set_log_level("WARN") -- LSP 로그 레벨을 WARN으로 설정 (ERROR보다 약간 더 많은 정보)
 
 -- 검색 설정 개선
 vim.opt.ignorecase = true -- 검색 시 대소문자 무시
@@ -72,19 +80,42 @@ vim.opt.incsearch = true -- 타이핑하는 동안 검색
 vim.opt.hlsearch = true -- 검색 결과 강조
 
 -- 0.11 개선된 splitkeep 설정
-vim.opt.splitkeep = "screen" -- 화면 분할 시 커서 위치 유지 (0.9 이상)
+vim.opt.splitkeep = "screen" -- 화면 분할 시 커서 위치 유지
 
 -- 유용한 자동 명령
 local augroup = vim.api.nvim_create_augroup("UserAutoCommands", { clear = true })
 
--- 0.11 이상에서 사용 가능한 vim.defer_fn으로 변경
+-- 0.11 최적화된 텍스트 yank 하이라이트
 vim.api.nvim_create_autocmd("TextYankPost", {
 	group = augroup,
 	pattern = "*",
 	callback = function()
-		vim.defer_fn(function()
-			vim.hl.on_yank({ higroup = "IncSearch", timeout = 250 })
-		end, 1)
+		vim.highlight.on_yank({ timeout = 200 })
+	end,
+})
+
+-- 버퍼 메모리 관리 개선 (0.11 최적화)
+vim.api.nvim_create_autocmd("BufHidden", {
+	group = augroup,
+	pattern = "*",
+	callback = function(args)
+		local bufnr = args.buf
+		-- 0.11에서 개선된 버퍼 크기 확인
+		local ok, bufsize = pcall(vim.api.nvim_buf_get_offset, bufnr, vim.api.nvim_buf_line_count(bufnr))
+		if not ok then
+			return
+		end
+
+		local filetype = vim.bo[bufnr].filetype
+
+		-- 20MB 이상 파일이거나 임시 파일타입인 경우
+		if bufsize > 20 * 1024 * 1024 or vim.tbl_contains({ "help", "man", "qf", "quickfix", "nofile" }, filetype) then
+			vim.schedule(function()
+				if vim.api.nvim_buf_is_valid(bufnr) and not vim.bo[bufnr].modified then
+					vim.api.nvim_buf_delete(bufnr, { force = false })
+				end
+			end)
+		end
 	end,
 })
 
@@ -95,6 +126,11 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		vim.opt_local.shiftwidth = 2
 		vim.opt_local.tabstop = 2
+		-- 0.11에서 개선된 Lua omnifunc 활용
+		vim.opt_local.omnifunc = "v:lua.vim.lua_omnifunc"
+		-- 0.11 기본 foldexpr 활용
+		vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+		vim.opt_local.foldmethod = "expr"
 	end,
 })
 
@@ -104,6 +140,38 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		vim.opt_local.shiftwidth = 4
 		vim.opt_local.tabstop = 4
+	end,
+})
+
+-- 대용량 파일 처리 최적화 (0.11 향상)
+vim.api.nvim_create_autocmd("BufReadPre", {
+	group = augroup,
+	pattern = "*",
+	callback = function(args)
+		local bufnr = args.buf
+		local filename = vim.api.nvim_buf_get_name(bufnr)
+		local ok, stats = pcall(vim.uv.fs_stat, filename)
+
+		if ok and stats and stats.size > 5 * 1024 * 1024 then -- 5MB 이상으로 임계값 증가
+			-- 대용량 파일에서 일부 기능 비활성화
+			vim.bo[bufnr].swapfile = false
+			vim.bo[bufnr].undofile = false
+			vim.wo.foldmethod = "manual"
+			vim.wo.list = false
+			-- 0.11에서는 Treesitter 비동기 처리로 성능 개선됨
+			vim.b[bufnr]._large_file = true
+		end
+	end,
+})
+
+-- 터미널 설정 자동화
+vim.api.nvim_create_autocmd("TermOpen", {
+	group = augroup,
+	pattern = "*",
+	callback = function()
+		-- 0.11에서 터미널 기본 설정은 자동으로 적용됨
+		vim.opt_local.relativenumber = false
+		vim.opt_local.number = false
 	end,
 })
 
@@ -146,3 +214,6 @@ map("v", ">", ">gv", opts)
 -- 2. 버퍼 탐색 관련 키 매핑
 -- 3. 선택 영역 이동 관련 키 매핑
 -- 4. 클립보드 관련 추가 매핑
+
+-- 0.11 기본 매핑 활용 알림
+-- grn, grr, gri, gO, gra, CTRL-S 등의 LSP 매핑이 기본으로 제공됨
