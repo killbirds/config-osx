@@ -4,7 +4,7 @@ local open_with_trouble = require("trouble.sources.telescope").open
 
 telescope.setup({
 	defaults = {
-		file_ignore_patterns = { "node_modules", ".git", "yarn.lock", ".cache" },
+		file_ignore_patterns = { "node_modules", ".git", "yarn.lock", "\\.cache" },
 		mappings = {
 			i = {
 				["<esc>"] = actions.close,
