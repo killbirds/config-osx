@@ -43,7 +43,7 @@ vim.diagnostic.config({
 vim.opt.statuscolumn = "%l %s"
 
 -- 새로운 윈도우 테두리 기본값 설정
-vim.o.winborder = "rounded"
+-- vim.o.winborder = "rounded"
 
 -- 새로운 completeopt 옵션 활용
 vim.opt.completeopt:append({ "fuzzy", "preinsert" })
