@@ -12,7 +12,6 @@ return {
 	},
 	{
 		"numToStr/Comment.nvim",
-		keys = { { "gc", mode = { "n", "v" } }, { "gb", mode = { "n", "v" } } },
 		config = function()
 			require("config.comment")
 		end,
@@ -20,7 +19,6 @@ return {
 	{
 		"mg979/vim-visual-multi",
 		branch = "master",
-		keys = { "<C-n>" }, -- 멀티 커서 키만 사용시 로드
 		config = function()
 			require("config.vim-visual-multi").setup()
 		end,
