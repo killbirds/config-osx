@@ -5,11 +5,11 @@ return {
 		lazy = false, -- 기본 설정이므로 즉시 로드
 		priority = 1000,
 	},
-	{
-		"kylechui/nvim-surround",
-		event = "VeryLazy", -- 필요할 때만 로드
-		config = true,
-	},
+	-- {
+	-- 	"kylechui/nvim-surround",
+	-- 	event = "VeryLazy", -- 필요할 때만 로드
+	-- 	config = true,
+	-- },
 	{
 		"numToStr/Comment.nvim",
 		config = function()
