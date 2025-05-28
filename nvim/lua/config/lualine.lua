@@ -46,7 +46,15 @@ require("lualine").setup({
 					unnamed = "[No Name]", -- 이름 없는 버퍼 표시
 				},
 			},
-			{ "diagnostics", sources = { "nvim_lsp" }, sections = { "error", "warn" } }, -- LSP 진단 추가
+			{
+				"diagnostics",
+				sources = { "nvim_lsp" },
+				sections = { "error", "warn", "info", "hint" },
+				symbols = { error = "✘ ", warn = "▲ ", info = "● ", hint = "◆ " },
+				colored = true,
+				update_in_insert = false,
+				always_visible = false,
+			}, -- LSP 진단 (중복 방지를 위해 통합)
 		},
 		lualine_x = {
 			-- 린트 상태 추가 (global 함수에서 가져옴)
@@ -55,7 +63,7 @@ require("lualine").setup({
 					return _G.lint_status and _G.lint_status() or ""
 				end,
 				color = {
-					fg = "#61afef", -- 린트 상태 색상
+					fg = "#e5c07b", -- 린트 상태 색상
 				},
 			},
 			{ "filetype", icon_only = false, colored = true }, -- 파일 타입과 아이콘 함께 표시

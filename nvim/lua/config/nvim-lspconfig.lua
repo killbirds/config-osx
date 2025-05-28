@@ -304,21 +304,7 @@ local function setup_lsp_servers()
 	end
 end
 
--- 진단 설정 (선택적)
-vim.diagnostic.config({
-	virtual_text = { prefix = "●" }, -- 가상 텍스트 표시 스타일
-	signs = true,
-	update_in_insert = false, -- 삽입 모드 업데이트 비활성화 (성능 개선)
-	severity_sort = true, -- 심각도순 정렬
-	float = {
-		focusable = false,
-		style = "minimal",
-		border = "rounded",
-		source = true,
-		header = "",
-		prefix = "",
-	},
-})
+-- 진단 설정은 config/diagnostics.lua에서 중앙 관리됨
 
 -- LSP 성능 문제 추적을 위한 로깅 설정
 vim.lsp.set_log_level("off") -- 일반적으로는 'off'로 설정, 문제 해결 시 'info' 또는 'debug'로 변경

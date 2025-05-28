@@ -119,17 +119,12 @@ vim.keymap.set(
 )
 
 -- 0.11 추가 매핑
--- 진단 관련 매핑 (0.11 기본 매핑과 보완)
-vim.keymap.set("n", "<Leader>df", vim.diagnostic.open_float, { desc = "Show diagnostic float" })
-vim.keymap.set("n", "<Leader>da", vim.diagnostic.setqflist, { desc = "Add diagnostics to quickfix" })
+-- 진단 관련 키맵은 config/diagnostics.lua에서 중앙 관리됨
 
--- virtual_lines 토글 (0.11 새 기능)
-vim.keymap.set("n", "<Leader>dl", function()
-	local current_config = vim.diagnostic.config()
-	vim.diagnostic.config({
-		virtual_lines = not current_config.virtual_lines,
-	})
-end, { desc = "Toggle virtual lines diagnostics" })
+-- 진단 모드 토글 키맵 추가
+vim.keymap.set("n", "<Leader>dm", function()
+	require("config.diagnostics").toggle_mode()
+end, { desc = "Toggle diagnostic mode (default/performance/development)" })
 
 -- 새로운 gO 매핑과 보완되는 매핑
 vim.keymap.set("n", "<Leader>go", vim.lsp.buf.document_symbol, { desc = "Document symbols (complement to gO)" })

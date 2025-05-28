@@ -136,10 +136,17 @@ brew install google-java-format
 - 개선된 hover 문서화 (마크다운 하이라이팅 포함)
 - 새로운 LSP 구성 방식 (`vim.lsp.config()`, `vim.lsp.enable()`)
 
-#### 진단 개선
-- Virtual lines 진단 표시 (기본 활성화)
-- Virtual text는 선택적 활성화 (성능을 위해 기본 비활성화)
+#### 진단 개선 (중앙화된 설정)
+- **중앙화된 진단 설정**: `config/diagnostics.lua`에서 모든 진단 관련 설정을 통합 관리
+- **3가지 진단 모드**: 
+  - `default`: Signs + lualine (중복 방지, 깔끔한 표시)
+  - `performance`: ERROR만 표시 (최소한의 정보)
+  - `development`: 모든 표시 방식 활성화 (상세한 정보)
+- **구분되는 진단 아이콘**: ✘ (오류), ▲ (경고), ● (정보), ◆ (힌트)
+- **중복 방지**: lualine과 virtual text/lines 간 중복 표시 제거
 - 개선된 진단 정렬 및 필터링
+- 대용량 파일 자동 감지 및 진단 최적화
+- 통합된 키맵: `<leader>dt` (virtual text 토글), `<leader>dm` (모드 전환)
 
 #### UI/UX 개선
 - 새로운 기본 매핑들: quickfix (`[q`, `]q`), buffer (`[b`, `]b`), 빈 줄 추가 (`[<Space>`, `]<Space>`)
@@ -165,6 +172,7 @@ nvim/
 │   ├── utils.lua           # 유틸리티 함수
 │   ├── cache_manager.lua   # 0.11 최적화된 캐시 관리
 │   ├── config/             # 플러그인별 설정
+│   ├── diagnostics.lua # 중앙화된 진단 설정
 │   └── plugins/            # 플러그인 정의
 ```
 

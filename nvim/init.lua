@@ -28,16 +28,8 @@ vim.g._ts_force_sync_parsing = false
 -- OSC 52 클립보드 지원 활성화
 vim.g.termfeatures = { osc52 = true }
 
--- 진단 설정 개선 (virtual_text는 0.11에서 기본 비활성화됨)
-vim.diagnostic.config({
-	virtual_text = false, -- 기본값으로 두거나 필요시 활성화
-	virtual_lines = true, -- 새로운 virtual_lines 기능 활성화
-	severity_sor = true, -- 심각도별 정렬
-	jump = { -- 진단 점프 기본값 설정
-		float = true,
-		severity_limit = vim.diagnostic.severity.WARN,
-	},
-})
+-- 중앙화된 진단 설정 로드
+require("config.diagnostics").setup()
 
 -- statuscolumn 개선 - 0.11에서 개선된 기능 활용
 vim.opt.statuscolumn = "%l %s"

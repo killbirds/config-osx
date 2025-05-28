@@ -92,17 +92,7 @@ function M.setup_memory_optimizations()
 	-- LSP 메모리 최적화
 	vim.lsp.set_log_level("WARN") -- 로그 레벨 최적화
 
-	-- 진단 메모리 최적화
-	vim.diagnostic.config({
-		signs = {
-			text = {
-				[vim.diagnostic.severity.ERROR] = "●",
-				[vim.diagnostic.severity.WARN] = "●",
-				[vim.diagnostic.severity.INFO] = "●",
-				[vim.diagnostic.severity.HINT] = "●",
-			},
-		},
-	})
+	-- 진단 설정은 config/diagnostics.lua에서 중앙 관리됨
 end
 
 -- 0.11 버퍼 캐시 최적화

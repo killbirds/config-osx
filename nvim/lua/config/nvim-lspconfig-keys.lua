@@ -58,13 +58,7 @@ end
 
 -- 추가 유틸리티 함수 (선택적)
 M.setup = function()
-	-- 전역 진단 설정 (필요 시)
-	vim.diagnostic.config({
-		virtual_text = true, -- 가상 텍스트로 진단 표시
-		signs = true, -- 사이드 컬럼에 기호 표시
-		update_in_insert = false, -- 삽입 모드에서 업데이트 비활성화 (성능 최적화)
-		severity_sort = true, -- 심각도順 정렬
-	})
+	-- 진단 설정은 config/diagnostics.lua에서 중앙 관리됨
 end
 
 return M

@@ -104,19 +104,7 @@ require("lazy").setup({
 -- 새로운 LSP 설정 방식 활용
 -- 기본 LSP 구성은 config/nvim-lspconfig.lua에서 처리
 
--- 진단 성능 최적화
-vim.diagnostic.config({
-	-- 0.11에서 개선된 진단 처리
-	signs = {
-		severity = { min = vim.diagnostic.severity.HINT },
-	},
-	float = {
-		border = "rounded", -- winborder와 일관성
-		source = "always",
-		header = "",
-		prefix = "",
-	},
-})
+-- 진단 설정은 config/diagnostics.lua에서 중앙 관리됨
 
 -- Treesitter 비동기 처리 확인
 vim.g._ts_force_sync_parsing = false
