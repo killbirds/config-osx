@@ -39,37 +39,45 @@ return {
 			provider = provider, -- 기본 AI 제공자
 
 			-- 다양한 AI 모델 설정
-			openai = {
-				endpoint = "https://api.openai.com/v1",
-				model = "o1-mini", -- 기본 모델
-				models = { -- 선택 가능한 모델 목록
-					{ name = "o1", label = "GPT-o1 (최고 성능)" },
-					{ name = "o1-mini", label = "GPT-o1-mini (표준)" },
+			providers = {
+				openai = {
+					endpoint = "https://api.openai.com/v1",
+					model = "o1-mini", -- 기본 모델
+					models = { -- 선택 가능한 모델 목록
+						{ name = "o1", label = "GPT-o1 (최고 성능)" },
+						{ name = "o1-mini", label = "GPT-o1-mini (표준)" },
+					},
+					timeout = 60000, -- 타임아웃 시간 증가 (60초)
+					extra_request_body = {
+						temperature = 0, -- 정확한 응답을 위한 낮은 온도
+						max_tokens = 8192, -- 토큰 한도 증가
+					},
+					retry_count = 3, -- 실패 시 재시도 횟수
+					api_key = api_keys.openai,
 				},
-				timeout = 60000, -- 타임아웃 시간 증가 (60초)
-				temperature = 0, -- 정확한 응답을 위한 낮은 온도
-				max_tokens = 8192, -- 토큰 한도 증가
-				retry_count = 3, -- 실패 시 재시도 횟수
-				api_key = api_keys.openai,
-			},
 
-			claude = {
-				endpoint = "https://api.anthropic.com",
-				model = "claude-3-7-sonnet-20250219",
-				models = {
-					{ name = "claude-3-7-sonnet-20250219", label = "Claude 3.7 Sonnet" },
-					{ name = "claude-3-5-sonnet-20241022", label = "Claude 3.5 Sonnet" },
-					{ name = "claude-3-opus-20240229", label = "Claude 3 Opus" },
+				claude = {
+					endpoint = "https://api.anthropic.com",
+					model = "claude-3-7-sonnet-20250219",
+					models = {
+						{ name = "claude-3-7-sonnet-20250219", label = "Claude 3.7 Sonnet" },
+						{ name = "claude-3-5-sonnet-20241022", label = "Claude 3.5 Sonnet" },
+						{ name = "claude-3-opus-20240229", label = "Claude 3 Opus" },
+					},
+					extra_request_body = {
+						temperature = 0,
+						max_tokens = 8192,
+					},
+					api_key = api_keys.anthropic,
 				},
-				temperature = 0,
-				max_tokens = 8192,
-				api_key = api_keys.anthropic,
-			},
 
-			copilot = {
-				temperature = 0,
-				max_tokens = 8192,
-				enabled = true,
+				copilot = {
+					extra_request_body = {
+						temperature = 0,
+						max_tokens = 8192,
+					},
+					enabled = true,
+				},
 			},
 
 			file_selector = {
