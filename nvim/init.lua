@@ -20,7 +20,7 @@ vim.o.mousemoveevent = true -- 마우스 이벤트 기능 활성화 (부동 창 
 
 -- 터미널 개선 기능
 vim.g.term_conceal = true -- 터미널 줄 숨김 기능 활성화
-vim.g.term_reflow = true -- 터미널 리플로우 활성화
+vim.g.term_reflow = true  -- 터미널 리플로우 활성화
 
 -- Treesitter 비동기 파싱 활성화
 vim.g._ts_force_sync_parsing = false

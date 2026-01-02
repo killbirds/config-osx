@@ -1,4 +1,4 @@
 return {
-	-- Miscellaneous
-	"tpope/vim-repeat",
+  -- Miscellaneous
+  "tpope/vim-repeat",
 }

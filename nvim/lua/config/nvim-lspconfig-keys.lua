@@ -51,15 +51,8 @@ M.on_attach = function(client, bufnr)
   set_keymap(bufnr, "n", "<leader>rn", vim.lsp.buf.rename, "Rename Symbol")
   set_keymap(bufnr, "n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
 
-  -- 진단 관련 키맵 (추가)
-  set_keymap(bufnr, "n", "<leader>e", vim.diagnostic.open_float, "Show Line Diagnostics")
-  set_keymap(bufnr, "n", "[d", function()
-    vim.diagnostic.jump({ count = -1, float = true })
-  end, "Go to Previous Diagnostic")
-  set_keymap(bufnr, "n", "]d", function()
-    vim.diagnostic.jump({ count = 1, float = true })
-  end, "Go to Next Diagnostic")
-  set_keymap(bufnr, "n", "<leader>q", vim.diagnostic.setqflist, "Set Quickfix List with Diagnostics")
+  -- 진단 관련 키맵은 config/diagnostics.lua에서 중앙 관리됨
+  -- 중복 방지를 위해 여기서는 제거
 
   -- 서버별 조건부 설정 (예시)
   if client:supports_method("textDocument/formatting") then

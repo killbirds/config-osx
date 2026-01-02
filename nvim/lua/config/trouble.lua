@@ -2,15 +2,15 @@ local trouble = require("trouble")
 
 -- trouble.nvim 기본 설정
 trouble.setup({
-	position = "bottom",
-	height = 10,
-	fold_open = "",
-	fold_closed = "",
-	indent_lines = true,
-	auto_preview = true,
-	auto_fold = false,
-	auto_jump = { "lsp_definitions" },
-	use_diagnostic_signs = false,
+  position = "bottom",
+  height = 10,
+  fold_open = "",
+  fold_closed = "",
+  indent_lines = true,
+  auto_preview = true,
+  auto_fold = false,
+  auto_jump = { "lsp_definitions" },
+  use_diagnostic_signs = false,
 })
 
 -- Telescope 통합을 위한 설정은 config/telescope.lua에 있습니다
