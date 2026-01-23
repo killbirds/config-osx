@@ -108,6 +108,7 @@ lint.linters_by_ft = {
   typescriptreact = { "eslint" }, -- TSX 지원 추가
   python = { "flake8" },         -- Python 린팅
   lua = { "luacheck" },          -- Lua 린팅
+  rust = { "clippy" },           -- Rust 린팅 (cargo clippy)
   scala = { "scalafix" },        -- Scala 린팅 (scalafix)
 }
 

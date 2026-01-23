@@ -236,21 +236,9 @@ local function setup_lsp_servers()
     local merged_config = vim.tbl_deep_extend("force", default_opts, config)
 
     -- 에러 핸들러 추가 (기존 on_init가 있으면 유지)
-    if not merged_config.on_init then
-      merged_config.on_init = function(client, _)
-        vim.notify(string.format("LSP 서버 '%s' 초기화 중...", client.name), vim.log.levels.INFO, {
-          title = "LSP 초기화",
-          timeout = 1000,
-        })
-      end
-    else
-      -- 기존 on_init를 래핑하여 알림 추가
+    if merged_config.on_init then
       local original_on_init = merged_config.on_init
       merged_config.on_init = function(client, init_result)
-        vim.notify(string.format("LSP 서버 '%s' 초기화 중...", client.name), vim.log.levels.INFO, {
-          title = "LSP 초기화",
-          timeout = 1000,
-        })
         return original_on_init(client, init_result)
       end
     end
