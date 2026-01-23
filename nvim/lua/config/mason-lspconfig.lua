@@ -12,7 +12,7 @@ require("mason-lspconfig").setup({
     -- "html", -- HTML
     -- "jsonls", -- JSON
     -- "yamlls", -- YAML
-    -- "marksman", -- Markdown
+    "marksman", -- Markdown
     -- "bashls", -- Bash
     -- "clangd", -- C/C++
     -- "gopls", -- Go
