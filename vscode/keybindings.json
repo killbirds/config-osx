@@ -11,6 +11,27 @@
     "key": "o",
     "command": "list.toggleExpand",
     "when": "explorerViewletVisible && filesExplorerFocus && explorerResourceIsFolder && !inputFocus"
+  },
+
+  // 터미널/사이드바에서도 Ctrl+h/j/k/l로 창 이동
+  {
+    "key": "ctrl+h",
+    "command": "workbench.action.focusLeftGroup",
+    "when": "terminalFocus || sideBarFocus"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "workbench.action.focusRightGroup",
+    "when": "terminalFocus || sideBarFocus"
+  },
+  {
+    "key": "ctrl+j",
+    "command": "workbench.action.focusBelowGroup",
+    "when": "terminalFocus || sideBarFocus"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "workbench.action.focusAboveGroup",
+    "when": "terminalFocus || sideBarFocus"
   }
 ]
-

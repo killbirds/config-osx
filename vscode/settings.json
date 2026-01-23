@@ -16,6 +16,8 @@
   "vim.history": 1000,
   "vim.smartcase": true,
   "vim.ignorecase": true,
+  "vim.timeout": true,
+  "vim.timeoutlen": 300,
 
   // Vim 모드 표시 설정
   "vim.statusBarColorControl": true,
@@ -39,6 +41,18 @@
 
   // 에디터 설정
   "editor.lineNumbers": "on",
+  "editor.wordWrap": "off",
+  "editor.rulers": [120],
+  "editor.cursorSurroundingLines": 5,
+  "editor.cursorSurroundingLinesStyle": "all",
+  "editor.renderLineHighlight": "all",
+  "editor.scrollBeyondLastLine": false,
+  "editor.minimap.enabled": false,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.smoothScrolling": false,
+  "files.autoSave": "onFocusChange",
 
   // 탐색기 포커스 관련 설정
   "workbench.editor.enablePreview": false,
@@ -77,18 +91,28 @@
 
   // 일반 모드 키 바인딩
   "vim.normalModeKeyBindingsNonRecursive": [
+    // ESC로 검색 하이라이트 제거
+    {
+      "before": ["<Esc>"],
+      "commands": [":nohlsearch"]
+    },
+
     // 파일 저장 및 종료
     {
       "before": ["<leader>", "w"],
       "commands": [":write"]
     },
     {
-      "before": ["<leader>", "q"],
+      "before": ["<leader>", "Q"],
+      "commands": [":qa!"]
+    },
+    {
+      "before": ["<leader>", "qq"],
       "commands": [":quit"]
     },
     {
-      "before": ["<leader>", "Q"],
-      "commands": [":qa!"]
+      "before": ["<leader>", "x"],
+      "commands": [":wq"]
     },
     {
       "before": ["<leader>", "wq"],
@@ -162,11 +186,19 @@
       "before": ["<leader>", "f"],
       "commands": ["editor.action.formatDocument"]
     },
+    {
+      "before": ["<leader>", "go"],
+      "commands": ["workbench.action.gotoSymbol"]
+    },
 
     // 진단 관련 키 바인딩
     {
       "before": ["<leader>", "e"],
       "commands": ["editor.action.showHover"]
+    },
+    {
+      "before": ["<leader>", "q"],
+      "commands": ["workbench.action.problems.view"]
     },
     {
       "before": ["[", "d"],
@@ -235,6 +267,16 @@
       "commands": ["workbench.action.focusAboveGroup"]
     },
 
+    // 줄 이동 (일반 모드)
+    {
+      "before": ["<A-j>"],
+      "commands": ["editor.action.moveLinesDownAction"]
+    },
+    {
+      "before": ["<A-k>"],
+      "commands": ["editor.action.moveLinesUpAction"]
+    },
+
     // 멀티 커서 관련 설정
     {
       "before": ["<C-n>"],
@@ -280,12 +322,30 @@
       "commands": ["workbench.action.toggleSidebarVisibility"]
     },
     {
+      "before": ["<leader>", "tt"],
+      "commands": ["workbench.action.terminal.new"]
+    },
+    {
+      "before": ["<leader>", "tv"],
+      "commands": ["workbench.action.terminal.split"]
+    },
+    {
       "before": ["<leader>", "fe"],
       "commands": ["workbench.view.explorer"]
     },
     {
       "before": ["<leader>", "/"],
       "commands": ["workbench.action.findInFiles"]
+    },
+
+    // 탭/버퍼 이동
+    {
+      "before": ["<Tab>"],
+      "commands": ["workbench.action.nextEditor"]
+    },
+    {
+      "before": ["<S-Tab>"],
+      "commands": ["workbench.action.previousEditor"]
     }
   ],
 
@@ -295,6 +355,15 @@
     {
       "before": ["j", "j"],
       "after": ["<Esc>"]
+    },
+    // 줄 이동 (삽입 모드)
+    {
+      "before": ["<A-j>"],
+      "commands": ["editor.action.moveLinesDownAction"]
+    },
+    {
+      "before": ["<A-k>"],
+      "commands": ["editor.action.moveLinesUpAction"]
     }
   ],
 
@@ -355,4 +424,3 @@
     }
   ]
 }
-
