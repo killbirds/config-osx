@@ -90,6 +90,9 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 require("nvim-tree").setup({
   sort_by = "name",
   update_cwd = false,
+  filesystem_watchers = {
+    enable = false,
+  },
   view = {
     adaptive_size = true,
     width = 30,

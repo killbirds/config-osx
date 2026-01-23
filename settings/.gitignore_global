@@ -10,3 +10,6 @@ config.codekit
 npm-debug.log
 .*.swp
 config.codekit3
+
+# Codex agent instructions
+AGENTS.md
