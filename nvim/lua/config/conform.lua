@@ -42,7 +42,7 @@ require("conform").setup({
     },
     ruff_format = {
       command = "ruff",
-      args = { "format", "--quiet", "-" },
+      args = { "format", "--quiet", "--stdin-filename", "$FILENAME", "-" },
       stdin = true,
     },
     rustfmt = {

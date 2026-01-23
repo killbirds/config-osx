@@ -4,10 +4,6 @@ local lint = require("lint")
 local config = {
   -- 지원하는 파일 타입
   filetypes = {
-    "javascript",
-    "typescript",
-    "javascriptreact",
-    "typescriptreact",
     "python",
     "lua",
     "rust",
@@ -15,7 +11,7 @@ local config = {
   },
 
   -- 지원하는 파일 패턴
-  patterns = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.py", "*.lua", "*.rs", "*.scala" },
+  patterns = { "*.py", "*.lua", "*.rs", "*.scala" },
 
   -- 디바운스 설정 (ms)
   debounce = {
