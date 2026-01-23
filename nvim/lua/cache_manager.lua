@@ -160,9 +160,11 @@ function M.setup_buffer_cache()
       if file_size > size_1mb then
         vim.b[bufnr]._large_file = true
         vim.diagnostic.config({
-          virtual_text = { enabled = false },
+          virtual_text = false,
           virtual_lines = false,
-          signs = { enabled = false },
+          signs = false,
+          underline = false,
+          float = false,
         }, bufnr)
       end
 
@@ -171,8 +173,17 @@ function M.setup_buffer_cache()
         vim.b[bufnr]._large_file = true
         vim.bo[bufnr].swapfile = false
         vim.bo[bufnr].undofile = false
-        vim.wo[bufnr].foldmethod = "manual"
-        vim.wo[bufnr].list = false
+        -- Window-local options must be set per-window for this buffer
+        vim.schedule(function()
+          if not vim.api.nvim_buf_is_valid(bufnr) then
+            return
+          end
+          local wins = vim.fn.win_findbuf(bufnr)
+          for _, win in ipairs(wins) do
+            vim.api.nvim_set_option_value("foldmethod", "manual", { win = win })
+            vim.api.nvim_set_option_value("list", false, { win = win })
+          end
+        end)
         -- 파일 크기 정보 저장 (나중에 사용 가능)
         vim.b[bufnr]._file_size = file_size
       end

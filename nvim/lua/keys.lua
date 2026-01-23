@@ -61,7 +61,7 @@ vim.keymap.set("n", "<Tab>", function()
   if vim.snippet and vim.snippet.active() then
     return "<Tab>"
   else
-    vim.cmd("bnext")
+    return "<Cmd>bnext<CR>"
   end
 end, vim.tbl_extend("force", buffer_opts, { desc = "Next buffer or snippet jump", expr = true }))
 
@@ -69,7 +69,7 @@ vim.keymap.set("n", "<S-Tab>", function()
   if vim.snippet and vim.snippet.active() then
     return "<S-Tab>"
   else
-    vim.cmd("bprevious")
+    return "<Cmd>bprevious<CR>"
   end
 end, vim.tbl_extend("force", buffer_opts, { desc = "Previous buffer or snippet jump", expr = true }))
 

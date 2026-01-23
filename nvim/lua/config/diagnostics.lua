@@ -11,59 +11,63 @@ local diagnostic_icons = {
   [vim.diagnostic.severity.HINT] = "◆",
 }
 
+local virtual_text_opts = {
+  prefix = function(diagnostic)
+    return diagnostic_icons[diagnostic.severity] or "●"
+  end,
+  spacing = 4,
+  source = false, -- Hide source to keep messages clean
+  format = function(diagnostic)
+    -- Format diagnostic message without source to keep it clean
+    return diagnostic.message
+  end,
+}
+
+local float_opts = {
+  focusable = false,
+  style = "minimal",
+  border = "rounded",
+  source = false, -- Hide source to keep messages clean
+  header = "",
+  prefix = function(diagnostic)
+    return (diagnostic_icons[diagnostic.severity] or "●") .. " "
+  end,
+  format = function(diagnostic)
+    -- Format diagnostic message without source to keep it clean
+    return diagnostic.message
+  end,
+}
+
+local signs_opts = {
+  priority = 10,
+  text = diagnostic_icons,
+  severity = { min = vim.diagnostic.severity.HINT },
+}
+
+local underline_opts = {
+  severity = { min = vim.diagnostic.severity.WARN },
+}
+
 -- Default diagnostic configuration
 local default_config = {
-  -- Virtual text settings
-  virtual_text = {
-    enabled = false, -- Disable by default for performance
-    prefix = function(diagnostic)
-      return diagnostic_icons[diagnostic.severity] or "●"
-    end,
-    spacing = 4,
-    source = false, -- Hide source to keep messages clean
-    format = function(diagnostic)
-      -- Format diagnostic message without source to keep it clean
-      return diagnostic.message
-    end,
-  },
+  -- Virtual text disabled by default for performance
+  virtual_text = false,
 
   -- Virtual lines disabled globally to prevent duplication with other display methods
   virtual_lines = false,
 
   -- Signs in the sign column
-  signs = {
-    enabled = true,
-    priority = 10,
-    text = diagnostic_icons,
-    severity = { min = vim.diagnostic.severity.HINT },
-  },
+  signs = signs_opts,
 
   -- Underline settings
-  underline = {
-    enabled = true,
-    severity = { min = vim.diagnostic.severity.WARN },
-  },
+  underline = underline_opts,
 
   -- Update behavior
   update_in_insert = false, -- Performance optimization
   severity_sort = true,    -- Sort by severity
 
   -- Float window settings
-  float = {
-    enabled = true,
-    focusable = false,
-    style = "minimal",
-    border = "rounded",
-    source = false, -- Hide source to keep messages clean
-    header = "",
-    prefix = function(diagnostic)
-      return (diagnostic_icons[diagnostic.severity] or "●") .. " "
-    end,
-    format = function(diagnostic)
-      -- Format diagnostic message without source to keep it clean
-      return diagnostic.message
-    end,
-  },
+  float = float_opts,
 
   -- Jump settings (Neovim 0.11+ feature)
   jump = {
@@ -75,10 +79,12 @@ local default_config = {
 -- Performance optimized configuration (minimal display)
 -- Only shows ERROR signs and lualine diagnostics
 local performance_config = vim.tbl_deep_extend("force", default_config, {
-  virtual_text = { enabled = false },
+  virtual_text = false,
   virtual_lines = false,
   update_in_insert = false,
   signs = {
+    priority = 10,
+    text = diagnostic_icons,
     severity = { min = vim.diagnostic.severity.ERROR },
   },
 })
@@ -86,11 +92,9 @@ local performance_config = vim.tbl_deep_extend("force", default_config, {
 -- Development configuration with verbose output
 -- Shows all diagnostic types with virtual text (virtual lines disabled to prevent duplication)
 local development_config = vim.tbl_deep_extend("force", default_config, {
-  virtual_text = { enabled = true },
+  virtual_text = virtual_text_opts,
   virtual_lines = false, -- Disabled to prevent duplication
-  signs = {
-    severity = { min = vim.diagnostic.severity.HINT },
-  },
+  signs = signs_opts,
 })
 
 -- Apply diagnostic configuration
@@ -147,10 +151,10 @@ function M.setup_keymaps()
   -- Toggle virtual text
   vim.keymap.set("n", "<leader>dt", function()
     local current_config = vim.diagnostic.config()
-    local virtual_text_enabled = current_config.virtual_text and current_config.virtual_text.enabled
-    vim.diagnostic.config({
-      virtual_text = { enabled = not virtual_text_enabled },
-    })
+  local virtual_text_enabled = current_config.virtual_text ~= false
+  vim.diagnostic.config({
+    virtual_text = virtual_text_enabled and false or virtual_text_opts,
+  })
     vim.notify(string.format("Virtual text %s", virtual_text_enabled and "disabled" or "enabled"))
   end, vim.tbl_extend("force", opts, { desc = "Toggle diagnostic virtual text" }))
 

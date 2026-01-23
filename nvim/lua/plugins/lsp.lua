@@ -97,11 +97,7 @@ return {
           y_padding = 0,
           align = "bottom",
           relative = "editor",
-        },
-      },
-      integration = {
-        ["nvim-tree"] = {
-          enable = true,
+          avoid = { "NvimTree" },
         },
       },
       logger = {
@@ -123,7 +119,7 @@ return {
     "stevearc/conform.nvim",
     -- tag = "v5.5.1", -- 특정 태그 사용 권장
     event = { "BufWritePre" }, -- 저장 시 포맷팅을 위한 트리거
-    cmd = { "ConformInfo" }, -- lazy 로딩 최적화
+    cmd = { "ConformInfo" },   -- lazy 로딩 최적화
     -- opts 테이블 삭제
     -- config 함수 복원
     config = function()

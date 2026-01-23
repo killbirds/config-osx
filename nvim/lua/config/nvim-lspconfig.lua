@@ -47,7 +47,7 @@ end
 local default_opts = {
   capabilities = cmp_nvim_lsp.default_capabilities(), -- nvim-cmp와의 통합
   flags = {
-    debounce_text_changes = 150,                     -- 텍스트 변경 후 지연 시간 (ms)
+    debounce_text_changes = 150,                      -- 텍스트 변경 후 지연 시간 (ms)
   },
   on_attach = setup_lsp,
   -- LSP 타임아웃 및 성능 관련 설정 추가
@@ -99,7 +99,7 @@ local servers = {
       -- eslint 서버 설정
       packageManager = "yarn", -- 패키지 매니저 (npm, yarn, pnpm 중)
       experimental = {
-        useFlatConfig = true, -- eslint.config.mjs와 같은 플랫 설정 파일 지원 활성화
+        useFlatConfig = true,  -- eslint.config.mjs와 같은 플랫 설정 파일 지원 활성화
       },
     },
     handlers = {
@@ -122,7 +122,7 @@ local servers = {
         checkOnSave = true,
         check = { command = "clippy" }, -- 저장 시 Clippy 실행
         rustc = {
-          source = "discover",      -- 러스트 소스 자동 탐색
+          source = "discover",          -- 러스트 소스 자동 탐색
         },
         rust = {
           unstable_features = true,
@@ -148,11 +148,11 @@ local servers = {
           watcher = "client", -- 파일 시스템 감시를 클라이언트(Neovim)에 위임
         },
         inlayHints = {
-          maxLength = 25,               -- 힌트 최대 길이
-          closingBraceHints = true,     -- 닫는 중괄호에 힌트 표시 여부
+          maxLength = 25,                    -- 힌트 최대 길이
+          closingBraceHints = true,          -- 닫는 중괄호에 힌트 표시 여부
           closureReturnTypeHints = "always", -- 클로저 반환 유형 힌트
           lifetimeElisionHints = { enable = true, useParameterNames = true },
-          reborrowHints = "never",      -- 재대여 힌트 비활성화
+          reborrowHints = "never",           -- 재대여 힌트 비활성화
           bindingModeHints = { enable = true },
           chainingHints = { enable = true }, -- 체인 메서드 타입 힌트 활성화
           expressionAdjustmentHints = { enable = true },
@@ -192,7 +192,7 @@ local servers = {
           -- Neovim 런타임 라이브러리 인식
           library = {
             vim.env.VIMRUNTIME,
-            vim.api.nvim_get_runtime_file("lua", true), -- Add Lua runtime files
+            vim.api.nvim_get_runtime_file("lua", true),    -- Add Lua runtime files
             vim.api.nvim_get_runtime_file("plugin", true), -- Add plugin runtime files
             -- 추가적인 플러그인 경로가 필요하면 아래 주석을 해제하고 사용
             -- "${3rd}/luv/library"
@@ -204,22 +204,22 @@ local servers = {
         },
         -- 향상된 진단 설정
         diagnostics = {
-          globals = { "vim" },       -- vim 전역 변수 인식
+          globals = { "vim" },            -- vim 전역 변수 인식
           disable = { "trailing-space" }, -- 불필요한 진단 비활성화
         },
         -- 텔레메트리 비활성화
         telemetry = { enable = false },
         -- 자동 완성 및 힌트 설정
         completion = {
-          callSnippet = "Replace", -- 함수 호출 시 파라미터 스니펫 동작
+          callSnippet = "Replace",    -- 함수 호출 시 파라미터 스니펫 동작
           keywordSnippet = "Replace", -- 키워드 자동 완성 동작
         },
         hint = {
-          enable = true,     -- inlay hints 활성화
+          enable = true,          -- inlay hints 활성화
           arrayIndex = "Disable", -- 배열 인덱스 힌트 비활성화
-          setType = true,    -- 변수 유형 힌트 표시
-          paramName = "All", -- 매개변수 이름 힌트 표시
-          paramType = true,  -- 매개변수 유형 힌트 표시
+          setType = true,         -- 변수 유형 힌트 표시
+          paramName = "All",      -- 매개변수 이름 힌트 표시
+          paramType = true,       -- 매개변수 유형 힌트 표시
         },
       })
     end,
@@ -286,9 +286,6 @@ end
 
 -- 진단 설정은 config/diagnostics.lua에서 중앙 관리됨
 
--- LSP 성능 문제 추적을 위한 로깅 설정
-vim.lsp.set_log_level("off") -- 문제 해결을 위해 일시적으로 'info'로 변경
-
 -- LSP 요청 타임아웃 설정
 vim.lsp.buf.request_timeout = 5000 -- 모든 LSP 요청 타임아웃을 5초로 설정 (3초에서 5초로 증가)
 
@@ -305,24 +302,9 @@ vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.s
   max_height = 15,
 })
 
--- LSP 진단 성능 최적화
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
-  -- 삽입 모드에서 진단 업데이트 비활성화
-  update_in_insert = false,
-  -- 진단 디바운싱
-  debounce_text_changes = 200,
-})
-
--- 서버와 파일 유형 간의 매핑
-local server_filetype_map = {
-  ts_ls = { "typescript", "javascript", "typescriptreact", "javascriptreact", "typescript.tsx", "javascript.jsx" },
-  eslint = { "typescript", "javascript", "typescriptreact", "javascriptreact" },
-  rust_analyzer = { "rust" },
-  lua_ls = { "lua" },
-}
-
 -- 모듈 실행을 즉시 로딩으로 변경 (지연 로딩 문제 해결)
 setup_lsp_servers()
+setup_inlay_hints_keymaps()
 
 -- LSP 클라이언트 관리 유틸리티 함수들
 local function cleanup_duplicate_clients()
@@ -423,7 +405,7 @@ return {
   setup = setup_lsp_servers, -- 기존 즉시 로딩 방식 (호환성 유지)
   get_servers = function()
     return servers
-  end,                                           -- 설정된 서버 목록 반환
+  end,                                            -- 설정된 서버 목록 반환
   cleanup_duplicates = cleanup_duplicate_clients, -- 중복 클라이언트 정리
-  show_status = show_lsp_status,                 -- LSP 상태 확인
+  show_status = show_lsp_status,                  -- LSP 상태 확인
 }
