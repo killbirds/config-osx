@@ -2,14 +2,13 @@ require("mason-tool-installer").setup({
   ensure_installed = {
     -- 필수 린터만 포함
     "luacheck", -- Lua
-    "flake8", -- Python
+    "ruff", -- Python
 
     -- 필수 포매터만 포함
     "stylua", -- Lua
     "prettier", -- JavaScript/TypeScript/HTML/CSS/JSON
 
     -- 필요할 때 주석 해제
-    -- "black", -- Python
     -- "gofumpt", -- Go
   },
   auto_update = false,          -- 자동 업데이트 비활성화

@@ -7,7 +7,7 @@ require("mason-lspconfig").setup({
     "eslint",      -- ESLint
 
     -- 자주 사용하는 서버는 필요에 따라 주석 해제
-    -- "pyright", -- Python
+    "pyright", -- Python
     -- "cssls", -- CSS
     -- "html", -- HTML
     -- "jsonls", -- JSON

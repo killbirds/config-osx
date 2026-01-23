@@ -11,7 +11,7 @@ require("conform").setup({
     yaml = { "prettier" },
     markdown = { "prettier" },
     lua = { "stylua" },
-    python = { "black", "isort" },
+    python = { "ruff_format" },
     rust = { "rustfmt" },
     go = { "gofmt" },
   },
@@ -40,13 +40,10 @@ require("conform").setup({
     stylua = {
       command = "stylua",
     },
-    black = {
-      command = "black",
-      args = { "--quiet", "--fast", "-" },
-    },
-    isort = {
-      command = "isort",
-      args = { "--profile", "black", "-" },
+    ruff_format = {
+      command = "ruff",
+      args = { "format", "--quiet", "-" },
+      stdin = true,
     },
     rustfmt = {
       command = "rustfmt",                             -- Rust 기본 포매터

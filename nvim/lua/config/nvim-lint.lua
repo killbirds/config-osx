@@ -106,7 +106,7 @@ lint.linters_by_ft = {
   typescript = { "eslint" },     -- TypeScript 린팅
   javascriptreact = { "eslint" }, -- JSX 지원 추가
   typescriptreact = { "eslint" }, -- TSX 지원 추가
-  python = { "flake8" },         -- Python 린팅
+  python = { "ruff" },           -- Python 린팅 (ruff)
   lua = { "luacheck" },          -- Lua 린팅
   rust = { "clippy" },           -- Rust 린팅 (cargo clippy)
   scala = { "scalafix" },        -- Scala 린팅 (scalafix)
@@ -122,13 +122,6 @@ lint.linters.eslint = {
   env = {
     ESLINT_USE_FLAT_CONFIG = "true",                                        -- eslint.config.mjs 파일을 인식하기 위한 환경 변수
   },
-}
-
-lint.linters.flake8 = {
-  name = "flake8",
-  cmd = "flake8",
-  args = { "--format", "default", "--stdin-display-name", "%filepath", "-" },
-  stream = "stdout",
 }
 
 lint.linters.luacheck = {
@@ -151,6 +144,21 @@ lint.linters.scalafix = {
   parser = require("lint.parser").from_errorformat("%f:%l:%c: %m,%f:%l: %m", {
     source = "scalafix",
     severity = vim.diagnostic.severity.WARN,
+  }),
+}
+
+lint.linters.ruff = {
+  name = "ruff",
+  cmd = "ruff",
+  args = { "check", "--output-format=text", "--quiet", "%filepath" },
+  stream = "stdout",
+  ignore_exitcode = true,
+  stdin = false,
+  condition = function()
+    return vim.fn.executable("ruff") == 1
+  end,
+  parser = require("lint.parser").from_errorformat("%f:%l:%c: %t%n %m", {
+    source = "ruff",
   }),
 }
 
