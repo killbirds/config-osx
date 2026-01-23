@@ -23,6 +23,7 @@ return {
   {
     "scalameta/nvim-metals",
     dependencies = "nvim-lua/plenary.nvim",
+    ft = { "scala", "sbt" },
     config = function()
       require("config.nvim-metals")
     end,

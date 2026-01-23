@@ -108,6 +108,7 @@ lint.linters_by_ft = {
   typescriptreact = { "eslint" }, -- TSX 지원 추가
   python = { "flake8" },         -- Python 린팅
   lua = { "luacheck" },          -- Lua 린팅
+  scala = { "scalafix" },        -- Scala 린팅 (scalafix)
 }
 
 -- 커스텀 린터 설정 (선택적)
@@ -134,6 +135,22 @@ lint.linters.luacheck = {
   cmd = "luacheck",
   args = { "--formatter", "plain", "--codes", "--ranges", "--filename", "%filepath", "-" },
   stream = "stdout",
+}
+
+lint.linters.scalafix = {
+  name = "scalafix",
+  cmd = "scalafix",
+  args = { "--check", "%filepath" },
+  stream = "stdout",
+  ignore_exitcode = true,
+  stdin = false,
+  condition = function()
+    return vim.fn.executable("scalafix") == 1
+  end,
+  parser = require("lint.parser").from_errorformat("%f:%l:%c: %m,%f:%l: %m", {
+    source = "scalafix",
+    severity = vim.diagnostic.severity.WARN,
+  }),
 }
 
 -- 진단 결과를 quickfix에 표시하는 함수 (현재 프로젝트의 진단만 표시)

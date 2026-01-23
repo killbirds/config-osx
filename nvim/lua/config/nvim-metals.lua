@@ -6,7 +6,7 @@ local cmp_nvim_lsp = require("cmp_nvim_lsp")
 -- 개발/프로덕션 환경에 따른 조건부 설정
 local DEV_MODE = true               -- 개발 모드 활성화 여부 (true = 개발 모드, false = 프로덕션 모드)
 local ENABLE_AUTO_FORMATTING = true -- 자동 포맷팅 활성화 여부
-local AUTO_START_METALS = true      -- Metals 자동 시작 활성화 여부
+local AUTO_START_METALS = false     -- Metals 자동 시작 활성화 여부 (기본: 수동 기동)
 
 -- 전역 설정 조정
 vim.opt_global.shortmess:remove("F") -- API 메시지 표시 활성화
@@ -16,6 +16,7 @@ local metals_config = metals.bare_config()
 
 -- Metals 전용 자동 명령 그룹 (미리 정의하여 다른 함수에서 사용할 수 있게 함)
 local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
+local nvim_metals_autostart_group = vim.api.nvim_create_augroup("nvim-metals-autostart", { clear = true })
 
 -- ========== 사용자 구성 함수 ========== --
 -- Metals 기능별 조건부 활성화 함수
@@ -55,6 +56,23 @@ local function configure_metals_settings()
   end
 
   return settings
+end
+
+local function apply_metals_settings()
+  metals_config.settings = metals_config.settings or {}
+  metals_config.settings.metals = configure_metals_settings()
+  metals_config.settings.trace = {
+    server = "verbose",
+  }
+
+  metals_config.init_options = {
+    statusBarProvider = "off",
+    compilerOptions = {
+      snippetAutoIndent = false,
+    },
+    debuggingProvider = DEV_MODE,
+    isHttpEnabled = DEV_MODE,
+  }
 end
 
 -- 에러 처리 핸들러 설정
@@ -116,6 +134,7 @@ local function initialize_metals_lazy(bufnr)
     else
       -- 초기화 성공 시 BufWritePre 이벤트 설정 (자동 포맷팅)
       if ENABLE_AUTO_FORMATTING then
+        vim.api.nvim_clear_autocmds({ group = nvim_metals_group, buffer = bufnr })
         vim.api.nvim_create_autocmd("BufWritePre", {
           buffer = bufnr,
           group = nvim_metals_group,
@@ -165,7 +184,7 @@ local function setup_auto_start()
   -- Scala/SBT 파일 타입 감지 시 Metals 초기화
   vim.api.nvim_create_autocmd("FileType", {
     pattern = { "scala", "sbt" },
-    group = nvim_metals_group,
+    group = nvim_metals_autostart_group,
     callback = function(opts)
       if is_scala_project() then
         initialize_metals_lazy(opts.buf)
@@ -176,7 +195,7 @@ local function setup_auto_start()
 
   -- 디렉토리 변경 시 Metals 초기화
   vim.api.nvim_create_autocmd("DirChanged", {
-    group = nvim_metals_group,
+    group = nvim_metals_autostart_group,
     callback = function()
       if is_scala_project() then
         initialize_metals_lazy(0)
@@ -187,7 +206,7 @@ local function setup_auto_start()
 
   -- Vim 시작 시 Scala 프로젝트 확인
   vim.api.nvim_create_autocmd("VimEnter", {
-    group = nvim_metals_group,
+    group = nvim_metals_autostart_group,
     callback = function()
       if is_scala_project() then
         initialize_metals_lazy(0)
@@ -198,17 +217,9 @@ local function setup_auto_start()
 end
 
 -- ========== 설정 적용 ========== --
--- Metals 설정 적용
-metals_config.settings = {
-  metals = configure_metals_settings(),
-}
+apply_metals_settings()
 
--- trace 설정 추가
-metals_config.settings.trace = {
-  server = "verbose",
-}
-
--- 자동 시작 설정 적용
+-- 자동 시작 설정 적용 (필요 시에만)
 setup_auto_start()
 
 -- 공통 LSP 설정 적용
@@ -239,18 +250,6 @@ metals_config.on_attach = function(client, bufnr)
 end
 
 metals_config.capabilities = cmp_nvim_lsp.default_capabilities() -- nvim-cmp 통합
-
--- 디버깅 설정 적용
-metals_config.init_options = {
-  -- 기본 설정
-  statusBarProvider = "off",
-  compilerOptions = {
-    snippetAutoIndent = false,
-  },
-  -- 디버깅 관련 설정 (개발 모드에서만 활성화)
-  debuggingProvider = DEV_MODE,
-  isHttpEnabled = DEV_MODE,
-}
 
 -- LSP 디버깅 활성화
 metals_config.flags = {
@@ -313,6 +312,11 @@ vim.api.nvim_create_autocmd("VimEnter", {
   desc = "Check Metals dependencies",
 })
 
+-- 수동 Metals 시작 명령어
+vim.api.nvim_create_user_command("MetalsStart", function()
+  initialize_metals_lazy(0)
+end, { desc = "Start Metals manually" })
+
 -- 모듈 반환
 return {
   config = metals_config, -- 현재 설정 반환
@@ -330,10 +334,15 @@ return {
         ENABLE_AUTO_FORMATTING = opts.auto_formatting
       end
 
+      if opts.auto_start ~= nil then
+        AUTO_START_METALS = opts.auto_start
+      end
+
       -- 기타 설정 병합
       metals_config = vim.tbl_deep_extend("force", metals_config, opts)
     end
-
+    apply_metals_settings()
+    setup_auto_start()
     return metals_config
   end,
   -- 수동 초기화 함수
