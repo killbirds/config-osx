@@ -102,10 +102,6 @@ end
 
 -- 파일 타입별 린터 설정
 lint.linters_by_ft = {
-  javascript = { "eslint" },     -- JavaScript 린팅
-  typescript = { "eslint" },     -- TypeScript 린팅
-  javascriptreact = { "eslint" }, -- JSX 지원 추가
-  typescriptreact = { "eslint" }, -- TSX 지원 추가
   python = { "ruff" },           -- Python 린팅 (ruff)
   lua = { "luacheck" },          -- Lua 린팅
   rust = { "clippy" },           -- Rust 린팅 (cargo clippy)
