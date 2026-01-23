@@ -28,7 +28,7 @@ require("lazy").setup({
   install = { colorscheme = { "catppuccin" } },
   -- automatically check for plugin updates
   checker = {
-    enabled = true,
+    enabled = false,
     frequency = 86400, -- check once a day (0.11 최적화)
   },
   -- Neovim 0.11+ ui 개선 사항 적용

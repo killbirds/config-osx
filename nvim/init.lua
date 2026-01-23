@@ -38,7 +38,7 @@ vim.opt.statuscolumn = "%l %s"
 -- vim.o.winborder = "rounded"
 
 -- 새로운 completeopt 옵션 활용
-vim.opt.completeopt:append({ "fuzzy", "preinsert" })
+vim.opt.completeopt = { "menuone", "noselect", "fuzzy", "preinsert" }
 
 -- 새로운 wildmode 옵션
 vim.opt.wildmode:append("noselect")

@@ -50,7 +50,7 @@ local underline_opts = {
 
 -- Default diagnostic configuration
 local default_config = {
-  -- Virtual text disabled by default for performance
+  -- Virtual text disabled by default
   virtual_text = false,
 
   -- Virtual lines disabled globally to prevent duplication with other display methods
