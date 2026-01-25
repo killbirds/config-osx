@@ -13,3 +13,4 @@ config.codekit3
 
 # Codex agent instructions
 AGENTS.md
+GEMINI.md

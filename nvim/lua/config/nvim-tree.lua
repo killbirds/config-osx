@@ -121,7 +121,7 @@ require("nvim-tree").setup({
   },
   filters = {
     dotfiles = false,
-    custom = { "node_modules", "\\.git", "target", "\\.DS_Store", "\\.cache" },
+    custom = { "node_modules", "\\.git", "^target$", "\\.DS_Store", "\\.cache" },
     exclude = {},
   },
   git = {
