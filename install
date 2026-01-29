@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cur=`pwd`
-install=$cur/script/install.sh
+cur="$(cd "$(dirname "$0")" && pwd)"
+install="$cur/script/install.sh"
 
 # 색상 정의
 GREEN='\033[0;32m'
@@ -24,14 +24,14 @@ check_dependencies() {
 # 백업 생성
 create_backup() {
   echo -e "${YELLOW}기존 설정 백업 중...${NC}"
-  backup_dir="$HOME/.config/backup_$(date +%Y%m%d%H%M%S)"
-  mkdir -p "$backup_dir"
+  BACKUP_DIR="$HOME/.config/backup_$(date +%Y%m%d%H%M%S)"
+  mkdir -p "$BACKUP_DIR"
 
   if [ -d "$HOME/.config/nvim" ]; then
-    cp -r "$HOME/.config/nvim" "$backup_dir/"
+    cp -r "$HOME/.config/nvim" "$BACKUP_DIR/"
   fi
 
-  echo -e "${GREEN}백업 완료: $backup_dir${NC}"
+  echo -e "${GREEN}백업 완료: $BACKUP_DIR${NC}"
 }
 
 # 메인 설치 과정
@@ -41,6 +41,17 @@ main_install() {
 
   echo -e "${YELLOW}설정 파일 설치 중...${NC}"
   (cd settings; $install ~)
+
+  echo -e "${YELLOW}프롬프트 설정 설치 중...${NC}"
+  if [ -L ~/.prompts ]; then
+    rm ~/.prompts
+  elif [ -e ~/.prompts ]; then
+    mv ~/.prompts ~/.prompts.bak_$(date +%Y%m%d%H%M%S)
+  fi
+  ln -s "$cur/prompts" ~/.prompts || {
+    echo -e "${RED}오류: ~/.prompts 링크 생성 실패${NC}"
+    exit 1
+  }
 
   echo -e "${YELLOW}Neovim 설정 설치 중...${NC}"
   (mkdir -p ~/.config/nvim)
@@ -68,5 +79,3 @@ main() {
 
 # 실행
 main
-
-
