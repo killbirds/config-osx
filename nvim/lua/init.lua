@@ -7,7 +7,7 @@ vim.opt.showmode = true
 
 -- 0.11에서 개선된 커서 설정
 vim.opt.guicursor =
-"n-v-c-sm:block-blinkwait300-blinkon200-blinkoff150,i-ci-ve:ver25-blinkwait300-blinkon200-blinkoff150,r-cr-o:hor20"
+	"n-v-c-sm:block-blinkwait300-blinkon200-blinkoff150,i-ci-ve:ver25-blinkwait300-blinkon200-blinkoff150,r-cr-o:hor20"
 vim.opt.visualbell = true
 vim.opt.autoread = true
 vim.opt.autowrite = true
@@ -18,19 +18,21 @@ vim.opt.hidden = true
 
 -- UI 개선
 vim.opt.relativenumber = false -- 절대 번호
-vim.opt.signcolumn = "yes"     -- 항상 사인 컬럼 표시 (LSP, Git 등)
-vim.opt.scrolloff = 5          -- 커서 위아래 최소 줄 수
-vim.opt.sidescrolloff = 5      -- 커서 좌우 최소 컬럼 수
-vim.opt.wrap = false           -- 긴 줄 자동 줄바꿈 비활성화
-vim.opt.colorcolumn = "120"    -- 120자 컬럼 표시
+vim.opt.signcolumn = "yes" -- 항상 사인 컬럼 표시 (LSP, Git 등)
+vim.opt.scrolloff = 5 -- 커서 위아래 최소 줄 수
+vim.opt.sidescrolloff = 5 -- 커서 좌우 최소 컬럼 수
+vim.opt.wrap = false -- 긴 줄 자동 줄바꿈 비활성화
+vim.opt.colorcolumn = "120" -- 120자 컬럼 표시
 
 -- 프로젝트별 설정 지원 (exrc)
-vim.opt.exrc = false  -- 프로젝트 디렉토리의 .nvim.lua, .nvimrc, .exrc 파일을 로드
+vim.opt.exrc = false -- 프로젝트 디렉토리의 .nvim.lua, .nvimrc, .exrc 파일을 로드
 vim.opt.secure = true -- 보안을 위해 일부 명령어 제한 (exrc와 함께 사용 권장)
 
 -- 리더 키 설정 (lazy.nvim과 공유)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+
+vim.g.python3_host_prog = vim.fn.expand("~/.local/pipx/venvs/pynvim/bin/python")
 
 -- leader 키 응답 시간 설정
 vim.opt.timeout = true
@@ -43,41 +45,41 @@ vim.opt.writebackup = false
 
 -- 파일 시스템 성능 최적화
 vim.opt.wildignore:append({
-  "**/.git/*",
-  "**/.cache/*",
-  "**/node_modules/*",
-  "**/target/*",
-  "**/.DS_Store",
-  "**/.vscode/*",
-  "**/dist/*",
-  "**/build/*",
+	"**/.git/*",
+	"**/.cache/*",
+	"**/node_modules/*",
+	"**/target/*",
+	"**/.DS_Store",
+	"**/.vscode/*",
+	"**/dist/*",
+	"**/build/*",
 })
 
 -- 그립(grep) 관련 성능 설정
 if vim.fn.executable("rg") == 1 then
-  -- 리플그립(ripgrep)이 설치된 경우 사용
-  vim.o.grepprg = "rg --vimgrep --no-heading --smart-case"
-  vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m"
+	-- 리플그립(ripgrep)이 설치된 경우 사용
+	vim.o.grepprg = "rg --vimgrep --no-heading --smart-case"
+	vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m"
 end
 
 -- 0.11 향상된 성능 최적화 설정
 vim.opt.redrawtime = 2000 -- 구문 강조 처리 시간 제한 증가 (ms)
-vim.opt.synmaxcol = 300   -- 긴 줄에서 구문 강조 제한 증가
-vim.opt.updatetime = 200  -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리거 시간 단축 (ms)
+vim.opt.synmaxcol = 300 -- 긴 줄에서 구문 강조 제한 증가
+vim.opt.updatetime = 200 -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리거 시간 단축 (ms)
 
 -- 추가 성능 최적화 설정
 vim.opt.maxmempattern = 5000000 -- 패턴 매칭 메모리 제한 증가 (5MB)
-vim.opt.ttimeoutlen = 5         -- 키 코드 대기 시간 단축 (빠른 응답)
-vim.opt.ttyfast = true          -- 빠른 터미널 연결 가정
+vim.opt.ttimeoutlen = 5 -- 키 코드 대기 시간 단축 (빠른 응답)
+vim.opt.ttyfast = true -- 빠른 터미널 연결 가정
 
 -- LSP 성능 최적화
 vim.lsp.set_log_level("WARN") -- LSP 로그 레벨을 WARN으로 설정 (ERROR보다 약간 더 많은 정보)
 
 -- 검색 설정 개선
 vim.opt.ignorecase = true -- 검색 시 대소문자 무시
-vim.opt.smartcase = true  -- 대문자가 포함되면 대소문자 구분
-vim.opt.incsearch = true  -- 타이핑하는 동안 검색
-vim.opt.hlsearch = true   -- 검색 결과 강조
+vim.opt.smartcase = true -- 대문자가 포함되면 대소문자 구분
+vim.opt.incsearch = true -- 타이핑하는 동안 검색
+vim.opt.hlsearch = true -- 검색 결과 강조
 
 -- 0.11 개선된 splitkeep 설정
 vim.opt.splitkeep = "screen" -- 화면 분할 시 커서 위치 유지
@@ -87,50 +89,56 @@ local augroup = vim.api.nvim_create_augroup("UserAutoCommands", { clear = true }
 
 -- 0.11 최적화된 텍스트 yank 하이라이트
 vim.api.nvim_create_autocmd("TextYankPost", {
-  group = augroup,
-  pattern = "*",
-  callback = function()
-    vim.highlight.on_yank({ timeout = 200 })
-  end,
+	group = augroup,
+	pattern = "*",
+	callback = function()
+		vim.highlight.on_yank({ timeout = 200 })
+	end,
 })
 
 -- 버퍼 메모리 관리는 cache_manager.lua에서 중앙 관리됨
 
 -- 파일 타입별 설정
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup,
-  pattern = { "lua" },
-  callback = function()
-    vim.opt_local.shiftwidth = 2
-    vim.opt_local.tabstop = 2
-    -- 0.11에서 개선된 Lua omnifunc 활용
-    vim.opt_local.omnifunc = "v:lua.vim.lua_omnifunc"
-    -- 0.11 기본 foldexpr 활용
-    vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-    vim.opt_local.foldmethod = "expr"
-  end,
+vim.filetype.add({
+	extension = {
+		mdx = "markdown",
+	},
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-  group = augroup,
-  pattern = { "python" },
-  callback = function()
-    vim.opt_local.shiftwidth = 4
-    vim.opt_local.tabstop = 4
-  end,
+	group = augroup,
+	pattern = { "lua" },
+	callback = function()
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.tabstop = 2
+		-- 0.11에서 개선된 Lua omnifunc 활용
+		vim.opt_local.omnifunc = "v:lua.vim.lua_omnifunc"
+		-- 0.11 기본 foldexpr 활용
+		vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+		vim.opt_local.foldmethod = "expr"
+	end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+	group = augroup,
+	pattern = { "python" },
+	callback = function()
+		vim.opt_local.shiftwidth = 4
+		vim.opt_local.tabstop = 4
+	end,
 })
 
 -- 대용량 파일 처리는 cache_manager.lua에서 중앙 관리됨
 
 -- 터미널 설정 자동화
 vim.api.nvim_create_autocmd("TermOpen", {
-  group = augroup,
-  pattern = "*",
-  callback = function()
-    -- 0.11에서 터미널 기본 설정은 자동으로 적용됨
-    vim.opt_local.relativenumber = false
-    vim.opt_local.number = false
-  end,
+	group = augroup,
+	pattern = "*",
+	callback = function()
+		-- 0.11에서 터미널 기본 설정은 자동으로 적용됨
+		vim.opt_local.relativenumber = false
+		vim.opt_local.number = false
+	end,
 })
 
 -- 들여쓰기 설정
