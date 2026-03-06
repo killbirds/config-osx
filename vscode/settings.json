@@ -59,9 +59,12 @@
   "workbench.editor.revealIfOpen": true,
   "explorer.autoReveal": true,
   "explorer.compactFolders": false,
+  "explorer.excludeGitIgnore": false,
   "files.exclude": {
     "**/.git": true,
-    "**/.DS_Store": true
+    "**/.DS_Store": true,
+    "**/.github": false,
+    "**/.gitignore": false
   },
 
   // EasyMotion 관련 설정

@@ -120,8 +120,8 @@ require("nvim-tree").setup({
     special_files = { "Cargo.toml", "Makefile", "README.md", "readme.md" },
   },
   filters = {
-    dotfiles = false,
-    custom = { "node_modules", "\\.git", "^target$", "\\.DS_Store", "\\.cache" },
+    dotfiles = true,
+    custom = { "node_modules", "^\\.git$", "^target$", "\\.DS_Store", "\\.cache" },
     exclude = {},
   },
   git = {
