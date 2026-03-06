@@ -3,6 +3,12 @@
 
 local M = {}
 
+local valid_modes = {
+  default = true,
+  performance = true,
+  development = true,
+}
+
 -- Diagnostic icons for different severity levels
 local diagnostic_icons = {
   [vim.diagnostic.severity.ERROR] = "✘",
@@ -99,12 +105,16 @@ local development_config = vim.tbl_deep_extend("force", default_config, {
 
 -- Apply diagnostic configuration
 function M.setup(config_type)
-  config_type = config_type or "default"
+  local mode = config_type or vim.g.diagnostic_mode or "default"
+  if not valid_modes[mode] then
+    mode = "default"
+  end
+  vim.g.diagnostic_mode = mode
 
   local config
-  if config_type == "performance" then
+  if mode == "performance" then
     config = performance_config
-  elseif config_type == "development" then
+  elseif mode == "development" then
     config = development_config
   else
     config = default_config
@@ -151,10 +161,10 @@ function M.setup_keymaps()
   -- Toggle virtual text
   vim.keymap.set("n", "<leader>dt", function()
     local current_config = vim.diagnostic.config()
-  local virtual_text_enabled = current_config.virtual_text ~= false
-  vim.diagnostic.config({
-    virtual_text = virtual_text_enabled and false or virtual_text_opts,
-  })
+    local virtual_text_enabled = current_config.virtual_text ~= false
+    vim.diagnostic.config({
+      virtual_text = virtual_text_enabled and false or virtual_text_opts,
+    })
     vim.notify(string.format("Virtual text %s", virtual_text_enabled and "disabled" or "enabled"))
   end, vim.tbl_extend("force", opts, { desc = "Toggle diagnostic virtual text" }))
 

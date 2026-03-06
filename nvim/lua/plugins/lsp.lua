@@ -111,12 +111,6 @@ return {
 
   -- 린트 및 포맷팅
   {
-    "mfussenegger/nvim-lint",
-    config = function()
-      require("config.nvim-lint")
-    end,
-  },
-  {
     "stevearc/conform.nvim",
     -- tag = "v5.5.1", -- 특정 태그 사용 권장
     event = { "BufWritePre" }, -- 저장 시 포맷팅을 위한 트리거

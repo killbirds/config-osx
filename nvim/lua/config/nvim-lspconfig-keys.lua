@@ -68,7 +68,7 @@ M.on_attach = function(client, bufnr)
 
   -- LSP 관리 키 매핑 추가
   local opts = { noremap = true, silent = true }
-  vim.keymap.set("n", "<leader>lc", "<cmd>LspCleanup<cr>",
+  vim.keymap.set("n", "<leader>lC", "<cmd>LspCleanup<cr>",
     vim.tbl_extend("force", opts, { desc = "LSP 중복 클라이언트 정리" }))
   vim.keymap.set("n", "<leader>ls", "<cmd>LspStatus<cr>",
     vim.tbl_extend("force", opts, { desc = "LSP 상태 확인" }))

@@ -271,6 +271,7 @@ local function setup_lsp_servers()
 		-- 서버 시작 시도
 		local ok, err = pcall(function()
 			vim.lsp.config(server, merged_config)
+			vim.lsp.enable(server)
 		end)
 
 		-- 설정 오류 처리
@@ -285,9 +286,6 @@ local function setup_lsp_servers()
 end
 
 -- 진단 설정은 config/diagnostics.lua에서 중앙 관리됨
-
--- LSP 요청 타임아웃 설정
-vim.lsp.buf.request_timeout = 5000 -- 모든 LSP 요청 타임아웃을 5초로 설정 (3초에서 5초로 증가)
 
 -- LSP 핸들러 성능 최적화
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
@@ -336,7 +334,7 @@ local function cleanup_duplicate_clients()
 			vim.log.levels.INFO,
 			{ title = "LSP 정리" }
 		)
-		client.stop()
+		client:stop()
 	end
 
 	return #clients_to_stop
@@ -393,13 +391,19 @@ vim.api.nvim_create_user_command("LspRestart", function()
 			title = "LSP 재시작",
 			timeout = 1000,
 		})
-		client.stop()
-		-- 서버 재시작은 자동으로 처리됨 (mason-lspconfig의 automatic_enable)
+		client:stop()
+		local ok, err = pcall(function()
+			vim.lsp.enable(client.name)
+		end)
+		if not ok then
+			vim.notify(
+				string.format("LSP 서버 '%s' 재시작 실패: %s", client.name, err),
+				vim.log.levels.WARN,
+				{ title = "LSP 재시작" }
+			)
+		end
 	end
 end, { desc = "현재 버퍼의 LSP 서버 재시작" })
-
--- 진단 설정 활성화
-require("config.diagnostics").setup("development")
 
 return {
 	setup = setup_lsp_servers, -- 기존 즉시 로딩 방식 (호환성 유지)

@@ -5,7 +5,7 @@ local M = {}
 function M.setup()
   -- 접기 방식 설정 (Treesitter 기반)
   vim.opt.foldmethod = "expr"
-  vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+  vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 
   -- 기본적으로 모든 접기를 펼친 상태로 시작
   vim.opt.foldenable = false
@@ -47,17 +47,30 @@ function M.setup()
     end,
   })
 
-  -- Neovim 0.11에 최적화된 LSP 문서 심볼 기반 폴딩 적용 함수
-  local function apply_lsp_folding(buffer, nestingLevel)
-    nestingLevel = nestingLevel or 2
+  local function has_lsp_folding(bufnr)
+    for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+      if client:supports_method("textDocument/foldingRange") then
+        return true
+      end
+    end
+    return false
+  end
+
+  local function apply_lsp_folding(buffer, fold_level)
+    if not has_lsp_folding(buffer) then
+      return false
+    end
+
+    fold_level = fold_level or 99
 
     -- 커서 위치 저장
     local cursor_pos = vim.api.nvim_win_get_cursor(0)
 
-    -- 0.11 이상에서는 document_fold 함수가 항상 사용 가능
-    vim.lsp.buf.document_fold({
-      nestingLevel = nestingLevel,
-    })
+    vim.opt_local.foldmethod = "expr"
+    vim.opt_local.foldexpr = "v:lua.vim.lsp.foldexpr()"
+    vim.opt_local.foldlevel = fold_level
+    vim.opt_local.foldenable = true
+    vim.cmd("normal! zx")
 
     -- 커서 위치 복원
     vim.api.nvim_win_set_cursor(0, cursor_pos)
@@ -71,12 +84,14 @@ function M.setup()
       local client = vim.lsp.get_client_by_id(args.data.client_id)
       local buffer = args.buf
 
-      -- 언어 서버가 documentSymbol을 지원하는지 확인
-      if client and client.server_capabilities.documentSymbolProvider then
+      if client and client:supports_method("textDocument/foldingRange") then
         -- LSP 기반 폴딩 키 매핑 추가
         vim.keymap.set("n", "<leader>zl", function()
-          apply_lsp_folding(buffer)
-          vim.notify("LSP 기반 폴딩이 적용되었습니다.", vim.log.levels.INFO)
+          if apply_lsp_folding(buffer) then
+            vim.notify("LSP 기반 폴딩이 적용되었습니다.", vim.log.levels.INFO)
+          else
+            vim.notify("LSP foldingRange를 지원하는 서버가 없습니다.", vim.log.levels.WARN)
+          end
         end, { buffer = buffer, noremap = true, desc = "Apply LSP-based folding" })
       end
     end,
@@ -101,11 +116,10 @@ function M.setup()
 
       -- 폴딩 키 매핑 재정의 (언어별 최적화)
       vim.keymap.set("n", "<leader>zL", function()
-        if vim.lsp.get_clients({ bufnr = 0 })[1] then
-          apply_lsp_folding(0, nestingLevels[ft] or 2)
+        if apply_lsp_folding(0, nestingLevels[ft] or 99) then
           vim.notify(ft .. " 언어에 최적화된 폴딩이 적용되었습니다.", vim.log.levels.INFO)
         else
-          vim.notify("LSP 서버가 준비되지 않았습니다.", vim.log.levels.WARN)
+          vim.notify("LSP foldingRange를 지원하는 서버가 준비되지 않았습니다.", vim.log.levels.WARN)
         end
       end, { buffer = 0, noremap = true, desc = "Apply language-optimized folding" })
     end,
@@ -115,24 +129,16 @@ function M.setup()
   -- 일부 언어에서는 LSP가 제공하지 않는 세밀한 폴딩을 Treesitter로 보완
   vim.keymap.set("n", "<leader>zh", function()
     -- 현재 LSP 클라이언트 확인
-    local clients = vim.lsp.get_clients({ bufnr = 0 })
-    local has_lsp_folding = false
-
-    for _, client in ipairs(clients) do
-      if client.server_capabilities.documentSymbolProvider then
-        has_lsp_folding = true
-        break
-      end
-    end
+    local lsp_folding_available = has_lsp_folding(0)
 
     -- LSP 폴딩 사용 가능하면 LSP 기반 폴딩 적용, 아니면 Treesitter 폴딩으로 대체
-    if has_lsp_folding then
+    if lsp_folding_available then
       apply_lsp_folding(0, 2)
       vim.notify("LSP 기반 폴딩이 적용되었습니다.", vim.log.levels.INFO)
     else
       -- Treesitter 폴딩 적용
       vim.opt_local.foldmethod = "expr"
-      vim.opt_local.foldexpr = "nvim_treesitter#foldexpr()"
+      vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
       vim.cmd("normal! zx") -- 폴딩 리프레시
       vim.notify("Treesitter 기반 폴딩이 적용되었습니다.", vim.log.levels.INFO)
     end

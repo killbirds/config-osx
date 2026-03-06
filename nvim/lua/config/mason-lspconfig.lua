@@ -18,7 +18,7 @@ require("mason-lspconfig").setup({
     -- "gopls", -- Go
   },
   automatic_installation = true, -- 자동 설치 활성화
-  automatic_enable = true,      -- 자동 활성화
+  automatic_enable = false,
   max_concurrent_installers = 2, -- 동시에 설치할 수 있는 서버 수 제한
   handlers = {
     -- 기본 핸들러: 모든 서버에 대해 기본 설정 적용
@@ -31,9 +31,20 @@ require("mason-lspconfig").setup({
       end
 
       -- 기본 설정으로 서버 시작
-      vim.lsp.config(server_name, {
-        capabilities = require("cmp_nvim_lsp").default_capabilities(),
-      })
+      local ok, err = pcall(function()
+        vim.lsp.config(server_name, {
+          capabilities = require("cmp_nvim_lsp").default_capabilities(),
+        })
+        vim.lsp.enable(server_name)
+      end)
+
+      if not ok then
+        vim.notify(
+          string.format("Mason LSP 서버 '%s' 활성화 실패: %s", server_name, err),
+          vim.log.levels.WARN,
+          { title = "Mason LSP" }
+        )
+      end
     end,
   },
 })

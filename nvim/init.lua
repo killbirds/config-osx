@@ -18,15 +18,13 @@ require("config.fold").setup()
 -- UI 개선 사항
 vim.o.mousemoveevent = true -- 마우스 이벤트 기능 활성화 (부동 창 호버 기능 등)
 
--- 터미널 개선 기능
-vim.g.term_conceal = true -- 터미널 줄 숨김 기능 활성화
-vim.g.term_reflow = true  -- 터미널 리플로우 활성화
-
 -- Treesitter 비동기 파싱 활성화
 vim.g._ts_force_sync_parsing = false
 
 -- OSC 52 클립보드 지원 활성화
-vim.g.termfeatures = { osc52 = true }
+local termfeatures = vim.g.termfeatures or {}
+termfeatures.osc52 = true
+vim.g.termfeatures = termfeatures
 
 -- 중앙화된 진단 설정 로드
 require("config.diagnostics").setup()
