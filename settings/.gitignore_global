@@ -11,6 +11,7 @@ npm-debug.log
 .*.swp
 config.codekit3
 
-# Codex agent instructions
+# Agent instructions
 AGENTS.md
 GEMINI.md
+.sisyphus/
