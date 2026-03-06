@@ -65,6 +65,13 @@ return {
     "j-hui/fidget.nvim",
     -- tag = "v1.2.0",
     event = "LspAttach",
+    config = function(_, opts)
+      require("fidget").setup(opts)
+
+      -- Fidget's health check still warns about implicit nvim-tree integration
+      -- even when notification.window.avoid already includes "NvimTree".
+      require("fidget.integration.nvim-tree").options.enable = false
+    end,
     opts = {
       progress = {
         poll_rate = 0,
