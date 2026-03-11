@@ -32,6 +32,56 @@ local config = {
   },
 }
 
+local function resolve_command(candidates)
+  for _, candidate in ipairs(candidates) do
+    if vim.fn.executable(candidate) == 1 then
+      return candidate
+    end
+  end
+
+  return nil
+end
+
+local scalafix_cmd = resolve_command({
+  "scalafix",
+  "/opt/homebrew/bin/scalafix",
+  "/usr/local/bin/scalafix",
+})
+
+local coursier_cmd = resolve_command({
+  "coursier",
+  "/opt/homebrew/bin/coursier",
+  "/usr/local/bin/coursier",
+})
+
+local function is_linter_runnable(linter)
+  if type(linter.condition) == "function" then
+    local ok, should_run = pcall(linter.condition)
+    if not ok or not should_run then
+      return false
+    end
+  end
+
+  local cmd = linter.cmd
+  if type(cmd) == "function" then
+    local ok, resolved_cmd = pcall(cmd)
+    if not ok or type(resolved_cmd) ~= "string" or resolved_cmd == "" then
+      return false
+    end
+    cmd = resolved_cmd
+  end
+
+  return type(cmd) == "string" and vim.fn.executable(cmd) == 1
+end
+
+local function try_lint_safe()
+  lint.try_lint(nil, {
+    filter = function(linter)
+      return is_linter_runnable(linter)
+    end,
+  })
+end
+
 -- 타이머 관리 모듈화
 local timers = {
   buffer = {},     -- 버퍼별 타이머
@@ -101,7 +151,7 @@ lint.linters_by_ft = {
   python = { "ruff" },           -- Python 린팅 (ruff)
   lua = { "luacheck" },          -- Lua 린팅
   rust = { "clippy" },           -- Rust 린팅 (cargo clippy)
-  scala = { "scalafix" },        -- Scala 린팅 (scalafix)
+  scala = (scalafix_cmd or coursier_cmd) and { "scalafix" } or {}, -- Scala 린팅 (scalafix)
 }
 
 -- 커스텀 린터 설정 (선택적)
@@ -123,21 +173,30 @@ lint.linters.luacheck = {
   stream = "stdout",
 }
 
-lint.linters.scalafix = {
-  name = "scalafix",
-  cmd = "scalafix",
-  args = { "--check", "%filepath" },
-  stream = "stdout",
-  ignore_exitcode = true,
-  stdin = false,
-  condition = function()
-    return vim.fn.executable("scalafix") == 1
-  end,
-  parser = require("lint.parser").from_errorformat("%f:%l:%c: %m,%f:%l: %m", {
-    source = "scalafix",
-    severity = vim.diagnostic.severity.WARN,
-  }),
-}
+lint.linters.scalafix = function()
+  local cmd = scalafix_cmd
+  local args = { "--check", "%filepath" }
+
+  if not cmd and coursier_cmd then
+    cmd = coursier_cmd
+    args = { "launch", "scalafix", "--", "--check", "%filepath" }
+  end
+
+  cmd = cmd or "scalafix"
+
+  return {
+    name = "scalafix",
+    cmd = cmd,
+    args = args,
+    stream = "stdout",
+    ignore_exitcode = true,
+    stdin = false,
+    parser = require("lint.parser").from_errorformat("%f:%l:%c: %m,%f:%l: %m", {
+      source = "scalafix",
+      severity = vim.diagnostic.severity.WARN,
+    }),
+  }
+end
 
 lint.linters.ruff = {
   name = "ruff",
@@ -274,7 +333,7 @@ if config.auto_lint.on_save then
         -- 타이머 생성 및 시작 (저장 후 지연된 린팅 실행)
         timers.start("buffer", bufnr, function()
           if vim.api.nvim_buf_is_valid(bufnr) then
-            lint.try_lint()
+            try_lint_safe()
             update_quickfix()
           end
         end)
@@ -299,7 +358,7 @@ if config.auto_lint.on_enter then
       -- 타이머 생성 및 시작
       timers.start("buffer", bufnr, function()
         if vim.api.nvim_buf_is_valid(bufnr) then
-          lint.try_lint()
+          try_lint_safe()
         end
       end)
     end,
@@ -359,7 +418,7 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- 편의 기능: 린팅 수동 실행 명령어 추가
 vim.api.nvim_create_user_command("Lint", function()
-  lint.try_lint()
+  try_lint_safe()
   update_quickfix()
 end, { desc = "수동으로 린팅 실행" })
 
