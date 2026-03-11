@@ -311,14 +311,16 @@ local function cleanup_duplicate_clients()
 
 	-- 클라이언트를 이름별로 그룹화
 	for _, client in ipairs(vim.lsp.get_clients()) do
-		if not clients_by_name[client.name] then
-			clients_by_name[client.name] = {}
+		if client.name ~= "metals" then
+			if not clients_by_name[client.name] then
+				clients_by_name[client.name] = {}
+			end
+			table.insert(clients_by_name[client.name], client)
 		end
-		table.insert(clients_by_name[client.name], client)
 	end
 
 	-- 중복 클라이언트 찾기
-	for name, clients in pairs(clients_by_name) do
+	for _, clients in pairs(clients_by_name) do
 		if #clients > 1 then
 			-- 첫 번째 클라이언트만 유지하고 나머지는 중지
 			for i = 2, #clients do
@@ -386,7 +388,19 @@ vim.api.nvim_create_user_command("LspRestart", function()
 		return
 	end
 
+	local restartable_clients = {}
 	for _, client in ipairs(clients) do
+		if client.name ~= "metals" then
+			table.insert(restartable_clients, client)
+		end
+	end
+
+	if #restartable_clients == 0 then
+		vim.notify("Metals는 LspRestart 대상에서 제외됩니다. :MetalsRestart를 사용하세요.", vim.log.levels.INFO)
+		return
+	end
+
+	for _, client in ipairs(restartable_clients) do
 		vim.notify(string.format("LSP 서버 '%s' 재시작 중...", client.name), vim.log.levels.INFO, {
 			title = "LSP 재시작",
 			timeout = 1000,
