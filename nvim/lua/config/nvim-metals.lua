@@ -13,6 +13,7 @@ vim.opt_global.shortmess:remove("F") -- API 메시지 표시 활성화
 
 -- Metals 기본 설정
 local metals_config = metals.bare_config()
+metals_config.find_root_dir_max_project_nesting = 2
 
 -- Metals 전용 자동 명령 그룹 (미리 정의하여 다른 함수에서 사용할 수 있게 함)
 local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
