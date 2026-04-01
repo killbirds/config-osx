@@ -81,9 +81,29 @@ brew install neovim
 brew install ag  # The Silver Searcher
 brew install ripgrep  # rg
 
-# 코드 포맷팅 도구
+# Java / JVM 도구
+brew install --cask temurin@17
 brew install google-java-format
+brew install checkstyle
 ```
+
+#### Java 개발 도구
+
+이 저장소의 Neovim 설정은 Java 파일에서 Metals를 LSP로 사용하고, 저장 시에는 `google-java-format`을 우선 사용합니다.
+`google-java-format`이 없으면 Conform의 LSP fallback을 통해 Metals 포매팅으로 동작하고, Java 린트는 `./install` 시 홈 디렉토리에 설치되는 `~/.custom_java_checks.xml`을 기준으로 `checkstyle`를 실행합니다.
+
+```bash
+# 기본 JDK 선택 (셸 설정에 추가 권장)
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# 확인
+java -version
+echo $JAVA_HOME
+```
+
+`SDKMAN`으로 JDK를 관리하더라도 최종적으로 `JAVA_HOME`이 올바른 JDK를 가리켜야 Metals가 정상 동작합니다.
+`zprezto.patch`를 별도로 적용해 사용하는 경우에는 `java_ls`, `java_use 17` 헬퍼도 함께 사용할 수 있습니다.
 
 #### Scala 개발 도구
 
