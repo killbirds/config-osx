@@ -1,6 +1,14 @@
 local actions = require("telescope.actions")
 local telescope = require("telescope")
-local open_with_trouble = require("trouble.sources.telescope").open
+
+local function open_with_trouble(prompt_bufnr)
+  local ok, trouble_telescope = pcall(require, "trouble.sources.telescope")
+  if ok then
+    return trouble_telescope.open(prompt_bufnr)
+  end
+
+  return actions.select_default(prompt_bufnr)
+end
 
 telescope.setup({
   defaults = {
@@ -64,28 +72,3 @@ telescope.load_extension("smart_history")
 
 -- Load projects
 telescope.load_extension("projects")
-
--- Key mappings for Telescope
-local telescope_mappings = {
-  ["<C-p>"] = "<cmd>Telescope find_files<cr>",
-  ["<leader>ff"] = "<cmd>Telescope find_files<cr>",
-  ["<leader>fg"] = "<cmd>Telescope live_grep<cr>",
-  ["<leader>fb"] = "<cmd>Telescope buffers<cr>",
-  ["<leader>fp"] = "<cmd>Telescope projects<cr>",
-  ["<leader>fh"] = "<cmd>Telescope help_tags<cr>",
-  [",ag"] = "<cmd>Telescope live_grep<cr>",
-  -- 이전 피커/검색 결과 다시 열기
-  ["<leader>fr"] = "<cmd>Telescope resume<cr>",
-  -- 이전 피커 목록 보기
-  ["<leader>fP"] = "<cmd>Telescope pickers<cr>",
-}
-
--- Set key mappings in normal mode
-for key, cmd in pairs(telescope_mappings) do
-  vim.keymap.set("n", key, cmd, { silent = true })
-end
-
-vim.keymap.set("n", "<leader>ag", function()
-  local current_word = vim.fn.expand("<cword>")
-  require("telescope.builtin").live_grep({ default_text = current_word })
-end, { desc = "Search for selected word" })
