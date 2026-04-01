@@ -32,8 +32,9 @@ require("mason-lspconfig").setup({
 
       -- 기본 설정으로 서버 시작
       local ok, err = pcall(function()
+        local lsp_config = require("config.nvim-lspconfig")
         vim.lsp.config(server_name, {
-          capabilities = require("cmp_nvim_lsp").default_capabilities(),
+          capabilities = lsp_config.get_default_capabilities(),
         })
         vim.lsp.enable(server_name)
       end)

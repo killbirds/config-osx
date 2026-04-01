@@ -1,6 +1,6 @@
 local metals = require("metals")
 local keys = require("config.nvim-lspconfig-keys")
-local cmp_nvim_lsp = require("cmp_nvim_lsp")
+local lsp_capabilities = require("config.lsp-capabilities")
 
 -- ========== 설정 변수 ========== --
 -- 개발/프로덕션 환경에 따른 조건부 설정
@@ -228,7 +228,7 @@ metals_config.on_attach = function(client, bufnr)
 
 end
 
-metals_config.capabilities = cmp_nvim_lsp.default_capabilities() -- nvim-cmp 통합
+metals_config.capabilities = lsp_capabilities.default_capabilities() -- nvim-cmp 통합
 
 -- LSP 디버깅 활성화
 metals_config.flags = {

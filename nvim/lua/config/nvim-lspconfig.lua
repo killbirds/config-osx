@@ -1,5 +1,5 @@
-local cmp_nvim_lsp = require("cmp_nvim_lsp")
 local keys = require("config.nvim-lspconfig-keys")
+local lsp_capabilities = require("config.lsp-capabilities")
 
 -- 공통 LSP 설정 함수
 local function setup_lsp(client, bufnr)
@@ -45,7 +45,7 @@ end
 
 -- 공통 옵션 설정
 local default_opts = {
-	capabilities = cmp_nvim_lsp.default_capabilities(), -- nvim-cmp와의 통합
+	capabilities = lsp_capabilities.default_capabilities(), -- nvim-cmp와의 통합
 	flags = {
 		debounce_text_changes = 150, -- 텍스트 변경 후 지연 시간 (ms)
 	},
@@ -411,6 +411,9 @@ return {
 	get_servers = function()
 		return servers
 	end, -- 설정된 서버 목록 반환
+	get_default_capabilities = function()
+		return lsp_capabilities.default_capabilities()
+	end,
 	cleanup_duplicates = cleanup_duplicate_clients, -- 중복 클라이언트 정리
 	show_status = show_lsp_status, -- LSP 상태 확인
 }

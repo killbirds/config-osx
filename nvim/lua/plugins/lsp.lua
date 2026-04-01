@@ -1,21 +1,25 @@
 return {
   -- nvim-cmp & LSP
-  "L3MON4D3/LuaSnip",
-  "saadparwaiz1/cmp_luasnip",
-  "onsails/lspkind-nvim",
   {
     "hrsh7th/nvim-cmp",
+    event = { "InsertEnter", "CmdlineEnter" },
+    dependencies = {
+      "L3MON4D3/LuaSnip",
+      "saadparwaiz1/cmp_luasnip",
+      "onsails/lspkind-nvim",
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-nvim-lua",
+      "hrsh7th/cmp-path",
+      "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-cmdline",
+    },
     config = function()
       require("config.nvim-cmp")
     end,
   },
-  "hrsh7th/cmp-nvim-lsp",
-  "hrsh7th/cmp-nvim-lua",
-  "hrsh7th/cmp-path",
-  "hrsh7th/cmp-buffer",
-  "hrsh7th/cmp-cmdline",
   {
     "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
       require("config.nvim-lspconfig")
     end,
@@ -39,6 +43,7 @@ return {
   {
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
       require("config.mason-lspconfig")
     end,
@@ -46,6 +51,7 @@ return {
   {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     dependencies = { "williamboman/mason.nvim" },
+    cmd = { "MasonToolsInstall", "MasonToolsUpdate", "MasonToolsClean" },
     config = function()
       require("config.mason-tool-installer")
     end,
