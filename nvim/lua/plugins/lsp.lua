@@ -54,9 +54,19 @@ return {
   -- Treesitter
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main",
+    lazy = false,
     build = ":TSUpdate",
     config = function()
       require("config.nvim-treesitter")
+    end,
+  },
+  {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    branch = "main",
+    lazy = false,
+    config = function()
+      require("config.nvim-treesitter-textobjects").setup()
     end,
   },
 
