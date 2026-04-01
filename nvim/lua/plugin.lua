@@ -106,9 +106,6 @@ require("lazy").setup({
 
 -- 진단 설정은 config/diagnostics.lua에서 중앙 관리됨
 
--- Treesitter 비동기 처리 확인
-vim.g._ts_force_sync_parsing = false
-
 -- 새로운 snippet 기능 활용 (0.11 기본 매핑)
 -- <Tab>과 <S-Tab>은 기본적으로 매핑됨
 

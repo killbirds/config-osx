@@ -121,9 +121,6 @@ end
 function M.setup_memory_optimizations()
   -- 0.11에서 개선된 메모리 관리
 
-  -- Treesitter 메모리 최적화
-  vim.g.ts_max_memory_usage = 100 * 1024 * 1024 -- 100MB 제한
-
   -- LSP 로그 레벨은 init.lua와 nvim-lspconfig.lua에서 중앙 관리됨
   -- 진단 설정은 config/diagnostics.lua에서 중앙 관리됨
 end

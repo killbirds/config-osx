@@ -160,47 +160,51 @@ function M.setup()
   -- 추가 폴딩 유틸리티
   vim.keymap.set("n", "<leader>zn", function()
     -- 현재 함수만 접기
-    if pcall(require, "nvim-treesitter.locals") then
-      local ts_locals = require("nvim-treesitter.locals")
-      local bufnr = vim.api.nvim_get_current_buf()
+    local bufnr = vim.api.nvim_get_current_buf()
+    local filetype = vim.bo[bufnr].filetype
+    local language = vim.treesitter.language.get_lang(filetype) or filetype
+    local ok, parser = pcall(vim.treesitter.get_parser, bufnr, language)
 
-      -- 현재 커서 위치 가져오기
-      local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-      row = row - 1
+    if not ok or not parser then
+      vim.notify("이 기능을 사용하려면 사용 가능한 Treesitter 파서가 필요합니다.", vim.log.levels.WARN)
+      return
+    end
 
-      -- 함수 위치 찾기
-      local root = vim.treesitter.get_parser(bufnr):parse()[1]:root()
-      local query = vim.treesitter.query.get(vim.bo.filetype, "locals")
+    local trees = parser:parse()
+    local tree = trees and trees[1]
+    if not tree then
+      vim.notify("현재 버퍼의 Treesitter 구문 트리를 가져올 수 없습니다.", vim.log.levels.WARN)
+      return
+    end
 
-      if not query then
-        vim.notify("이 언어에 대한 Treesitter 쿼리를 찾을 수 없습니다.", vim.log.levels.WARN)
-        return
-      end
+    local query = vim.treesitter.query.get(language, "locals")
+    if not query then
+      vim.notify("이 언어에 대한 Treesitter locals 쿼리를 찾을 수 없습니다.", vim.log.levels.WARN)
+      return
+    end
 
-      for _, node, _ in query:iter_captures(root, bufnr, 0, -1) do
-        local node_type = node:type()
-        if
-            node_type == "function"
-            or node_type == "method"
-            or node_type:match("function")
-            or node_type:match("method")
-        then
-          local start_row, _, end_row, _ = node:range()
+    local row = vim.api.nvim_win_get_cursor(0)[1] - 1
+    local root = tree:root()
 
-          -- 현재 커서가 함수 내에 있는지 확인
-          if row >= start_row and row <= end_row then
-            -- 함수 폴딩
-            vim.api.nvim_win_set_cursor(0, { start_row + 1, 0 })
-            vim.cmd("normal! za")
-            return
-          end
+    for _, node, _ in query:iter_captures(root, bufnr, 0, -1) do
+      local node_type = node:type()
+      if
+          node_type == "function"
+          or node_type == "method"
+          or node_type:match("function")
+          or node_type:match("method")
+      then
+        local start_row, _, end_row, _ = node:range()
+
+        if row >= start_row and row <= end_row then
+          vim.api.nvim_win_set_cursor(0, { start_row + 1, 0 })
+          vim.cmd("normal! za")
+          return
         end
       end
-
-      vim.notify("현재 커서 위치에서 함수를 찾을 수 없습니다.", vim.log.levels.INFO)
-    else
-      vim.notify("이 기능을 사용하려면 nvim-treesitter가 필요합니다.", vim.log.levels.WARN)
     end
+
+    vim.notify("현재 커서 위치에서 함수를 찾을 수 없습니다.", vim.log.levels.INFO)
   end, { noremap = true, desc = "Fold current function only" })
 end
 

@@ -18,9 +18,6 @@ require("config.fold").setup()
 -- UI 개선 사항
 vim.o.mousemoveevent = true -- 마우스 이벤트 기능 활성화 (부동 창 호버 기능 등)
 
--- Treesitter 비동기 파싱 활성화
-vim.g._ts_force_sync_parsing = false
-
 -- OSC 52 클립보드 지원 활성화
 local termfeatures = vim.g.termfeatures or {}
 termfeatures.osc52 = true
