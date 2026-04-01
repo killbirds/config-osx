@@ -5,6 +5,7 @@ require("conform").setup({
     typescript = { "prettier" },
     javascriptreact = { "prettier" },
     typescriptreact = { "prettier" },
+    java = { "google-java-format" },
     html = { "prettier" },
     css = { "prettier" },
     json = { "prettier" },
@@ -36,6 +37,11 @@ require("conform").setup({
     prettier = {
       command = "prettier",
       args = { "--stdin-filepath", "$FILENAME" },
+    },
+    ["google-java-format"] = {
+      command = "google-java-format",
+      args = { "--assume-filename", "$FILENAME", "-" },
+      stdin = true,
     },
     stylua = {
       command = "stylua",

@@ -8,10 +8,11 @@ local config = {
     "lua",
     "rust",
     "scala",
+    "java",
   },
 
   -- 지원하는 파일 패턴
-  patterns = { "*.py", "*.lua", "*.rs", "*.scala" },
+  patterns = { "*.py", "*.lua", "*.rs", "*.scala", "*.java" },
 
   -- 디바운스 설정 (ms)
   debounce = {
@@ -53,6 +54,14 @@ local coursier_cmd = resolve_command({
   "/opt/homebrew/bin/coursier",
   "/usr/local/bin/coursier",
 })
+
+local checkstyle_cmd = resolve_command({
+  "checkstyle",
+  "/opt/homebrew/bin/checkstyle",
+  "/usr/local/bin/checkstyle",
+})
+
+local java_checkstyle_config = vim.fn.expand("~/.custom_java_checks.xml")
 
 local function is_linter_runnable(linter)
   if type(linter.condition) == "function" then
@@ -152,6 +161,7 @@ lint.linters_by_ft = {
   lua = { "luacheck" },          -- Lua 린팅
   rust = { "clippy" },           -- Rust 린팅 (cargo clippy)
   scala = (scalafix_cmd or coursier_cmd) and { "scalafix" } or {}, -- Scala 린팅 (scalafix)
+  java = { "java_checkstyle" },
 }
 
 -- 커스텀 린터 설정 (선택적)
@@ -194,6 +204,24 @@ lint.linters.scalafix = function()
     parser = require("lint.parser").from_errorformat("%f:%l:%c: %m,%f:%l: %m", {
       source = "scalafix",
       severity = vim.diagnostic.severity.WARN,
+    }),
+  }
+end
+
+lint.linters.java_checkstyle = function()
+  return {
+    name = "java_checkstyle",
+    cmd = checkstyle_cmd or "checkstyle",
+    args = { "-f", "sarif", "-c", java_checkstyle_config },
+    stream = "stdout",
+    ignore_exitcode = true,
+    stdin = false,
+    append_fname = true,
+    condition = function()
+      return checkstyle_cmd ~= nil and vim.uv.fs_stat(java_checkstyle_config) ~= nil
+    end,
+    parser = require("lint.parser").for_sarif({
+      source = "checkstyle",
     }),
   }
 end

@@ -20,6 +20,15 @@ local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = t
 local nvim_metals_autostart_group = vim.api.nvim_create_augroup("nvim-metals-autostart", { clear = true })
 local metals_starting = false
 
+local function resolve_java_home()
+	local java_home = vim.env.JAVA_HOME
+	if type(java_home) == "string" and java_home ~= "" and vim.fn.isdirectory(java_home) == 1 then
+		return java_home
+	end
+
+	return nil
+end
+
 -- ========== 사용자 구성 함수 ========== --
 -- Metals 기능별 조건부 활성화 함수
 local function configure_metals_settings()
@@ -35,8 +44,6 @@ local function configure_metals_settings()
 			"akka.actor.typed.javadsl",
 			"com.github.swagger.akka.javadsl",
 		},
-		-- Java 홈 디렉토리 설정 (환경 변수에서 가져오기)
-		javaHome = vim.fn.expand("$JAVA_HOME"),
 		-- 엄격한 null 체크 (타입 안전성 향상)
 		strictMode = true,
 		-- 서버 속성 설정 (JVM 옵션)
@@ -47,6 +54,11 @@ local function configure_metals_settings()
 			"-XX:+UseStringDeduplication",
 		},
 	}
+
+	local java_home = resolve_java_home()
+	if java_home then
+		settings.javaHome = java_home
+	end
 
 	-- 조건부 기능 활성화
 	-- 성능 비용이 큰 기능들은 필요에 따라 활성화
@@ -123,6 +135,10 @@ local function setup_format_on_save(bufnr)
 		return
 	end
 
+	if vim.bo[bufnr].filetype == "java" then
+		return
+	end
+
 	vim.api.nvim_clear_autocmds({ group = nvim_metals_group, buffer = bufnr })
 	vim.api.nvim_create_autocmd("BufWritePre", {
 		buffer = bufnr,
@@ -135,7 +151,7 @@ local function setup_format_on_save(bufnr)
 				end,
 			})
 		end,
-		desc = "Format Scala/SBT/Java buffer on save",
+		desc = "Format Scala/SBT buffer on save",
 	})
 end
 
