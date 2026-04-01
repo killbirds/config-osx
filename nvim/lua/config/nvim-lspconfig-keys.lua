@@ -27,6 +27,22 @@ local function setup_inlay_hints_keymaps(bufnr)
   end, vim.tbl_extend("force", opts, { desc = "Toggle Inlay Hints" }))
 end
 
+local function show_hover()
+  vim.lsp.buf.hover({
+    border = "rounded",
+    max_width = 80,
+    max_height = 20,
+  })
+end
+
+local function show_signature_help()
+  vim.lsp.buf.signature_help({
+    border = "rounded",
+    max_width = 80,
+    max_height = 15,
+  })
+end
+
 -- on_attach 함수: LSP 클라이언트가 버퍼에 연결될 때 호출
 M.on_attach = function(client, bufnr)
   -- 버퍼 옵션 설정
@@ -35,7 +51,7 @@ M.on_attach = function(client, bufnr)
   -- LSP 기본 키바인딩
   set_keymap(bufnr, "n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
   set_keymap(bufnr, "n", "gd", vim.lsp.buf.definition, "Go to Definition")
-  set_keymap(bufnr, "n", "K", vim.lsp.buf.hover, "Show Hover Documentation")
+  set_keymap(bufnr, "n", "K", show_hover, "Show Hover Documentation")
   set_keymap(bufnr, "n", "gi", vim.lsp.buf.implementation, "Go to Implementation")
   set_keymap(bufnr, "n", "gy", vim.lsp.buf.type_definition, "Go to Type Definition")
   set_keymap(bufnr, "n", "gr", vim.lsp.buf.references, "List References")
@@ -50,6 +66,7 @@ M.on_attach = function(client, bufnr)
   -- 코드 조작 관련 키맵
   set_keymap(bufnr, "n", "<leader>rn", vim.lsp.buf.rename, "Rename Symbol")
   set_keymap(bufnr, "n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
+  set_keymap(bufnr, { "i", "s" }, "<C-S>", show_signature_help, "Show Signature Help")
 
   -- 진단 관련 키맵은 config/diagnostics.lua에서 중앙 관리됨
   -- 중복 방지를 위해 여기서는 제거

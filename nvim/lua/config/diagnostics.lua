@@ -44,6 +44,18 @@ local float_opts = {
   end,
 }
 
+local function show_jump_diagnostic(diagnostic, bufnr)
+  if not diagnostic then
+    return
+  end
+
+  vim.diagnostic.open_float({
+    bufnr = bufnr,
+    scope = "cursor",
+    focus = false,
+  })
+end
+
 local signs_opts = {
   priority = 10,
   text = diagnostic_icons,
@@ -77,8 +89,8 @@ local default_config = {
 
   -- Jump settings (Neovim 0.11+ feature)
   jump = {
-    float = true,
-    severity_limit = vim.diagnostic.severity.WARN,
+    on_jump = show_jump_diagnostic,
+    severity = { min = vim.diagnostic.severity.WARN },
   },
 }
 
@@ -136,11 +148,11 @@ function M.setup_keymaps()
 
   -- Diagnostic navigation
   vim.keymap.set("n", "[d", function()
-    vim.diagnostic.jump({ count = -1, float = true })
+    vim.diagnostic.jump({ count = -1 })
   end, vim.tbl_extend("force", opts, { desc = "Previous diagnostic" }))
 
   vim.keymap.set("n", "]d", function()
-    vim.diagnostic.jump({ count = 1, float = true })
+    vim.diagnostic.jump({ count = 1 })
   end, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
 
   -- Diagnostic display

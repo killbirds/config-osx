@@ -73,7 +73,7 @@ vim.opt.ttimeoutlen = 5 -- 키 코드 대기 시간 단축 (빠른 응답)
 vim.opt.ttyfast = true -- 빠른 터미널 연결 가정
 
 -- LSP 성능 최적화
-vim.lsp.set_log_level("WARN") -- LSP 로그 레벨을 WARN으로 설정 (ERROR보다 약간 더 많은 정보)
+vim.lsp.log.set_level("WARN") -- LSP 로그 레벨을 WARN으로 설정 (ERROR보다 약간 더 많은 정보)
 
 -- 검색 설정 개선
 vim.opt.ignorecase = true -- 검색 시 대소문자 무시

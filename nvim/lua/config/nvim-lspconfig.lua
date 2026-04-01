@@ -287,19 +287,6 @@ end
 
 -- 진단 설정은 config/diagnostics.lua에서 중앙 관리됨
 
--- LSP 핸들러 성능 최적화
-vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-	border = "rounded",
-	max_width = 80,
-	max_height = 20,
-})
-
-vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-	border = "rounded",
-	max_width = 80,
-	max_height = 15,
-})
-
 -- 모듈 실행을 즉시 로딩으로 변경 (지연 로딩 문제 해결)
 setup_lsp_servers()
 setup_inlay_hints_keymaps()
