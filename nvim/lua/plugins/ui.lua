@@ -23,6 +23,16 @@ return {
   {
     "famiu/bufdelete.nvim",
     cmd = { "Bdelete", "Bwipeout" },
+    keys = {
+      {
+        "<C-c>",
+        function()
+          require("config.bufdelete").smart_bufdelete()
+        end,
+        silent = true,
+        desc = "Delete current buffer unless it is protected",
+      },
+    },
     config = function()
       require("config.bufdelete")
     end,
@@ -40,6 +50,7 @@ return {
   {
     "folke/trouble.nvim",
     dependencies = "nvim-tree/nvim-web-devicons",
+    cmd = { "Trouble" },
     config = function()
       require("config.trouble")
     end,
