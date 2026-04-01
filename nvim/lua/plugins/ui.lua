@@ -1,9 +1,13 @@
 return {
   -- Statusline & UI
-  "nvim-tree/nvim-web-devicons",
+  {
+    "nvim-tree/nvim-web-devicons",
+    lazy = true,
+  },
   {
     "nvim-lualine/lualine.nvim",
     dependencies = "nvim-tree/nvim-web-devicons",
+    event = "VeryLazy",
     config = function()
       require("config.lualine")
     end,
@@ -11,12 +15,14 @@ return {
   {
     "akinsho/bufferline.nvim",
     dependencies = "nvim-tree/nvim-web-devicons",
+    event = "VeryLazy",
     config = function()
       require("config.bufferline")
     end,
   },
   {
     "famiu/bufdelete.nvim",
+    cmd = { "Bdelete", "Bwipeout" },
     config = function()
       require("config.bufdelete")
     end,
@@ -26,6 +32,7 @@ return {
   {
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
+    event = { "BufReadPost", "BufNewFile" },
     opts = {},
   },
 

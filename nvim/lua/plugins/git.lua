@@ -4,6 +4,7 @@ return {
   { "rbong/vim-flog", dependencies = "tpope/vim-fugitive" },
   {
     "lewis6991/gitsigns.nvim",
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
       require("config.gitsigns")
     end,
