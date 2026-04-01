@@ -80,19 +80,3 @@ vim.api.nvim_create_user_command("Format", function(args)
     range = args.range ~= 0 and { args.line1, args.line2 } or nil,
   })
 end, { range = true, desc = "Format buffer or range" })
-
--- 수동 포매팅 키맵 (선택적)
-vim.keymap.set("n", "<leader>fmt", function()
-  local bufnr = vim.api.nvim_get_current_buf()
-  require("conform").format({ async = true, lsp_fallback = should_lsp_fallback(bufnr) })
-end, { silent = true, desc = "Format buffer" })
-
--- 비주얼 모드에서 선택 영역만 포맷팅
-vim.keymap.set("v", "<leader>fmt", function()
-  local bufnr = vim.api.nvim_get_current_buf()
-  require("conform").format({
-    async = true,
-    lsp_fallback = should_lsp_fallback(bufnr),
-    range = { vim.fn.line("'<"), vim.fn.line("'>") },
-  })
-end, { silent = true, desc = "Format selected lines" })

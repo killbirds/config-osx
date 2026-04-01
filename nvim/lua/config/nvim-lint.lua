@@ -61,6 +61,12 @@ local checkstyle_cmd = resolve_command({
   "/usr/local/bin/checkstyle",
 })
 
+local luacheck_cmd = resolve_command({
+  "/opt/homebrew/bin/luacheck",
+  "/usr/local/bin/luacheck",
+  "luacheck",
+})
+
 local java_checkstyle_config = vim.fn.expand("~/.custom_java_checks.xml")
 
 local function is_linter_runnable(linter)
@@ -176,12 +182,8 @@ lint.linters.eslint = {
   },
 }
 
-lint.linters.luacheck = {
-  name = "luacheck",
-  cmd = "luacheck",
-  args = { "--formatter", "plain", "--codes", "--ranges", "--filename", "%filepath", "-" },
-  stream = "stdout",
-}
+lint.linters.luacheck.cmd = luacheck_cmd or "luacheck"
+lint.linters.luacheck.args = { "--formatter", "plain", "--codes", "--ranges", "--filename", "%filepath", "-" }
 
 lint.linters.scalafix = function()
   local cmd = scalafix_cmd

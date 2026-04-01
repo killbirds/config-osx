@@ -20,6 +20,19 @@ return {
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
+    cmd = { "LspCleanup", "LspStatus", "LspRestart" },
+    keys = {
+      {
+        "<leader>th",
+        function()
+          local bufnr = vim.api.nvim_get_current_buf()
+          local filter = { bufnr = bufnr }
+          local enabled = vim.lsp.inlay_hint.is_enabled(filter)
+          vim.lsp.inlay_hint.enable(not enabled, filter)
+        end,
+        desc = "Toggle Inlay Hints",
+      },
+    },
     config = function()
       require("config.nvim-lspconfig")
     end,
@@ -28,6 +41,7 @@ return {
     "scalameta/nvim-metals",
     dependencies = "nvim-lua/plenary.nvim",
     ft = { "scala", "sbt", "java" },
+    cmd = { "MetalsStart" },
     config = function()
       require("config.nvim-metals")
     end,
@@ -135,15 +149,32 @@ return {
   -- 린트 및 포맷팅
   {
     "stevearc/conform.nvim",
-    -- tag = "v5.5.1", -- 특정 태그 사용 권장
-    event = { "BufWritePre" }, -- 저장 시 포맷팅을 위한 트리거
-    cmd = { "ConformInfo" },   -- lazy 로딩 최적화
-    -- opts 테이블 삭제
-    -- config 함수 복원
+    event = { "BufReadPre", "BufNewFile" },
+    cmd = { "ConformInfo", "Format" },
+    keys = {
+      {
+        "<leader>fmt",
+        function()
+          require("conform").format({ async = true, lsp_fallback = true })
+        end,
+        mode = "n",
+        desc = "Format buffer",
+      },
+      {
+        "<leader>fmt",
+        function()
+          require("conform").format({
+            async = true,
+            lsp_fallback = true,
+            range = { vim.fn.line("'<"), vim.fn.line("'>") },
+          })
+        end,
+        mode = "v",
+        desc = "Format selected lines",
+      },
+    },
     config = function()
       require("config.conform")
     end,
-    -- 기존 0.11 최적화 설정 (필요시 config/conform.lua 내부에서 관리)
-    -- opts = { ... }
   },
 }
