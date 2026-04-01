@@ -73,7 +73,7 @@ return {
 	-- im-select.nvim for Korean input method management
 	{
 		"keaising/im-select.nvim",
-		event = "InsertEnter", -- 입력 시에만 로드
+		lazy = false,
 		config = function()
 			require("config.im-select")
 		end,
