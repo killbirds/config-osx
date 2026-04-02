@@ -11,6 +11,11 @@ local function setup_buffer_options(bufnr)
   -- 오므니펑션 설정 (LSP 기반 자동완성)
   vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
   -- 버퍼별 추가 옵션 (선택적)
+  if vim.bo[bufnr].filetype == "java" then
+    vim.bo[bufnr].formatexpr = ""
+    return
+  end
+
   vim.bo[bufnr].formatexpr = "v:lua.vim.lsp.formatexpr()"
 end
 
@@ -72,7 +77,7 @@ M.on_attach = function(client, bufnr)
   -- 중복 방지를 위해 여기서는 제거
 
   -- 서버별 조건부 설정 (예시)
-  if client:supports_method("textDocument/formatting") then
+  if client:supports_method("textDocument/formatting") and vim.bo[bufnr].filetype ~= "java" then
     vim.api.nvim_buf_create_user_command(bufnr, "Format", function()
       vim.lsp.buf.format({ async = true })
     end, { desc = "Format current buffer with LSP" })

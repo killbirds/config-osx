@@ -89,8 +89,9 @@ brew install checkstyle
 
 #### Java 개발 도구
 
-이 저장소의 Neovim 설정은 Java 파일에서 Metals를 LSP로 사용하고, 저장 시에는 `google-java-format`을 우선 사용합니다.
-`google-java-format`이 없으면 Conform의 LSP fallback을 통해 Metals 포매팅으로 동작하고, Java 린트는 `./install` 시 홈 디렉토리에 설치되는 `~/.custom_java_checks.xml`을 기준으로 `checkstyle`를 실행합니다.
+이 저장소의 Neovim 설정은 Java 파일에서 Metals를 LSP로 사용하며, Java 포매팅은 `google-java-format`으로 표준화되어 있습니다.
+Java 들여쓰기는 2칸(`shiftwidth=2`, `softtabstop=2`, `tabstop=2`, `expandtab=true`)으로 맞추고, Java 린트는 `./install` 시 홈 디렉토리에 설치되는 `~/.custom_java_checks.xml`을 사용하는 `checkstyle` 기준으로 실행합니다.
+Java 포매팅은 `google-java-format` 경로가 준비되지 않으면 즉시 실패하도록 두고, Java에서 Metals 포매팅으로 자동 fallback 하지는 않습니다.
 
 ```bash
 # 기본 JDK 선택 (셸 설정에 추가 권장)

@@ -128,6 +128,18 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+vim.api.nvim_create_autocmd("FileType", {
+	group = augroup,
+	pattern = { "java" },
+	callback = function()
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.softtabstop = 2
+		vim.opt_local.tabstop = 2
+		vim.opt_local.expandtab = true
+		vim.opt_local.colorcolumn = "100"
+	end,
+})
+
 -- 대용량 파일 처리는 cache_manager.lua에서 중앙 관리됨
 
 -- 터미널 설정 자동화
