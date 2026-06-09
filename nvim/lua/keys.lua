@@ -133,7 +133,7 @@ vim.keymap.set("n", "<Leader>go", vim.lsp.buf.document_symbol, { desc = "Documen
 vim.keymap.set("n", "<Leader>lc", function()
   local clients = vim.lsp.get_clients({ bufnr = 0 })
   for _, client in ipairs(clients) do
-    if client.supports_method("textDocument/completion") then
+    if client:supports_method("textDocument/completion") then
       if vim.b.lsp_completion_enabled then
         vim.lsp.completion.enable(false, client.id)
         vim.b.lsp_completion_enabled = false

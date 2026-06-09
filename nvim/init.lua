@@ -32,8 +32,8 @@ vim.opt.statuscolumn = "%l %s"
 -- 새로운 윈도우 테두리 기본값 설정
 -- vim.o.winborder = "rounded"
 
--- 새로운 completeopt 옵션 활용
-vim.opt.completeopt = { "menuone", "noselect", "fuzzy", "preinsert" }
+-- completeopt는 nvim-cmp(config/nvim-cmp.lua)가 소유한다.
+-- cmp가 InsertEnter 시 전역 completeopt를 덮어쓰므로 여기서 설정하면 무시된다.
 
 -- 새로운 wildmode 옵션
 vim.opt.wildmode:append("noselect")

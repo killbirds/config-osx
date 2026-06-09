@@ -19,19 +19,6 @@ local function setup_buffer_options(bufnr)
   vim.bo[bufnr].formatexpr = "v:lua.vim.lsp.formatexpr()"
 end
 
--- Inlay Hints 키 매핑 설정 함수
-local function setup_inlay_hints_keymaps(bufnr)
-  local opts = { noremap = true, silent = true, buffer = bufnr }
-  -- Inlay hints 토글 키 매핑 (API 문서 기반 수정)
-  vim.keymap.set("n", "<leader>th", function()
-    -- 현재 버퍼에서만 토글
-    local current_bufnr = vim.api.nvim_get_current_buf()
-    local filter = { bufnr = current_bufnr }
-    local enabled = vim.lsp.inlay_hint.is_enabled(filter)
-    vim.lsp.inlay_hint.enable(not enabled, filter)
-  end, vim.tbl_extend("force", opts, { desc = "Toggle Inlay Hints" }))
-end
-
 local function show_hover()
   vim.lsp.buf.hover({
     border = "rounded",
@@ -76,16 +63,13 @@ M.on_attach = function(client, bufnr)
   -- 진단 관련 키맵은 config/diagnostics.lua에서 중앙 관리됨
   -- 중복 방지를 위해 여기서는 제거
 
+  -- Inlay Hints 토글 키맵(<leader>th)은 plugins/lsp.lua의 lazy keys에서 정의됨
+
   -- 서버별 조건부 설정 (예시)
   if client:supports_method("textDocument/formatting") and vim.bo[bufnr].filetype ~= "java" then
     vim.api.nvim_buf_create_user_command(bufnr, "Format", function()
       vim.lsp.buf.format({ async = true })
     end, { desc = "Format current buffer with LSP" })
-  end
-
-  -- Inlay Hints 키 매핑 설정 (최신 Neovim 버전 확인)
-  if vim.lsp.inlay_hint and vim.fn.has("nvim-0.10.0") == 1 then
-    setup_inlay_hints_keymaps(bufnr)
   end
 
   -- LSP 관리 키 매핑 추가

@@ -3,7 +3,11 @@ local M = {}
 function M.default_capabilities(override)
 	override = override or {}
 
-	local capabilities = vim.lsp.protocol.make_client_capabilities()
+	-- nvim-cmp가 로드되어 있으면 cmp_nvim_lsp의 capabilities를 기반으로 사용한다.
+	-- (cmp 버전 업데이트 시 누락 항목이 생기지 않도록 표준 경로를 우선한다.)
+	local ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
+	local capabilities = ok and cmp_nvim_lsp.default_capabilities()
+		or vim.lsp.protocol.make_client_capabilities()
 	local completion = capabilities.textDocument.completion
 	local completion_item = completion.completionItem
 

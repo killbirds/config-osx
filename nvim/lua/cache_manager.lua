@@ -154,15 +154,11 @@ function M.setup_buffer_cache()
       local size_5mb = 5 * 1024 * 1024
 
       -- 1MB 이상 파일은 진단 비활성화 (diagnostics.lua와 통합)
+      -- 주의: vim.diagnostic.config의 두 번째 인자는 namespace이며 bufnr가 아니므로
+      -- 버퍼별 비활성화에는 vim.diagnostic.enable(false, { bufnr = ... })을 사용한다.
       if file_size > size_1mb then
         vim.b[bufnr]._large_file = true
-        vim.diagnostic.config({
-          virtual_text = false,
-          virtual_lines = false,
-          signs = false,
-          underline = false,
-          float = false,
-        }, bufnr)
+        vim.diagnostic.enable(false, { bufnr = bufnr })
       end
 
       -- 5MB 이상 파일은 추가 최적화 적용 (init.lua와 동일한 임계값 사용)

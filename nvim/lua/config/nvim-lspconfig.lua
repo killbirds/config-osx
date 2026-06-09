@@ -30,18 +30,7 @@ local function setup_lsp(client, bufnr)
 	-- })
 end
 
--- Inlay Hints 키 매핑 설정
-local function setup_inlay_hints_keymaps()
-	local opts = { noremap = true, silent = true }
-	-- Inlay hints 토글 키 매핑 (API 문서 기반 수정)
-	vim.keymap.set("n", "<leader>th", function()
-		-- 현재 버퍼에서만 토글
-		local bufnr = vim.api.nvim_get_current_buf()
-		local filter = { bufnr = bufnr }
-		local enabled = vim.lsp.inlay_hint.is_enabled(filter)
-		vim.lsp.inlay_hint.enable(not enabled, filter)
-	end, vim.tbl_extend("force", opts, { desc = "Toggle Inlay Hints" }))
-end
+-- Inlay Hints 토글 키맵(<leader>th)은 plugins/lsp.lua의 lazy keys에서 정의됨
 
 -- 공통 옵션 설정
 local default_opts = {
@@ -289,7 +278,6 @@ end
 
 -- 모듈 실행을 즉시 로딩으로 변경 (지연 로딩 문제 해결)
 setup_lsp_servers()
-setup_inlay_hints_keymaps()
 
 -- LSP 클라이언트 관리 유틸리티 함수들
 local function cleanup_duplicate_clients()
