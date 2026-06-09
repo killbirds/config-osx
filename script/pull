@@ -10,5 +10,7 @@ for PROJECT in "${PROJECTS[@]}"; do
     git pull --all --recurse --log
     popd > /dev/null
     echo "--------------------------------------"
+
+    sleep 5
   fi
 done
