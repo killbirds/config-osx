@@ -15,3 +15,5 @@ config.codekit3
 AGENTS.md
 GEMINI.md
 .sisyphus/
+
+**/.claude/settings.local.json
