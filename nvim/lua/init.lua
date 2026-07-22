@@ -25,8 +25,8 @@ vim.opt.wrap = false -- 긴 줄 자동 줄바꿈 비활성화
 vim.opt.colorcolumn = "120" -- 120자 컬럼 표시
 
 -- 프로젝트별 설정 지원 (exrc)
-vim.opt.exrc = false -- 프로젝트 디렉토리의 .nvim.lua, .nvimrc, .exrc 파일을 로드
-vim.opt.secure = true -- 보안을 위해 일부 명령어 제한 (exrc와 함께 사용 권장)
+vim.opt.exrc = false -- 프로젝트 디렉토리의 .nvim.lua 등 로컬 설정 파일을 로드하지 않음
+vim.opt.secure = true -- 보안을 위해 일부 명령어 제한 (exrc를 켤 경우 함께 사용 권장)
 
 -- 리더 키 설정 (lazy.nvim과 공유)
 vim.g.mapleader = " "
@@ -42,6 +42,8 @@ vim.opt.timeoutlen = 300 -- 기본값 1000ms보다 짧게 설정하여 더 빠�
 vim.opt.swapfile = false
 vim.opt.backup = false
 vim.opt.writebackup = false
+-- swap/backup을 모두 껐으므로 영속 undo로 편집 이력을 보존한다.
+vim.opt.undofile = true
 
 -- 파일 시스템 성능 최적화
 vim.opt.wildignore:append({
@@ -93,6 +95,17 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	pattern = "*",
 	callback = function()
 		vim.hl.on_yank({ timeout = 200 })
+	end,
+})
+
+-- autoread는 외부 명령 실행 시에만 동작하므로, 포커스 복귀/버퍼 진입 시
+-- 파일 변경 여부를 직접 확인해 외부 수정 사항을 반영한다.
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
+	group = augroup,
+	callback = function()
+		if vim.api.nvim_get_mode().mode ~= "c" and vim.fn.getcmdwintype() == "" then
+			vim.cmd("checktime")
+		end
 	end,
 })
 

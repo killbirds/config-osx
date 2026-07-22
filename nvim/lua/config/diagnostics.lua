@@ -238,6 +238,7 @@ function M.toggle_mode()
 end
 
 -- Utility function to get diagnostic status for statusline
+-- (참고: 현재 상태줄은 lualine의 diagnostics 컴포넌트를 사용하므로 이 함수는 옵션)
 function M.get_status()
   local diagnostics = vim.diagnostic.get(0)
   if #diagnostics == 0 then
@@ -273,8 +274,5 @@ function M.get_status()
 
   return table.concat(status, " ")
 end
-
--- Export for global access
-_G.diagnostic_status = M.get_status
 
 return M

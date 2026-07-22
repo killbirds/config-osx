@@ -33,8 +33,8 @@ end
 -- Metals 기능별 조건부 활성화 함수
 local function configure_metals_settings()
 	-- 기본 설정
+	-- serverVersion은 고정하지 않는다 (nvim-metals가 관리하는 안정 버전 사용)
 	local settings = {
-		serverVersion = "1.6.6",
 		showImplicitArguments = true, -- 암묵적 인수 표시
 		ammoniteJvmProperties = { "-Xmx2G" }, -- Ammonite JVM 메모리 설정
 		bloopSbtAlreadyInstalled = true,
@@ -76,9 +76,8 @@ end
 local function apply_metals_settings()
 	metals_config.settings = metals_config.settings or {}
 	metals_config.settings.metals = configure_metals_settings()
-	metals_config.settings.trace = {
-		server = "verbose",
-	}
+	-- trace.server = "verbose"는 로그가 과도해 제거함 (기본값 off).
+	-- LSP 통신 디버깅이 필요할 때만 일시적으로 켤 것.
 
 	metals_config.init_options = {
 		statusBarProvider = "off",
@@ -277,10 +276,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
 			table.insert(missing_tools, "java")
 		end
 
-		-- Bloop 확인 (선택적)
-		if vim.fn.executable("bloop") == 0 and metals_config.settings.metals.bloopSbtAlreadyInstalled then
-			table.insert(missing_tools, "bloop")
-		end
+		-- 참고: bloop CLI 존재 검사는 제거함. Metals가 Bloop을 내장 관리하므로
+		-- 별도의 bloop 실행 파일은 필요하지 않다.
 
 		-- 누락된 도구가 있으면 경고
 		if #missing_tools > 0 then

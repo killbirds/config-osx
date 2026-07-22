@@ -9,16 +9,18 @@ function M.setup()
   vim.g.VM_silent_exit = 0                -- 종료 시 메시지 표시
 
   -- 키 매핑 설정
+  -- 주의: "Find Under", "Select Cursor Down/Up", "Add Cursor At Pos", "Select All"은
+  -- VM 진입점이라 전역 매핑으로 등록된다. <C-j>/<C-k>(창 이동), <C-a>(숫자 증가),
+  -- <C-x>(숫자 감소) 같은 기본 기능을 덮지 않도록 전역 키는 신중히 고른다.
   vim.g.VM_maps = {
     -- 기본 매핑
     ["Find Under"] = "<C-n>",       -- 커서 아래 단어 선택 및 다음 일치 항목 찾기
     ["Find Subword Under"] = "<C-n>", -- 커서 아래 부분 단어 선택
-    ["Select All"] = "<C-a>",       -- 모든 일치 항목 선택
-    ["Select Cursor Down"] = "<C-j>", -- 아래에 커서 추가
-    ["Select Cursor Up"] = "<C-k>", -- 위에 커서 추가
+    ["Select Cursor Down"] = "<C-Down>", -- 아래에 커서 추가 (VM 기본값)
+    ["Select Cursor Up"] = "<C-Up>", -- 위에 커서 추가 (VM 기본값)
+    -- "Select All"(기본 \\A), "Add Cursor At Pos"(기본 \\\\)는 VM 기본 리더 매핑 사용
 
-    -- 추가 매핑
-    ["Add Cursor At Pos"] = "<C-x>", -- 현재 위치에 커서 추가
+    -- 추가 매핑 (비주얼 모드 한정이라 전역 충돌 없음)
     ["Visual All"] = "<C-a>",      -- 비주얼 모드에서 모든 일치 항목 선택
     ["Visual Find"] = "<C-f>",     -- 비주얼 모드에서 선택 항목 찾기
     ["Visual Add"] = "<C-d>",      -- 비주얼 모드에서 선택 항목 추가

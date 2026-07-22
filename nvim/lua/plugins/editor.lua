@@ -1,10 +1,6 @@
 return {
 	-- 기본 편집 도구
-	{
-		"tpope/vim-sensible",
-		lazy = false, -- 기본 설정이므로 즉시 로드
-		priority = 1000,
-	},
+	-- (tpope/vim-sensible은 Neovim에서 거의 전부 기본값이라 제거함)
 	-- {
 	-- 	"kylechui/nvim-surround",
 	-- 	event = "VeryLazy", -- 필요할 때만 로드

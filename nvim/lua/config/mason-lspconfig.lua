@@ -1,51 +1,32 @@
+-- mason-lspconfig v2: 지원 옵션은 ensure_installed와 automatic_enable 뿐이다.
+-- (v1의 handlers / automatic_installation / max_concurrent_installers는 제거되어 무시됨)
+--
+-- 서버별 세부 설정은 config/nvim-lspconfig.lua의 servers 테이블에서 vim.lsp.config()로
+-- 등록되고, 공통 capabilities는 vim.lsp.config("*")로 적용된다.
+-- 여기서는 설치 보장과 vim.lsp.enable() 자동 호출만 담당한다.
 require("mason-lspconfig").setup({
   ensure_installed = {
-    -- 핵심 서버만 기본 설치
     "lua_ls",      -- Lua
     "rust_analyzer", -- Rust
     "ts_ls",       -- TypeScript
     "eslint",      -- ESLint
+    "pyright",     -- Python
+    "marksman",    -- Markdown
 
     -- 자주 사용하는 서버는 필요에 따라 주석 해제
-    "pyright", -- Python
     -- "cssls", -- CSS
     -- "html", -- HTML
     -- "jsonls", -- JSON
     -- "yamlls", -- YAML
-    "marksman", -- Markdown
     -- "bashls", -- Bash
     -- "clangd", -- C/C++
     -- "gopls", -- Go
   },
-  automatic_installation = true, -- 자동 설치 활성화
-  automatic_enable = false,
-  max_concurrent_installers = 2, -- 동시에 설치할 수 있는 서버 수 제한
-  handlers = {
-    -- 기본 핸들러: 모든 서버에 대해 기본 설정 적용
-    function(server_name)
-      -- nvim-lspconfig.lua에서 이미 설정된 서버는 건너뛰기
-      local servers = require("config.nvim-lspconfig").get_servers()
-      if servers[server_name] then
-        -- 이미 설정된 서버는 건너뛰기 (중복 방지)
-        return
-      end
-
-      -- 기본 설정으로 서버 시작
-      local ok, err = pcall(function()
-        local lsp_config = require("config.nvim-lspconfig")
-        vim.lsp.config(server_name, {
-          capabilities = lsp_config.get_default_capabilities(),
-        })
-        vim.lsp.enable(server_name)
-      end)
-
-      if not ok then
-        vim.notify(
-          string.format("Mason LSP 서버 '%s' 활성화 실패: %s", server_name, err),
-          vim.log.levels.WARN,
-          { title = "Mason LSP" }
-        )
-      end
-    end,
+  -- 설치된 서버를 자동으로 vim.lsp.enable() 한다.
+  -- servers 테이블에 있는 서버는 nvim-lspconfig.lua에서도 enable하지만 중복 호출은 무해하다.
+  -- ruff는 mason 패키지(린터 바이너리)가 LSP 서버로도 등록되는데,
+  -- Python 린팅은 nvim-lint의 ruff가 담당하므로 진단 중복을 막기 위해 제외한다.
+  automatic_enable = {
+    exclude = { "ruff" },
   },
 })

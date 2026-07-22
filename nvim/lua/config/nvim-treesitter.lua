@@ -125,15 +125,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
-local has_context, ts_context = pcall(require, "treesitter-context")
-if has_context then
-  ts_context.setup({
-    enable = true,
-    max_lines = 4,
-    min_window_height = 20,
-    multiline_threshold = 3,
-    trim_scope = "inner",
-    mode = "cursor",
-    separator = nil,
-  })
-end
+-- 참고: nvim-treesitter-context 설정이 있었지만 플러그인이 설치되어 있지 않아
+-- 동작한 적이 없어 제거함. 필요하면 plugins/editor.lua에
+-- "nvim-treesitter/nvim-treesitter-context"를 추가하고 여기서 setup할 것.

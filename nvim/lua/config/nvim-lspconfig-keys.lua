@@ -49,9 +49,10 @@ M.on_attach = function(client, bufnr)
   set_keymap(bufnr, "n", "gr", vim.lsp.buf.references, "List References")
 
   -- 워크스페이스 관련 키맵
-  set_keymap(bufnr, "n", "<leader>wa", vim.lsp.buf.add_workspace_folder, "Add Workspace Folder")
-  set_keymap(bufnr, "n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, "Remove Workspace Folder")
-  set_keymap(bufnr, "n", "<leader>wl", function()
+  -- <leader>w는 저장(:w) 키이므로 timeout 지연을 피하기 위해 <leader>L 네임스페이스 사용
+  set_keymap(bufnr, "n", "<leader>La", vim.lsp.buf.add_workspace_folder, "Add Workspace Folder")
+  set_keymap(bufnr, "n", "<leader>Ld", vim.lsp.buf.remove_workspace_folder, "Remove Workspace Folder")
+  set_keymap(bufnr, "n", "<leader>Ll", function()
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, "List Workspace Folders")
 
@@ -72,14 +73,8 @@ M.on_attach = function(client, bufnr)
     end, { desc = "Format current buffer with LSP" })
   end
 
-  -- LSP 관리 키 매핑 추가
-  local opts = { noremap = true, silent = true }
-  vim.keymap.set("n", "<leader>lC", "<cmd>LspCleanup<cr>",
-    vim.tbl_extend("force", opts, { desc = "LSP 중복 클라이언트 정리" }))
-  vim.keymap.set("n", "<leader>ls", "<cmd>LspStatus<cr>",
-    vim.tbl_extend("force", opts, { desc = "LSP 상태 확인" }))
-  vim.keymap.set("n", "<leader>lr", "<cmd>LspRestart<cr>",
-    vim.tbl_extend("force", opts, { desc = "LSP 재시작" }))
+  -- LSP 관리 키맵(<leader>Lc/Ls/Lr)은 전역이므로 config/nvim-lspconfig.lua에서
+  -- 한 번만 등록한다. (이전에는 on_attach마다 전역 매핑을 재등록했음)
 end
 
 -- 추가 유틸리티 함수 (선택적)

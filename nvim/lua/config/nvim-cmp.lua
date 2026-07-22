@@ -57,6 +57,9 @@ cmp.setup({
   }),
   -- 자동완성 소스 설정 (우선순위 순)
   sources = cmp.config.sources({
+    -- lazydev: lua 파일에서 require("...") 경로 및 Neovim API 완성
+    -- (group_index = 0으로 LSP 소스보다 우선; lua 외 파일타입에서는 비활성)
+    { name = "lazydev", group_index = 0 },
     { name = "nvim_lsp", priority = 1000 }, -- LSP 소스 (최우선)
     { name = "luasnip",  priority = 750 }, -- LuaSnip 스니펫
     { name = "nvim_lua", priority = 500 }, -- Neovim Lua API
@@ -147,10 +150,10 @@ cmp.setup({
 })
 
 -- 파일 타입별 추가 설정
+-- (cmp_git, cmp-emoji 소스는 플러그인이 설치되어 있지 않아 제거함.
+--  쓰려면 petertriho/cmp-git, hrsh7th/cmp-emoji를 플러그인 스펙에 추가할 것)
 cmp.setup.filetype("gitcommit", {
   sources = cmp.config.sources({
-    { name = "cmp_git" }, -- Git 관련 자동완성 (설치 필요)
-  }, {
     { name = "buffer" },
   }),
 })
@@ -161,7 +164,6 @@ cmp.setup.filetype("markdown", {
     { name = "nvim_lsp" },
     { name = "luasnip" },
     { name = "path" },
-    { name = "emoji",   option = { insert = true } }, -- 이모지 지원 (cmp-emoji 필요)
   }, {
     { name = "buffer" },
   }),

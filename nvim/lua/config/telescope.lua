@@ -12,7 +12,10 @@ end
 
 telescope.setup({
   defaults = {
-    file_ignore_patterns = { "node_modules", ".git", "yarn.lock", "\\.cache" },
+    -- Lua 패턴이므로 .은 %.로 이스케이프해야 한다.
+    -- (".git"은 임의 문자+git이라 "digit" 같은 파일명까지 숨기고,
+    --  "\\.cache"는 리터럴 백슬래시를 요구해 아무것도 매치하지 않았음)
+    file_ignore_patterns = { "node_modules/", "%.git/", "yarn%.lock", "%.cache/" },
     mappings = {
       i = {
         ["<esc>"] = actions.close,

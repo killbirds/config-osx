@@ -56,12 +56,9 @@ require("lazy").setup({
     },
   },
   performance = {
-    -- 0.11 권장 성능 최적화 설정
     cache = {
+      -- 현행 lazy.nvim의 cache 옵션은 enabled 뿐이다 (path/ttl은 무시됨)
       enabled = true,
-      path = vim.fn.stdpath("cache") .. "/lazy/cache",
-      -- 캐시 수명 연장 (기본 7일 -> 30일)
-      ttl = 86400 * 30,
     },
     reset_packpath = true, -- 패키지 경로 재설정으로 성능 향상
     rtp = {
@@ -69,7 +66,7 @@ require("lazy").setup({
       disabled_plugins = {
         "gzip",
         "matchit",
-        "matchparen", -- 0.11에서 권장하는 비활성화
+        -- matchparen은 괄호 짝 하이라이트이므로 비활성화하지 않는다
         "netrwPlugin",
         "tarPlugin",
         "tohtml",

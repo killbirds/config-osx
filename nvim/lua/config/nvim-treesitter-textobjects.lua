@@ -13,6 +13,8 @@ function M.setup()
   local select = require("nvim-treesitter-textobjects.select")
   local move = require("nvim-treesitter-textobjects.move")
 
+  -- 주의: ab/ib는 내장 괄호 텍스트오브젝트(a(/i( 별칭)를 덮어쓰므로 사용하지 않는다.
+  -- @block은 대부분 aB/iB({} 블록)로 대체 가능하다.
   local select_keymaps = {
     af = "@function.outer",
     ["if"] = "@function.inner",
@@ -20,8 +22,6 @@ function M.setup()
     ic = "@class.inner",
     aa = "@parameter.outer",
     ia = "@parameter.inner",
-    ab = "@block.outer",
-    ib = "@block.inner",
     al = "@loop.outer",
     il = "@loop.inner",
     ad = "@conditional.outer",
@@ -34,6 +34,8 @@ function M.setup()
     end, { desc = "Treesitter textobject: " .. query })
   end
 
+  -- 주의: 조건문 이동은 ]o/[o를 사용한다.
+  -- ]d/[d는 진단 이동(config/diagnostics.lua)과 충돌하므로 쓰지 않는다.
   local move_keymaps = {
     ["]m"] = function()
       move.goto_next_start("@function.outer", "textobjects")
@@ -41,7 +43,7 @@ function M.setup()
     ["]]"] = function()
       move.goto_next_start("@class.outer", "textobjects")
     end,
-    ["]d"] = function()
+    ["]o"] = function()
       move.goto_next_start("@conditional.outer", "textobjects")
     end,
     ["]l"] = function()
@@ -59,7 +61,7 @@ function M.setup()
     ["[["] = function()
       move.goto_previous_start("@class.outer", "textobjects")
     end,
-    ["[d"] = function()
+    ["[o"] = function()
       move.goto_previous_start("@conditional.outer", "textobjects")
     end,
     ["[l"] = function()

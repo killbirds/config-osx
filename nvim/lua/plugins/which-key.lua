@@ -8,7 +8,8 @@ return {
   },
   keys = {
     {
-      "<leader>?",
+      -- <leader>?는 Comment.nvim의 블록 코멘트 토글이 사용하므로 <leader>K 사용
+      "<leader>K",
       function()
         require("which-key").show({ global = false })
       end,

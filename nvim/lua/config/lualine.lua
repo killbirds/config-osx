@@ -57,15 +57,7 @@ require("lualine").setup({
       }, -- LSP 진단 (중복 방지를 위해 통합)
     },
     lualine_x = {
-      -- 린트 상태 추가 (global 함수에서 가져옴)
-      {
-        function()
-          return _G.lint_status and _G.lint_status() or ""
-        end,
-        color = {
-          fg = "#e5c07b", -- 린트 상태 색상
-        },
-      },
+      -- 진단 개수는 lualine_c의 diagnostics 컴포넌트가 표시하므로 여기서 중복 표시하지 않는다
       { "filetype", icon_only = false, colored = true }, -- 파일 타입과 아이콘 함께 표시
     },
     lualine_y = {

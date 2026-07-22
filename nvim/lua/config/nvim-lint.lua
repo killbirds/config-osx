@@ -22,7 +22,9 @@ local config = {
 
   -- Quickfix 설정
   quickfix = {
-    auto_open = true,                          -- 자동으로 quickfix 창 열기 여부
+    -- 진단이 바뀔 때마다 창이 열리고 닫히는 것이 산만하므로 자동 열기는 끈다.
+    -- 목록은 항상 갱신되므로 :copen 또는 <leader>xQ(Trouble)로 확인.
+    auto_open = false,
     min_severity = vim.diagnostic.severity.WARN, -- 최소 심각도 수준
   },
 
@@ -170,28 +172,33 @@ lint.linters_by_ft = {
   java = { "java_checkstyle" },
 }
 
--- 커스텀 린터 설정 (선택적)
-lint.linters.eslint = {
-  name = "eslint",                                                          -- 린터 이름
-  cmd = "eslint",                                                           -- 실행 명령어
-  args = { "--format", "json", "--stdin", "--stdin-filename", "%filepath" }, -- JSON 출력 설정
-  stream = "stdout",                                                        -- 출력 스트림
-  ignore_exitcode = true,                                                   -- 종료 코드 무시 (에러가 있어도 계속 진행)
-  env = {
-    ESLINT_USE_FLAT_CONFIG = "true",                                        -- eslint.config.mjs 파일을 인식하기 위한 환경 변수
-  },
-}
+-- 커스텀 린터 설정
+-- 주의: nvim-lint는 args의 문자열을 그대로 전달한다(%filepath 같은 플레이스홀더 치환 없음).
+-- 파일명이 필요하면 args에 함수를 넣거나(호출 시점에 평가됨),
+-- stdin=false + append_fname(기본값 true)으로 자동으로 덧붙이게 한다.
+-- (JS/TS 린팅은 LSP의 eslint 서버가 담당하므로 여기에는 없음)
 
+-- luacheck: 내장 정의를 쓰되 homebrew 경로 해석과 --filename 만 보강
 lint.linters.luacheck.cmd = luacheck_cmd or "luacheck"
-lint.linters.luacheck.args = { "--formatter", "plain", "--codes", "--ranges", "--filename", "%filepath", "-" }
+lint.linters.luacheck.args = {
+  "--formatter",
+  "plain",
+  "--codes",
+  "--ranges",
+  "--filename",
+  function()
+    return vim.api.nvim_buf_get_name(0)
+  end,
+  "-",
+}
 
 lint.linters.scalafix = function()
   local cmd = scalafix_cmd
-  local args = { "--check", "%filepath" }
+  local args = { "--check" } -- 파일명은 append_fname(stdin=false 기본값)으로 자동 추가됨
 
   if not cmd and coursier_cmd then
     cmd = coursier_cmd
-    args = { "launch", "scalafix", "--", "--check", "%filepath" }
+    args = { "launch", "scalafix", "--", "--check" }
   end
 
   cmd = cmd or "scalafix"
@@ -228,20 +235,9 @@ lint.linters.java_checkstyle = function()
   }
 end
 
-lint.linters.ruff = {
-  name = "ruff",
-  cmd = "ruff",
-  args = { "check", "--output-format=text", "--quiet", "%filepath" },
-  stream = "stdout",
-  ignore_exitcode = true,
-  stdin = false,
-  condition = function()
-    return vim.fn.executable("ruff") == 1
-  end,
-  parser = require("lint.parser").from_errorformat("%f:%l:%c: %t%n %m", {
-    source = "ruff",
-  }),
-}
+-- ruff는 nvim-lint 내장 린터를 그대로 사용한다.
+-- (기존 커스텀 정의는 치환되지 않는 %filepath 인자와 최신 ruff에서 제거된
+--  --output-format=text 때문에 항상 실패했음)
 
 -- 진단 결과를 quickfix에 표시하는 함수 (현재 프로젝트의 진단만 표시)
 local function update_quickfix()
@@ -452,55 +448,5 @@ vim.api.nvim_create_user_command("Lint", function()
   update_quickfix()
 end, { desc = "수동으로 린팅 실행" })
 
--- 상태 표시줄 함수 추가 (lualine 등에서 사용 가능)
-local function lint_status()
-  if vim.bo.buftype ~= "" or not vim.tbl_contains(config.filetypes, vim.bo.filetype) then
-    return ""
-  end
-
-  -- 현재 버퍼의 진단 정보 가져오기
-  local diagnostics = vim.diagnostic.get(0)
-  if #diagnostics == 0 then
-    return "✓" -- 이상 없음
-  end
-
-  -- 오류, 경고, 정보, 힌트 개수 집계
-  local counts = {
-    errors = 0,
-    warnings = 0,
-    info = 0,
-    hints = 0,
-  }
-
-  for _, diagnostic in ipairs(diagnostics) do
-    if diagnostic.severity == vim.diagnostic.severity.ERROR then
-      counts.errors = counts.errors + 1
-    elseif diagnostic.severity == vim.diagnostic.severity.WARN then
-      counts.warnings = counts.warnings + 1
-    elseif diagnostic.severity == vim.diagnostic.severity.INFO then
-      counts.info = counts.info + 1
-    elseif diagnostic.severity == vim.diagnostic.severity.HINT then
-      counts.hints = counts.hints + 1
-    end
-  end
-
-  -- 상태 문자열 만들기
-  local status = {}
-  if counts.errors > 0 then
-    table.insert(status, string.format("E:%d", counts.errors))
-  end
-  if counts.warnings > 0 then
-    table.insert(status, string.format("W:%d", counts.warnings))
-  end
-  if counts.info > 0 then
-    table.insert(status, string.format("I:%d", counts.info))
-  end
-  if counts.hints > 0 then
-    table.insert(status, string.format("H:%d", counts.hints))
-  end
-
-  return table.concat(status, " ")
-end
-
--- 글로벌 함수로 노출 (lualine 등에서 사용 가능)
-_G.lint_status = lint_status
+-- 참고: 상태줄 진단 표시는 lualine의 diagnostics 컴포넌트가 담당한다.
+-- (이전의 _G.lint_status는 같은 vim.diagnostic 정보를 중복 표시했음)

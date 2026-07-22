@@ -17,6 +17,19 @@ return {
       require("config.nvim-cmp")
     end,
   },
+  -- Neovim 설정/플러그인 Lua 편집용 lua_ls 자동 구성
+  -- 열린 파일의 require()를 감지해 해당 플러그인 경로만 lua_ls workspace에
+  -- 지연 추가한다 (전체 플러그인 인덱싱 없이 vim.* / 플러그인 API 자동완성 제공)
+  {
+    "folke/lazydev.nvim",
+    ft = "lua", -- lua 파일에서만 로드
+    opts = {
+      library = {
+        -- vim.uv를 사용하는 파일에서 luv 타입 정의 로드
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+      },
+    },
+  },
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
@@ -47,16 +60,16 @@ return {
     end,
   },
 
-  -- Mason
+  -- Mason (저장소가 williamboman → mason-org 조직으로 이관됨)
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     config = function()
       require("config.mason")
     end,
   },
   {
-    "williamboman/mason-lspconfig.nvim",
-    dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
+    "mason-org/mason-lspconfig.nvim",
+    dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       require("config.mason-lspconfig")
@@ -64,7 +77,7 @@ return {
   },
   {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
-    dependencies = { "williamboman/mason.nvim" },
+    dependencies = { "mason-org/mason.nvim" },
     cmd = { "MasonToolsInstall", "MasonToolsUpdate", "MasonToolsClean" },
     config = function()
       require("config.mason-tool-installer")
@@ -95,12 +108,11 @@ return {
     "j-hui/fidget.nvim",
     -- tag = "v1.2.0",
     event = "LspAttach",
+    -- 참고: 과거의 fidget.integration.nvim-tree 비활성화 핵은 최신 fidget에서
+    -- 해당 모듈이 제거되어 오히려 에러를 냈으므로 삭제함.
+    -- nvim-tree 회피는 notification.window.avoid 옵션이 담당한다.
     config = function(_, opts)
       require("fidget").setup(opts)
-
-      -- Fidget's health check still warns about implicit nvim-tree integration
-      -- even when notification.window.avoid already includes "NvimTree".
-      require("fidget.integration.nvim-tree").options.enable = false
     end,
     opts = {
       progress = {

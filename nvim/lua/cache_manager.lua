@@ -183,23 +183,15 @@ function M.setup_buffer_cache()
     end,
   })
 
-  -- 비활성 버퍼 정리 (0.11 최적화, 통합된 버전)
+  -- 비활성 버퍼 정리 (대용량 파일 한정)
+  -- 참고: help/qf 버퍼를 숨겨질 때마다 삭제하던 로직은 제거함.
+  -- 도움말을 오갈 때마다 재로드되고 quickfix 목록이 깨지는 부작용이 더 컸고,
+  -- 목록에 있던 "nofile"은 filetype이 아니라 buftype이라 매치된 적도 없다.
   vim.api.nvim_create_autocmd("BufHidden", {
     group = augroup,
     pattern = "*",
     callback = function(args)
       local bufnr = args.buf
-      local filetype = vim.bo[bufnr].filetype
-
-      -- 임시 파일타입은 즉시 정리
-      if vim.tbl_contains({ "help", "man", "qf", "quickfix", "nofile" }, filetype) then
-        vim.schedule(function()
-          if vim.api.nvim_buf_is_valid(bufnr) and not vim.bo[bufnr].modified then
-            vim.api.nvim_buf_delete(bufnr, { force = false })
-          end
-        end)
-        return
-      end
 
       -- 대용량 파일 정리 (20MB 이상)
       if vim.b[bufnr]._large_file then

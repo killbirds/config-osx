@@ -55,23 +55,10 @@ vim.keymap.set("n", "<Leader>bn", ":bnext<CR>", vim.tbl_extend("force", buffer_o
 vim.keymap.set("n", "<Leader>bp", ":bprevious<CR>", vim.tbl_extend("force", buffer_opts, { desc = "Previous buffer" }))
 vim.keymap.set("n", "<Leader>bd", ":Bdelete<CR>", vim.tbl_extend("force", buffer_opts, { desc = "Delete buffer" }))
 
--- Tab 키는 snippet과 충돌할 수 있으므로 조건부 매핑
--- 0.11에서는 snippet이 있을 때만 Tab 사용, 아니면 버퍼 전환
-vim.keymap.set("n", "<Tab>", function()
-  if vim.snippet and vim.snippet.active() then
-    return "<Tab>"
-  else
-    return "<Cmd>bnext<CR>"
-  end
-end, vim.tbl_extend("force", buffer_opts, { desc = "Next buffer or snippet jump", expr = true }))
-
-vim.keymap.set("n", "<S-Tab>", function()
-  if vim.snippet and vim.snippet.active() then
-    return "<S-Tab>"
-  else
-    return "<Cmd>bprevious<CR>"
-  end
-end, vim.tbl_extend("force", buffer_opts, { desc = "Previous buffer or snippet jump", expr = true }))
+-- 주의: 노멀 모드 <Tab> 매핑은 두지 않는다.
+-- 대부분의 터미널에서 <Tab>과 <C-i>는 같은 키코드라서, <Tab>을 버퍼 전환에 쓰면
+-- 점프리스트 앞으로 가기(<C-i>)가 사라진다. 버퍼 순환은 ]b/[b(기본 매핑) 또는
+-- <Leader>bn/<Leader>bp를 사용한다.
 
 -- 줄 이동 - 0.11 성능 최적화된 버전
 local move_opts = { noremap = true, silent = true }
@@ -130,7 +117,8 @@ end, { desc = "Toggle diagnostic mode (default/performance/development)" })
 vim.keymap.set("n", "<Leader>go", vim.lsp.buf.document_symbol, { desc = "Document symbols (complement to gO)" })
 
 -- LSP completion 토글 (0.11 새 기능)
-vim.keymap.set("n", "<Leader>lc", function()
+-- <Leader>l은 Comment.nvim 라인 코멘트 토글이므로 지연을 피해 <Leader>L 네임스페이스 사용
+vim.keymap.set("n", "<Leader>Lt", function()
   local clients = vim.lsp.get_clients({ bufnr = 0 })
   for _, client in ipairs(clients) do
     if client:supports_method("textDocument/completion") then
@@ -157,7 +145,7 @@ vim.keymap.set("n", "<Leader>x", ":x<CR>", { noremap = true, silent = true, desc
 -- vim-visual-multi 관련 설명
 -- 기본 키 매핑:
 -- <C-n>: 커서 아래 단어 선택 및 다음 일치 항목 찾기
--- <C-j>/<C-k>: 커서를 위/아래로 추가
+-- <C-Down>/<C-Up>: 커서를 아래/위로 추가 (<C-j>/<C-k>는 창 이동에 사용)
 -- <S-Left/Right>: 선택 영역 확장/축소
 -- 자세한 설정은 config/vim-visual-multi.lua 파일 참조
 

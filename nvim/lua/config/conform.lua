@@ -24,7 +24,8 @@ require("conform").setup({
   -- 저장 시 자동 포매팅 설정
   format_on_save = function(bufnr)
     -- 특정 파일 유형은 자동 포맷팅에서 제외
-    local exclude_filetypes = { "sql", "text" }
+    -- scala/sbt는 nvim-metals의 BufWritePre 포맷이 담당하므로 이중 포맷을 막기 위해 제외
+    local exclude_filetypes = { "sql", "text", "scala", "sbt" }
     if vim.tbl_contains(exclude_filetypes, vim.bo[bufnr].filetype) then
       return
     end

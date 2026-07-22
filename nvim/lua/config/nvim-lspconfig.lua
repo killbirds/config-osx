@@ -6,18 +6,6 @@ local function setup_lsp(client, bufnr)
 	-- 키맵 및 버퍼 설정
 	keys.on_attach(client, bufnr)
 
-	-- 포매팅 기능 활성화
-	client.server_capabilities.documentFormattingProvider = true
-	client.server_capabilities.documentRangeFormattingProvider = true
-
-	-- Inlay Hints 설정 (Neovim 0.10.0+)
-	if vim.lsp.inlay_hint and client.server_capabilities.inlayHintProvider then
-		-- 버퍼별 inlay hint 활성화 (API 문서 기반 수정)
-		if vim.fn.has("nvim-0.10.0") == 1 then
-			vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
-		end
-	end
-
 	-- 서버별 추가 설정 (선택적)
 	if client.name == "ts_ls" then
 		client.server_capabilities.documentFormattingProvider = false -- tsserver는 prettier에 위임 가능
@@ -39,24 +27,28 @@ local default_opts = {
 		debounce_text_changes = 150, -- 텍스트 변경 후 지연 시간 (ms)
 	},
 	on_attach = setup_lsp,
-	-- LSP 타임아웃 및 성능 관련 설정 추가
-	settings = {
-		-- 모든 LSP 서버에 적용될 기본 설정
-		workspace = {
-			-- 무시할 디렉토리 및 파일 패턴
-			ignoredFolders = {
-				"${workspaceFolder}/.cache",
-				"${workspaceFolder}/node_modules",
-				"${workspaceFolder}/.git",
-				"${workspaceFolder}/target",
-				"${workspaceFolder}/dist",
-				"${workspaceFolder}/.svelte-kit",
-				"${workspaceFolder}/.next",
-			},
-			maxFileSizeInMegabytes = 5, -- 5MB 이상 파일 LSP 분석 제외
-		},
-	},
 }
+
+-- servers 테이블에 없는 서버(mason-lspconfig automatic_enable로 시작되는 서버 포함)에도
+-- nvim-cmp capabilities가 적용되도록 전역 기본값을 등록한다.
+-- (on_attach를 "*"에 넣으면 서버별 rtp 기본 on_attach를 덮어쓸 수 있으므로
+--  공통 키맵은 아래 LspAttach autocmd로 적용한다)
+vim.lsp.config("*", {
+	capabilities = lsp_capabilities.default_capabilities(),
+})
+
+-- 어떤 서버가 붙든 공통 키맵/버퍼 옵션이 적용되도록 보장한다.
+-- servers 테이블의 서버는 setup_lsp에서도 keys.on_attach를 호출하지만,
+-- 동일한 버퍼 로컬 매핑을 다시 설정할 뿐이라 중복 호출은 무해하다.
+vim.api.nvim_create_autocmd("LspAttach", {
+	group = vim.api.nvim_create_augroup("UserLspAttachKeys", { clear = true }),
+	callback = function(args)
+		local client = vim.lsp.get_client_by_id(args.data.client_id)
+		if client then
+			keys.on_attach(client, args.buf)
+		end
+	end,
+})
 
 -- LSP 서버별 설정
 -- 공통 인레이 힌트 설정 테이블
@@ -180,28 +172,19 @@ local servers = {
 			end
 
 			-- Neovim 특화 설정으로 확장
+			-- workspace.library는 lazydev.nvim이 관리한다:
+			-- 열린 파일의 require()에 맞춰 Neovim 런타임과 플러그인 경로를
+			-- 지연 추가하므로 여기서 수동으로 나열하지 않는다.
 			client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
 				runtime = {
 					-- Neovim은 LuaJIT 사용
+					-- 주의: runtime.path는 "?.lua" 형태의 모듈 검색 패턴 목록이므로
+					-- 디렉토리 목록을 넣으면 안 된다. 기본값을 그대로 사용한다.
 					version = "LuaJIT",
-					-- 경로 설정
-					path = vim.api.nvim_get_runtime_file("", true), -- Use nvim_get_runtime_file for robust path
 				},
 				workspace = {
 					-- 서드파티 라이브러리 검사 비활성화 (성능 향상)
 					checkThirdParty = false,
-					-- Neovim 런타임 라이브러리 인식
-					library = {
-						vim.env.VIMRUNTIME,
-						vim.api.nvim_get_runtime_file("lua", true), -- Add Lua runtime files
-						vim.api.nvim_get_runtime_file("plugin", true), -- Add plugin runtime files
-						-- 추가적인 플러그인 경로가 필요하면 아래 주석을 해제하고 사용
-						-- "${3rd}/luv/library"
-						-- "${3rd}/busted/library",
-					},
-					-- 최대 preload 파일 수 (대규모 프로젝트 지원)
-					maxPreload = 2000,
-					preloadFileSize = 1000,
 				},
 				-- 향상된 진단 설정
 				diagnostics = {
@@ -236,25 +219,20 @@ local function setup_lsp_servers()
 	for server, config in pairs(servers) do
 		local merged_config = vim.tbl_deep_extend("force", default_opts, config)
 
-		-- 에러 핸들러 추가 (기존 on_init가 있으면 유지)
-		if merged_config.on_init then
-			local original_on_init = merged_config.on_init
-			merged_config.on_init = function(client, init_result)
-				return original_on_init(client, init_result)
-			end
-		end
-
 		merged_config.on_exit = function(code, signal, client_id)
-			local client = vim.lsp.get_client_by_id(client_id)
-			local server_name = client and client.name or "알 수 없음"
+			-- on_exit는 fast event context에서 호출될 수 있으므로 API 호출을 예약한다.
+			vim.schedule(function()
+				local client = vim.lsp.get_client_by_id(client_id)
+				local server_name = client and client.name or "알 수 없음"
 
-			if code ~= 0 or signal ~= 0 then
-				vim.notify(
-					string.format("LSP 서버 '%s' 비정상 종료 (code: %d, signal: %d)", server_name, code, signal),
-					vim.log.levels.ERROR,
-					{ title = "LSP 오류" }
-				)
-			end
+				if code ~= 0 or signal ~= 0 then
+					vim.notify(
+						string.format("LSP 서버 '%s' 비정상 종료 (code: %d, signal: %d)", server_name, code, signal),
+						vim.log.levels.ERROR,
+						{ title = "LSP 오류" }
+					)
+				end
+			end)
 		end
 
 		-- 서버 시작 시도
@@ -375,24 +353,45 @@ vim.api.nvim_create_user_command("LspRestart", function()
 		return
 	end
 
+	-- vim.lsp.enable(name)은 이미 enabled 상태면 no-op이므로 stop() 후 다시 호출해도
+	-- 재시작되지 않는다. enable(name, false)로 내렸다가 잠시 후 다시 올린다.
+	local names = {}
 	for _, client in ipairs(restartable_clients) do
-		vim.notify(string.format("LSP 서버 '%s' 재시작 중...", client.name), vim.log.levels.INFO, {
+		names[client.name] = true
+	end
+
+	for name in pairs(names) do
+		vim.notify(string.format("LSP 서버 '%s' 재시작 중...", name), vim.log.levels.INFO, {
 			title = "LSP 재시작",
 			timeout = 1000,
 		})
-		client:stop()
-		local ok, err = pcall(function()
-			vim.lsp.enable(client.name)
-		end)
-		if not ok then
-			vim.notify(
-				string.format("LSP 서버 '%s' 재시작 실패: %s", client.name, err),
-				vim.log.levels.WARN,
-				{ title = "LSP 재시작" }
-			)
-		end
+		vim.lsp.enable(name, false)
 	end
+
+	vim.defer_fn(function()
+		for name in pairs(names) do
+			local ok, err = pcall(vim.lsp.enable, name)
+			if not ok then
+				vim.notify(
+					string.format("LSP 서버 '%s' 재시작 실패: %s", name, err),
+					vim.log.levels.WARN,
+					{ title = "LSP 재시작" }
+				)
+			end
+		end
+	end, 500)
 end, { desc = "현재 버퍼의 LSP 서버 재시작" })
+
+-- LSP 관리 키맵 (전역이므로 on_attach가 아닌 여기서 한 번만 등록)
+-- <leader>l은 Comment.nvim의 라인 코멘트 토글이므로, timeout 지연을 만들지 않도록
+-- 관리용 키는 <leader>L 네임스페이스를 사용한다.
+local lsp_admin_opts = { noremap = true, silent = true }
+vim.keymap.set("n", "<leader>Lc", "<cmd>LspCleanup<cr>",
+	vim.tbl_extend("force", lsp_admin_opts, { desc = "LSP 중복 클라이언트 정리" }))
+vim.keymap.set("n", "<leader>Ls", "<cmd>LspStatus<cr>",
+	vim.tbl_extend("force", lsp_admin_opts, { desc = "LSP 상태 확인" }))
+vim.keymap.set("n", "<leader>Lr", "<cmd>LspRestart<cr>",
+	vim.tbl_extend("force", lsp_admin_opts, { desc = "LSP 재시작" }))
 
 return {
 	setup = setup_lsp_servers, -- 기존 즉시 로딩 방식 (호환성 유지)

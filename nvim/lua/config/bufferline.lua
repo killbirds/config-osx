@@ -2,10 +2,12 @@ require("bufferline").setup({
   options = {
     mode = "buffers", -- 버퍼 모드 (기본값, 탭 대신 버퍼 표시)
     numbers = "none", -- 버퍼 번호 표시 안 함
-    close_command = "bdelete! %d", -- 버퍼 강제 삭제 명령어 (숨김 방지)
-    right_mouse_command = "bdelete! %d", -- 우클릭으로 버퍼 강제 삭제
+    -- bufdelete.nvim의 :Bdelete 사용 (창 레이아웃 유지).
+    -- bang 없이 실행해 수정된 버퍼는 경고 없이 날아가지 않도록 한다.
+    close_command = "Bdelete %d",
+    right_mouse_command = "Bdelete %d", -- 우클릭으로 버퍼 삭제
     left_mouse_command = "buffer %d", -- 좌클릭으로 버퍼 이동
-    middle_mouse_command = "bdelete! %d", -- 중클릭으로 버퍼 삭제
+    middle_mouse_command = "Bdelete %d", -- 중클릭으로 버퍼 삭제
     indicator = {
       style = "icon", -- 활성 버퍼를 아이콘으로 표시
       icon = "▎", -- 커스텀 인디케이터 아이콘 (심플한 수직선)
@@ -18,7 +20,8 @@ require("bufferline").setup({
     diagnostics_update_in_insert = false, -- 삽입 모드에서 진단 업데이트 비활성화 (성능 최적화)
     custom_filter = function(bufnr)
       -- 표시하지 않을 파일 타입 필터링
-      local exclude_ft = { "qf", "fugitive", "git", "help", "text" }
+      -- ("text"를 넣으면 .txt 파일이 버퍼라인에서 사라지므로 제외하지 않는다)
+      local exclude_ft = { "qf", "fugitive", "git", "help" }
       local cur_ft = vim.bo[bufnr].filetype
       return not vim.tbl_contains(exclude_ft, cur_ft)
     end,
