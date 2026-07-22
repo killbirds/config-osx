@@ -14,6 +14,11 @@ config.codekit3
 # Agent instructions
 AGENTS.md
 GEMINI.md
+CLAUDE.md
 .sisyphus/
 
 **/.claude/settings.local.json
+.playwright-mcp/
+.visual-match-tmp/
+.metals/
+.bloop/
