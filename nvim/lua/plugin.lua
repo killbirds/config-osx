@@ -17,8 +17,18 @@ vim.opt.rtp:prepend(lazypath)
 
 -- 참고: mapleader와 maplocalleader는 init.lua에서 설정됩니다.
 
+-- lazy-lock.json은 git 백업/시점 복구를 위해 레포에서 관리한다.
+-- ~/.config/nvim은 심링크 구성이므로 init.lua의 실경로에서 레포 위치를 역산한다.
+-- (역산 실패 시 nil이 되어 lazy 기본 경로(stdpath config)를 사용)
+local lockfile
+local real_init = vim.uv.fs_realpath(vim.fn.stdpath("config") .. "/init.lua")
+if real_init then
+  lockfile = vim.fn.fnamemodify(real_init, ":h") .. "/lazy-lock.json"
+end
+
 -- Setup lazy.nvim with 0.11 optimizations
 require("lazy").setup({
+  lockfile = lockfile,
   spec = {
     -- import your plugins
     { import = "plugins" },
