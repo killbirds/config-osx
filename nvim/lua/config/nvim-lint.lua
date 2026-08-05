@@ -23,7 +23,8 @@ local config = {
   -- Quickfix 설정
   quickfix = {
     -- 진단이 바뀔 때마다 창이 열리고 닫히는 것이 산만하므로 자동 열기는 끈다.
-    -- 목록은 항상 갱신되므로 :copen 또는 <leader>xQ(Trouble)로 확인.
+    -- 전용 목록(:Lint로 생성)이 있는 동안은 백그라운드로 갱신된다.
+    -- :copen(:chistory로 목록 전환) 또는 <leader>xQ(Trouble)로 확인.
     auto_open = false,
     min_severity = vim.diagnostic.severity.WARN, -- 최소 심각도 수준
   },
@@ -239,8 +240,35 @@ end
 -- (기존 커스텀 정의는 치환되지 않는 %filepath 인자와 최신 ruff에서 제거된
 --  --output-format=text 때문에 항상 실패했음)
 
+-- 진단 quickfix 목록 타이틀 (다른 용도의 목록과 구분하는 식별자)
+local QF_TITLE = "Diagnostics (nvim-lint)"
+
+-- quickfix 스택 전체에서 우리 목록의 id를 찾는다 (없으면 nil).
+-- 현재 목록만 검사하면 :grep 등 다른 목록이 현재일 때 우리 목록이 stale해지므로,
+-- vim.diagnostic.setqflist와 같은 방식으로 title 기반 id를 추적해
+-- 현재가 아닌 목록도 제자리 갱신한다.
+local function find_qflist_id()
+  for nr = 1, vim.fn.getqflist({ nr = "$" }).nr do
+    local info = vim.fn.getqflist({ nr = nr, id = 0, title = 1 })
+    if info.title == QF_TITLE then
+      return info.id
+    end
+  end
+  return nil
+end
+
 -- 진단 결과를 quickfix에 표시하는 함수 (현재 프로젝트의 진단만 표시)
-local function update_quickfix()
+-- opts.create가 참이면(수동 :Lint) 전용 목록이 없을 때 새로 만든다.
+-- 백그라운드 갱신은 기존 전용 목록의 제자리 갱신만 한다 — 새 목록을 만들면
+-- 사용자가 보던 현재 목록(:grep 등)을 스택에서 밀어내기 때문이다.
+local function update_quickfix(opts)
+  opts = opts or {}
+
+  local qf_id = find_qflist_id()
+  if not qf_id and not opts.create and vim.fn.getqflist({ nr = "$" }).nr ~= 0 then
+    return
+  end
+
   -- 현재 작업 디렉토리(프로젝트 루트) 가져오기
   local cwd = vim.fn.getcwd()
 
@@ -315,33 +343,31 @@ local function update_quickfix()
     item.severity = nil
   end
 
-  -- 현재 윈도우 ID 저장
+  -- 현재 윈도우 ID 저장 (cwindow가 포커스를 옮길 수 있음)
   local current_win = vim.api.nvim_get_current_win()
 
-  -- pcall을 사용해 안전하게 quickfix 목록 업데이트
-  local ok, err = pcall(function()
-    -- 무조건 목록 초기화 (진단이 없는 경우에도)
-    vim.fn.setqflist(all_diagnostics)
+  -- 우리 목록이 있으면 id로 지정해 제자리 갱신('u': 현재 선택 위치 보존 시도),
+  -- 없으면 새 목록 생성(' '). 다른 용도의 현재 목록은 건드리지 않으며,
+  -- 진단이 없어도 창을 강제로 닫지 않는다 (사용자가 연 창은 사용자가 닫는다).
+  local ok, err = pcall(vim.fn.setqflist, {}, qf_id and "u" or " ", {
+    id = qf_id,
+    title = QF_TITLE,
+    items = all_diagnostics,
+  })
 
-    if #all_diagnostics > 0 then
-      -- 진단이 있으면 quickfix 창 열기
-      if config.quickfix.auto_open then
-        vim.cmd("cwindow")
-      end
-    else
-      -- 진단이 없으면 quickfix 창 닫기
-      vim.cmd("cclose")
-    end
-  end)
-
-  -- 에러가 있을 경우 로그 출력
   if not ok then
     vim.notify("Quickfix 업데이트 오류: " .. tostring(err), vim.log.levels.ERROR)
+    return
   end
 
-  -- 에러가 없고 현재 윈도우가 여전히 유효할 경우에만 원래 윈도우로 포커스 돌려놓기
-  if ok and vim.api.nvim_win_is_valid(current_win) then
-    vim.api.nvim_set_current_win(current_win)
+  if config.quickfix.auto_open and #all_diagnostics > 0 then
+    -- 우리 목록이 현재 목록일 때만 창을 연다 (다른 목록 사용을 방해하지 않음)
+    if not qf_id or vim.fn.getqflist({ id = 0 }).id == qf_id then
+      vim.cmd("cwindow")
+      if vim.api.nvim_win_is_valid(current_win) then
+        vim.api.nvim_set_current_win(current_win)
+      end
+    end
   end
 end
 
@@ -445,7 +471,8 @@ vim.api.nvim_create_autocmd("FileType", {
 -- 편의 기능: 린팅 수동 실행 명령어 추가
 vim.api.nvim_create_user_command("Lint", function()
   try_lint_safe()
-  update_quickfix()
+  -- 수동 실행은 전용 quickfix 목록이 없으면 새로 만든다
+  update_quickfix({ create = true })
 end, { desc = "수동으로 린팅 실행" })
 
 -- 참고: 상태줄 진단 표시는 lualine의 diagnostics 컴포넌트가 담당한다.
