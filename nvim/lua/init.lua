@@ -64,13 +64,13 @@ if vim.fn.executable("rg") == 1 then
 	vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m"
 end
 
--- 0.11 향상된 성능 최적화 설정
-vim.opt.redrawtime = 2000 -- 구문 강조 처리 시간 제한 증가 (ms)
-vim.opt.synmaxcol = 300 -- 긴 줄에서 구문 강조 제한 증가
+-- 성능 관련 설정
+vim.opt.redrawtime = 2000 -- 구문 강조 처리 시간 제한 (기본값 2000ms를 명시)
+vim.opt.synmaxcol = 300 -- 긴 줄 구문 강조를 300컬럼까지만 처리 (기본 3000에서 축소, 성능 개선)
 vim.opt.updatetime = 200 -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리거 시간 단축 (ms)
 
 -- 추가 성능 최적화 설정
-vim.opt.maxmempattern = 5000000 -- 패턴 매칭 메모리 제한 증가 (5MB)
+vim.opt.maxmempattern = 5000000 -- 패턴 매칭 메모리 제한 (단위 KB — 사실상 무제한으로 상향)
 vim.opt.ttimeoutlen = 5 -- 키 코드 대기 시간 단축 (빠른 응답)
 vim.opt.ttyfast = true -- 빠른 터미널 연결 가정
 
