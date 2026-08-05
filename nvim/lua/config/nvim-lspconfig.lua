@@ -383,7 +383,7 @@ vim.api.nvim_create_user_command("LspRestart", function()
 end, { desc = "현재 버퍼의 LSP 서버 재시작" })
 
 -- LSP 관리 키맵 (전역이므로 on_attach가 아닌 여기서 한 번만 등록)
--- <leader>l은 Comment.nvim의 라인 코멘트 토글이므로, timeout 지연을 만들지 않도록
+-- <leader>l은 라인 주석 토글(내장 gcc)이므로, timeout 지연을 만들지 않도록
 -- 관리용 키는 <leader>L 네임스페이스를 사용한다.
 local lsp_admin_opts = { noremap = true, silent = true }
 vim.keymap.set("n", "<leader>Lc", "<cmd>LspCleanup<cr>",

@@ -6,12 +6,19 @@ return {
 	-- 	event = "VeryLazy", -- 필요할 때만 로드
 	-- 	config = true,
 	-- },
+	-- 주석 토글은 Neovim 0.10+ 내장 기능(gc/gcc)을 사용한다. 키맵은 keys.lua 참고.
+	-- (numToStr/Comment.nvim은 2024-06 이후 방치되어 0.11에서 바뀐
+	--  vim.treesitter.get_parser 동작 때문에 파서 없는 버퍼에서 깨졌으므로 제거함)
+	--
+	-- 내장 커멘팅은 commentstring을 treesitter 언어 단위로만 고르기 때문에
+	-- tsx 파일의 JSX 안에서도 `//`를 넣는다. ts-comments는 노드 타입까지 보고
+	-- `{/* */}`를 골라준다. 내장 gc를 그대로 쓰고 commentstring만 보정한다.
 	{
-		"numToStr/Comment.nvim",
-		config = function()
-			require("config.comment")
-		end,
+		"folke/ts-comments.nvim",
+		event = "VeryLazy",
+		opts = {},
 	},
+
 	{
 		"mg979/vim-visual-multi",
 		branch = "master",

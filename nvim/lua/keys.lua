@@ -116,8 +116,13 @@ end, { desc = "Toggle diagnostic mode (default/performance/development)" })
 -- 새로운 gO 매핑과 보완되는 매핑
 vim.keymap.set("n", "<Leader>go", vim.lsp.buf.document_symbol, { desc = "Document symbols (complement to gO)" })
 
+-- 주석 토글: Neovim 0.10+ 내장 gc/gcc에 <Leader>l을 연결한다.
+-- 내장 gc/gcc 자체가 매핑이므로 remap = true가 필요하다.
+vim.keymap.set("n", "<Leader>l", "gcc", { remap = true, desc = "Toggle comment line" })
+vim.keymap.set("x", "<Leader>l", "gc", { remap = true, desc = "Toggle comment selection" })
+
 -- LSP completion 토글 (0.11 새 기능)
--- <Leader>l은 Comment.nvim 라인 코멘트 토글이므로 지연을 피해 <Leader>L 네임스페이스 사용
+-- <Leader>l은 주석 토글이므로 지연을 피해 <Leader>L 네임스페이스 사용
 vim.keymap.set("n", "<Leader>Lt", function()
   local clients = vim.lsp.get_clients({ bufnr = 0 })
   for _, client in ipairs(clients) do
