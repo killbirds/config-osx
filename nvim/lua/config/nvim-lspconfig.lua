@@ -85,13 +85,11 @@ local servers = {
 	},
 	eslint = {
 		filetypes = js_ts_filetypes,
-		settings = {
-			-- eslint 서버 설정
-			packageManager = "yarn", -- 패키지 매니저 (npm, yarn, pnpm 중)
-			experimental = {
-				useFlatConfig = true, -- eslint.config.mjs와 같은 플랫 설정 파일 지원 활성화
-			},
-		},
+		-- ESLint 9+ 로컬 설치를 가정하고 deprecated 옵션을 정리함:
+		-- - packageManager("yarn")는 전역 설치 탐색 경로에만 쓰여 로컬 설치에서는 불필요
+		-- - flat config는 9.x부터 기본. 8.57~8.x 프로젝트는 settings.useFlatConfig = true,
+		--   8.21~8.56 프로젝트는 settings.experimental.useFlatConfig = true가 필요하므로
+		--   구버전 프로젝트를 다루게 되면 복원할 것.
 		handlers = {
 			["eslint/openDoc"] = function(_, result)
 				if result then

@@ -136,15 +136,13 @@ cmp.setup({
     }),
   },
   -- 실험적 기능
+  -- (기존 native_menu = false는 deprecated 옵션의 기본값 그대로라 no-op이어서 제거함.
+  --  truthy 값은 아직 view.entries = "native"로 변환하는 호환 분기가 있다)
   experimental = {
     ghost_text = { hl_group = "Comment" }, -- 입력 중 미리보기 (스타일 지정)
-    native_menu = false,                 -- 네이티브 메뉴 비활성화
   },
-  -- 완성 확인 이벤트 핸들러 추가
-  confirm_opts = {
-    behavior = cmp.ConfirmBehavior.Replace, -- 선택 항목으로 교체
-    select = true,                        -- 첫 번째 항목 자동 선택
-  },
+  -- (confirm_opts는 cmp.setup이 읽지 않는 키라 제거함.
+  --  확정 동작은 mapping의 <CR> confirm 옵션이 담당한다)
   -- 완성 항목이 하나만 있을 때 자동 선택
   preselect = cmp.PreselectMode.Item,
 })
