@@ -1,3 +1,5 @@
 .metals
 .bloop
 .luarc.json
+.bsp/
+.scala-build/
