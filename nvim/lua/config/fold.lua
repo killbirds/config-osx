@@ -148,14 +148,13 @@ function M.setup()
   end, { noremap = true, desc = "Apply hybrid folding (LSP + Treesitter)" })
 
   -- 기존 키 매핑
-  vim.keymap.set("n", "<leader>z", "za", { noremap = true, desc = "Toggle fold" })
+  -- <leader>zl/zL/zh/zn과 접두사를 공유하면 timeoutlen 대기가 생기므로
+  -- 단독 <leader>z 대신 <leader>zz를 사용한다.
+  vim.keymap.set("n", "<leader>zz", "za", { noremap = true, desc = "Toggle fold" })
   vim.keymap.set("n", "<leader>Z", "zA", { noremap = true, desc = "Toggle all folds" })
-  vim.keymap.set("n", "zR", function()
-    vim.opt.foldenable = false
-  end, { noremap = true, desc = "Open all folds" })
-  vim.keymap.set("n", "zM", function()
-    vim.opt.foldenable = true
-  end, { noremap = true, desc = "Close all folds" })
+  -- zR/zM 재정의는 제거함. foldenable만 토글하는 방식은 foldlevel을 건드리지 않아
+  -- zM이 아무것도 접지 못했다 (foldlevel 99 유지). 내장 zR/zM이 foldlevel까지
+  -- 올바르게 관리하므로 그대로 사용한다.
 
   -- 추가 폴딩 유틸리티
   vim.keymap.set("n", "<leader>zn", function()

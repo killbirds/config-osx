@@ -143,8 +143,9 @@ end, { desc = "Toggle LSP completion" })
 
 -- 추가 유용한 매핑
 vim.keymap.set("n", "<Leader>w", ":w<CR>", { noremap = true, silent = true, desc = "Save file" })
--- <Leader>q는 config/diagnostics.lua에서 진단 관련으로 사용됨
-vim.keymap.set("n", "<Leader>qq", ":q<CR>", { noremap = true, silent = true, desc = "Quit" })
+-- <Leader>q는 config/diagnostics.lua에서 진단 관련으로 사용됨.
+-- <Leader>qq를 쓰면 <Leader>q가 timeoutlen만큼 대기하므로 종료는 <Leader>Q를 사용한다.
+vim.keymap.set("n", "<Leader>Q", ":q<CR>", { noremap = true, silent = true, desc = "Quit" })
 vim.keymap.set("n", "<Leader>x", ":x<CR>", { noremap = true, silent = true, desc = "Save and quit" })
 
 -- vim-visual-multi 관련 설명

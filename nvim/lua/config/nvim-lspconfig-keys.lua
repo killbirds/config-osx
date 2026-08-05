@@ -41,12 +41,14 @@ M.on_attach = function(client, bufnr)
   setup_buffer_options(bufnr)
 
   -- LSP 기본 키바인딩
+  -- gr(references)/gi(implementation) 커스텀 매핑은 제거함.
+  -- gr은 0.11 기본 gr* 매핑(grr/grn/gri/gra)과 접두사가 겹쳐 timeoutlen 대기를
+  -- 만들었고, gi는 내장 gi(마지막 삽입 위치에서 삽입 모드 진입)를 가렸다.
+  -- references는 grr, implementation은 gri(기본 매핑)를 사용한다.
   set_keymap(bufnr, "n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
   set_keymap(bufnr, "n", "gd", vim.lsp.buf.definition, "Go to Definition")
   set_keymap(bufnr, "n", "K", show_hover, "Show Hover Documentation")
-  set_keymap(bufnr, "n", "gi", vim.lsp.buf.implementation, "Go to Implementation")
   set_keymap(bufnr, "n", "gy", vim.lsp.buf.type_definition, "Go to Type Definition")
-  set_keymap(bufnr, "n", "gr", vim.lsp.buf.references, "List References")
 
   -- 워크스페이스 관련 키맵
   -- <leader>w는 저장(:w) 키이므로 timeout 지연을 피하기 위해 <leader>L 네임스페이스 사용
