@@ -1,27 +1,50 @@
+-- trouble.nvim v3 설정
+-- v2의 position/height/auto_preview/auto_jump/use_diagnostic_signs는
+-- v3에서 modes 구조로 이동했다. 각 모드별 옵션은 여기서 정의한다.
 local trouble = require("trouble")
 
--- trouble.nvim 기본 설정
 trouble.setup({
-  position = "bottom",
-  height = 10,
-  fold_open = "",
-  fold_closed = "",
-  indent_lines = true,
-  auto_preview = true,
-  auto_fold = false,
-  auto_jump = { "lsp_definitions" },
-  use_diagnostic_signs = false,
+  modes = {
+    diagnostics = {
+      win = {
+        position = "bottom",
+        size = 10,
+      },
+      auto_preview = true,
+      preview = {
+        type = "main",
+      },
+    },
+    lsp = {
+      win = {
+        position = "bottom",
+        size = 10,
+      },
+      auto_preview = true,
+      preview = {
+        type = "main",
+      },
+      -- v3의 auto_jump는 boolean: 결과가 1개면 바로 점프.
+      -- (v2의 { "lsp_definitions" } 같은 모드 목록 형식은 더 이상 없음)
+      auto_jump = true,
+    },
+    symbols = {
+      win = {
+        position = "bottom",
+        size = 10,
+      },
+      auto_preview = true,
+      preview = {
+        type = "main",
+      },
+    },
+  },
 })
 
--- Telescope 통합을 위한 설정은 config/telescope.lua에 있습니다
--- local open_with_trouble = require("trouble.sources.telescope").open
-
--- 유용한 키 바인딩은 이미 plugin 설정에 정의되어 있습니다:
--- { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "진단 목록 표시" }
--- { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "현재 버퍼 진단 목록" }
--- { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "로케이션 리스트" }
--- { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>", desc = "퀵픽스 리스트" }
--- { "<leader>xl", "<cmd>Trouble lsp toggle<cr>", desc = "LSP 참조/정의/구현" }
--- { "<leader>xs", "<cmd>Trouble symbols toggle<cr>", desc = "문서 심볼" }
-
--- 추가적인 trouble.nvim 커스텀 설정을 여기에 추가할 수 있습니다
+-- 키 바인딩은 plugins/ui.lua에서 정의됨:
+-- <leader>xx: diagnostics toggle
+-- <leader>xX: diagnostics toggle (현재 버퍼)
+-- <leader>xL: loclist toggle
+-- <leader>xQ: qflist toggle
+-- <leader>xl: lsp toggle
+-- <leader>xs: symbols toggle
