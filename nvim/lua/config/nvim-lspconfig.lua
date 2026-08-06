@@ -13,14 +13,14 @@ end
 
 -- 공통 옵션 설정 (on_attach는 사용하지 않고 LspAttach autocmd로 통일)
 local default_opts = {
-  capabilities = lsp_capabilities.default_capabilities(), -- nvim-cmp와의 통합
+  capabilities = lsp_capabilities.default_capabilities(), -- blink.cmp와의 통합
   flags = {
     debounce_text_changes = 150, -- 텍스트 변경 후 지연 시간 (ms)
   },
 }
 
 -- servers 테이블에 없는 서버(mason-lspconfig automatic_enable로 시작되는 서버 포함)에도
--- nvim-cmp capabilities가 적용되도록 전역 기본값을 등록한다.
+-- blink.cmp capabilities가 적용되도록 전역 기본값을 등록한다.
 vim.lsp.config("*", {
   capabilities = lsp_capabilities.default_capabilities(),
 })

@@ -20,8 +20,11 @@
 -- 5. 손버릇(<Tab> 순환, <CR> 확정, <C-d>/<C-f> 문서 스크롤)은 그대로 유지한다.
 --
 -- 6. 의도적으로 버린 것: nvim-cmp sorting.comparators의 언더스코어 페널티 비교자.
---    blink의 score는 frizbee가 만드는 float라 동점이 거의 나지 않아 tiebreaker가
---    사실상 발동하지 않는다. 필요해지면 fuzzy.sorts에 함수를 끼워 넣을 수 있다.
+--    blink의 score는 i32 정수다(fuzzy/rust/fuzzy.rs:30, 157에서 frizbee 점수 +
+--    frecency + proximity + score_offset을 정수로 합산). 즉 동점이 구조적으로
+--    드물다고 볼 근거는 없고, `_foo` 계열 후보의 상대 순위는 기존과 달라질 수 있다.
+--    그래도 제거하는 이유는 blink의 fuzzy가 프리픽스/정확도 가중을 이미 하기 때문이며,
+--    불편하면 fuzzy.sorts에 비교 함수를 끼워 넣으면 된다.
 
 ---@module 'blink.cmp'
 ---@type blink.cmp.Config
@@ -72,9 +75,12 @@ return {
 			winhighlight = "Normal:Normal,FloatBorder:BorderBG,CursorLine:PmenuSel,Search:None",
 
 			draw = {
-				-- 기존 cmp의 fields = { "kind", "abbr", "menu" } 순서를 그대로 재현
+				-- 기존 cmp의 fields = { "kind", "abbr", "menu" } 순서를 그대로 재현.
+				-- kind_icon만 쓰면 아이콘만 남는다(text = ctx.kind_icon .. ctx.icon_gap).
+				-- 기존 lspkind는 mode = "symbol_text"로 아이콘 + kind 이름을 함께 보여줬으므로
+				-- kind 컴포넌트를 같은 열에 붙인다. 아이콘만 원하면 "kind"를 빼면 된다.
 				columns = {
-					{ "kind_icon" },
+					{ "kind_icon", "kind" },
 					{ "label", "label_description", gap = 1 },
 					{ "source_name" },
 				},
@@ -128,8 +134,10 @@ return {
 	},
 
 	sources = {
-		-- lazydev를 맨 앞 + score_offset으로 올려 LSP보다 우선시한다
-		-- (기존 cmp의 group_index = 0 과 같은 의도)
+		-- 주의: default 배열의 순서는 우선순위가 아니다. blink은 fuzzy score에
+		-- provider별 score_offset을 더한 정수 점수로 정렬한다
+		-- (blink.cmp/lua/blink/cmp/fuzzy/rust/fuzzy.rs:157).
+		-- 우선순위는 아래 providers의 score_offset이 결정한다.
 		default = { "lazydev", "lsp", "path", "snippets", "buffer" },
 
 		per_filetype = {
@@ -145,13 +153,31 @@ return {
 				module = "lazydev.integrations.blink",
 				score_offset = 100,
 			},
-			lsp = { name = "LSP" },
+			-- blink 기본 score_offset은 path +3 / lsp 0 이라 동일 품질이면 path가 LSP를
+			-- 앞선다. 기존 nvim-cmp는 nvim_lsp 1000 > path 250 이었으므로 LSP를 올려
+			-- 그 순서를 되돌린다.
+			lsp = { name = "LSP", score_offset = 4 },
 			path = { name = "Path" },
+			-- snippets는 blink 기본값(provider -1 + 전역 -3 = -4)을 그대로 둔다.
+			-- 기존 설정의 luasnip priority 750은 사실상 무의미했다(스니펫 소스가
+			-- 항목을 0개 내놓았음). 이제 friendly-snippets가 실제로 항목을 내므로
+			-- buffer보다 아래에 두는 blink 기본값이 오히려 덜 시끄럽다.
 			snippets = { name = "Snip" },
+			cmdline = {
+				name = "Cmd",
+				-- blink의 cmdline provider는 기본 임계값이 없어 전역 0으로 떨어진다.
+				-- 기존 nvim-cmp는 `:`의 cmdline 소스에 keyword_length = 2였으므로 맞춘다.
+				-- (이게 없으면 `:` 뒤 한 글자에 200개 후보 메뉴가 바로 뜬다)
+				min_keyword_length = 2,
+			},
 			buffer = {
 				name = "Buf",
-				-- 기존 cmp buffer 소스의 keyword_length = 3
-				min_keyword_length = 3,
+				-- provider 설정은 모드 간 공유되므로(blink에 per-mode provider 설정이 없다)
+				-- 하나의 값으로는 기존 동작을 재현할 수 없었다. 기존 nvim-cmp는
+				-- insert buffer 소스 keyword_length = 3, `/`·`?` 검색 buffer 소스는 2였다.
+				min_keyword_length = function(ctx)
+					return ctx.mode == "cmdline" and 2 or 3
+				end,
 				opts = {
 					-- 성능을 위해 큰 버퍼는 제외한다 (기존 get_bufnrs 로직 이식).
 					-- blink 기본값은 "보이는 버퍼만"이지만, 기존 동작은 열려 있는 모든 버퍼였다.
@@ -183,6 +209,7 @@ return {
 		completion = {
 			-- nvim-cmp는 cmdline 완성을 자동으로 띄웠으므로 동작을 유지한다.
 			-- 산만하면 auto_show = false로 되돌릴 수 있다.
+			-- 최소 키워드 길이는 위 providers의 cmdline/buffer에서 2자로 맞췄다.
 			menu = { auto_show = true },
 			ghost_text = { enabled = true },
 		},

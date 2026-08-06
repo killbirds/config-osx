@@ -227,7 +227,7 @@ metals_config.on_attach = function(client, bufnr)
 
 end
 
-metals_config.capabilities = lsp_capabilities.default_capabilities() -- nvim-cmp 통합
+metals_config.capabilities = lsp_capabilities.default_capabilities() -- blink.cmp 통합
 
 -- LSP 디버깅 활성화
 metals_config.flags = {

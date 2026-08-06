@@ -169,6 +169,16 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- 대용량 파일 처리는 cache_manager.lua에서 중앙 관리됨
 
+-- command-line window(q:, q/, q?)에서는 현재 줄 강조를 끈다.
+-- (기존에 config/nvim-cmp.lua가 들고 있던 autocmd다. 자동완성과 무관한 UI 설정이라
+--  blink.cmp로 이전할 때 이쪽으로 옮겼다.)
+vim.api.nvim_create_autocmd("CmdwinEnter", {
+	group = augroup,
+	callback = function()
+		vim.opt_local.cursorline = false
+	end,
+})
+
 -- 터미널 설정 자동화
 vim.api.nvim_create_autocmd("TermOpen", {
 	group = augroup,
