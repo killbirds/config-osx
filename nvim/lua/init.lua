@@ -86,6 +86,11 @@ if log_stat and log_stat.size > log_max_bytes then
   os.rename(lsp_log_path, lsp_log_path .. ".old")
 end
 
+-- 내장 완성 동작.
+-- blink.cmp는 자체 메뉴를 그려서 completeopt를 보지 않으므로, 이 값은
+-- 내장 완성(<C-x><C-o> 등)과 <leader>Lt로 토글하는 vim.lsp.completion에만 적용된다.
+vim.opt.completeopt = { "menu", "menuone", "noselect" }
+
 -- 검색 설정 개선
 vim.opt.ignorecase = true -- 검색 시 대소문자 무시
 vim.opt.smartcase = true -- 대문자가 포함되면 대소문자 구분

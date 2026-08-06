@@ -32,8 +32,9 @@ vim.opt.statuscolumn = "%l %s"
 -- 새로운 윈도우 테두리 기본값 설정
 -- vim.o.winborder = "rounded"
 
--- completeopt는 nvim-cmp(config/nvim-cmp.lua)가 소유한다.
--- cmp가 InsertEnter 시 전역 completeopt를 덮어쓰므로 여기서 설정하면 무시된다.
+-- completeopt는 lua/init.lua가 소유한다.
+-- blink.cmp는 자체 메뉴를 그리므로 completeopt를 읽지 않는다. 따라서 이 옵션은
+-- 내장 완성(<C-x><C-o>, <leader>Lt로 켜는 vim.lsp.completion)에만 영향을 준다.
 
 -- 새로운 wildmode 옵션
 vim.opt.wildmode:append("noselect")
