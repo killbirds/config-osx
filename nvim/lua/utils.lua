@@ -45,7 +45,7 @@ function M.check_lsp_status()
   for _, client in ipairs(clients) do
     table.insert(
       status_lines,
-      string.format("• %s: %s", client.name, client.is_stopped() and "stopped" or "running")
+      string.format("• %s: %s", client.name, client:is_stopped() and "stopped" or "running")
     )
   end
 

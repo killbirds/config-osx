@@ -126,6 +126,10 @@ fzf.setup({
 			-- 기존 telescope <C-o> = actions.select_default
 			["ctrl-o"] = fzf_actions.file_edit_or_qf,
 			-- 기존 telescope <C-t> = open_with_trouble
+			-- trouble의 액션은 { fn = ..., prefix = ..., desc = ... } table인데
+			-- fzf-lua의 주석은 fun(...)만 허용해 타입 경고가 난다. fzf-lua는 실제로
+			-- action table을 받으므로(동작 확인됨) 경고만 억제한다.
+			---@diagnostic disable-next-line: assign-type-mismatch
 			["ctrl-t"] = trouble_open,
 		},
 	},

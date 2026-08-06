@@ -196,6 +196,10 @@ lint.linters_by_ft = {
 local base_clippy = lint.linters.clippy
 lint.linters.clippy = function()
   local cargo_root = vim.fs.root(0, "Cargo.toml")
+  -- lint.linters[name]의 선언 타입이 `fun():lint.Linter|lint.Linter` 유니온이라
+  -- lua_ls가 table 분기임을 증명하지 못해 경고가 난다. 실제로는 내장 clippy가
+  -- table이고(확인함) :Lint도 정상 동작하므로 경고만 억제한다.
+  ---@diagnostic disable-next-line: param-type-mismatch
   return vim.tbl_extend("force", base_clippy, {
     cwd = cargo_root,
     condition = function()

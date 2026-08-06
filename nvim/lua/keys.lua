@@ -127,7 +127,9 @@ vim.keymap.set("n", "<Leader>Lt", function()
   for _, client in ipairs(clients) do
     if client:supports_method("textDocument/completion") then
       if vim.b.lsp_completion_enabled then
-        vim.lsp.completion.enable(false, client.id)
+        -- bufnr는 필수 인자다(nil이면 _resolve_bufnr가 현재 버퍼로 해석하지만
+        --  아래 enable 분기와 형태를 맞춘다)
+        vim.lsp.completion.enable(false, client.id, 0)
         vim.b.lsp_completion_enabled = false
         vim.notify("LSP completion disabled", vim.log.levels.INFO)
       else

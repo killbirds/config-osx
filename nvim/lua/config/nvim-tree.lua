@@ -23,9 +23,9 @@ local function on_attach(bufnr)
   vim.keymap.set("n", "-", api.tree.change_root_to_parent, opts("Up"))
   vim.keymap.set("n", "a", api.fs.create, opts("Create"))
   vim.keymap.set("n", "bmv", api.marks.bulk.move, opts("Move Bookmarked"))
-  vim.keymap.set("n", "B", api.tree.toggle_no_buffer_filter, opts("Toggle No Buffer"))
+  vim.keymap.set("n", "B", api.filter.no_buffer.toggle, opts("Toggle No Buffer"))
   vim.keymap.set("n", "c", api.fs.copy.node, opts("Copy"))
-  vim.keymap.set("n", "C", api.tree.toggle_git_clean_filter, opts("Toggle Git Clean"))
+  vim.keymap.set("n", "C", api.filter.git.clean.toggle, opts("Toggle Git Clean"))
   vim.keymap.set("n", "[c", api.node.navigate.git.prev, opts("Prev Git"))
   vim.keymap.set("n", "]c", api.node.navigate.git.next, opts("Next Git"))
   vim.keymap.set("n", "d", api.fs.remove, opts("Delete"))
@@ -34,12 +34,12 @@ local function on_attach(bufnr)
   vim.keymap.set("n", "e", api.fs.rename_basename, opts("Rename: Basename"))
   vim.keymap.set("n", "]e", api.node.navigate.diagnostics.next, opts("Next Diagnostic"))
   vim.keymap.set("n", "[e", api.node.navigate.diagnostics.prev, opts("Prev Diagnostic"))
-  vim.keymap.set("n", "F", api.live_filter.clear, opts("Clean Filter"))
-  vim.keymap.set("n", "f", api.live_filter.start, opts("Filter"))
+  vim.keymap.set("n", "F", api.filter.live.clear, opts("Clean Filter"))
+  vim.keymap.set("n", "f", api.filter.live.start, opts("Filter"))
   vim.keymap.set("n", "g?", api.tree.toggle_help, opts("Help"))
   vim.keymap.set("n", "gy", api.fs.copy.absolute_path, opts("Copy Absolute Path"))
-  vim.keymap.set("n", "H", api.tree.toggle_hidden_filter, opts("Toggle Dotfiles"))
-  vim.keymap.set("n", "I", api.tree.toggle_gitignore_filter, opts("Toggle Git Ignore"))
+  vim.keymap.set("n", "H", api.filter.dotfiles.toggle, opts("Toggle Dotfiles"))
+  vim.keymap.set("n", "I", api.filter.git.ignored.toggle, opts("Toggle Git Ignore"))
   vim.keymap.set("n", "J", api.node.navigate.sibling.last, opts("Last Sibling"))
   vim.keymap.set("n", "K", api.node.navigate.sibling.first, opts("First Sibling"))
   vim.keymap.set("n", "m", api.marks.toggle, opts("Toggle Bookmark"))
@@ -52,7 +52,7 @@ local function on_attach(bufnr)
   vim.keymap.set("n", "R", api.tree.reload, opts("Refresh"))
   vim.keymap.set("n", "s", api.node.run.system, opts("Run System"))
   vim.keymap.set("n", "S", api.tree.search_node, opts("Search"))
-  vim.keymap.set("n", "U", api.tree.toggle_custom_filter, opts("Toggle Hidden"))
+  vim.keymap.set("n", "U", api.filter.custom.toggle, opts("Toggle Hidden"))
   vim.keymap.set("n", "W", api.tree.collapse_all, opts("Collapse"))
   vim.keymap.set("n", "x", api.fs.cut, opts("Cut"))
   vim.keymap.set("n", "y", api.fs.copy.filename, opts("Copy Name"))
@@ -68,11 +68,11 @@ end
 
 -- 하이라이트 그룹 정의
 local function setup_nvim_tree_highlights()
-  vim.api.nvim_set_hl(0, "NvimTreeGitDirty", { fg = "#f1c40f" })  -- 변경된 파일 (노란색)
+  vim.api.nvim_set_hl(0, "NvimTreeGitDirty", { fg = "#f1c40f" }) -- 변경된 파일 (노란색)
   vim.api.nvim_set_hl(0, "NvimTreeGitStaged", { fg = "#2ecc71" }) -- 스테이징된 파일 (녹색)
-  vim.api.nvim_set_hl(0, "NvimTreeGitMerge", { fg = "#3498db" })  -- 머지 충돌 (파란색)
+  vim.api.nvim_set_hl(0, "NvimTreeGitMerge", { fg = "#3498db" }) -- 머지 충돌 (파란색)
   vim.api.nvim_set_hl(0, "NvimTreeGitRenamed", { fg = "#e67e22" }) -- 이름 변경 (주황색)
-  vim.api.nvim_set_hl(0, "NvimTreeGitNew", { fg = "#95a5a6" })    -- 새 파일 (회색)
+  vim.api.nvim_set_hl(0, "NvimTreeGitNew", { fg = "#95a5a6" }) -- 새 파일 (회색)
   vim.api.nvim_set_hl(0, "NvimTreeGitDeleted", { fg = "#e74c3c" }) -- 삭제된 파일 (빨간색)
 end
 
@@ -101,7 +101,9 @@ require("nvim-tree").setup({
   },
   renderer = {
     group_empty = true,
-    highlight_git = true,
+    -- 문자열 enum이다("none"|"icon"|"name"|"all"). boolean을 넣으면
+    -- legacy.lua:98-99가 조용히 "name"으로 변환하므로 처음부터 명시한다.
+    highlight_git = "name",
     full_name = false,
     root_folder_label = ":~:s?$?/..?",
     indent_width = 2,

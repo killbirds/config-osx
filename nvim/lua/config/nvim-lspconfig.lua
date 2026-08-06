@@ -292,10 +292,10 @@ local function show_lsp_status()
 
 	local status_lines = { "활성화된 LSP 클라이언트:" }
 	for _, client in ipairs(clients) do
-		local buffers = {}
-		for _, buf in ipairs(vim.lsp.get_buffers_by_client_id(client.id)) do
-			table.insert(buffers, buf)
-		end
+		-- vim.lsp.get_buffers_by_client_id()는 deprecated이고 Neovim 0.13에서 제거된다
+		-- (runtime/lua/vim/lsp.lua의 vim.deprecate(..., '0.13')).
+		local buffers = vim.tbl_keys(client.attached_buffers or {})
+		table.sort(buffers)
 		table.insert(
 			status_lines,
 			string.format("- %s (id: %d, buffers: %s)", client.name, client.id, table.concat(buffers, ", "))

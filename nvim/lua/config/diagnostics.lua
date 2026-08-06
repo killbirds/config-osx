@@ -83,7 +83,7 @@ local default_config = {
 
   -- Update behavior
   update_in_insert = false, -- Performance optimization
-  severity_sort = true,    -- Sort by severity
+  severity_sort = true, -- Sort by severity
 
   -- Float window settings
   float = float_opts,
@@ -164,7 +164,9 @@ function M.setup_keymaps()
 
   -- Toggle virtual text
   vim.keymap.set("n", "<leader>dt", function()
-    local current_config = vim.diagnostic.config()
+    -- vim.diagnostic.config()는 인자 없이 부르면 항상 현재 설정 table을 돌려주지만
+    -- 주석상 반환 타입이 table?이라 가드를 둔다.
+    local current_config = vim.diagnostic.config() or {}
     local virtual_text_enabled = current_config.virtual_text ~= false
     vim.diagnostic.config({
       virtual_text = virtual_text_enabled and false or virtual_text_opts,
@@ -185,7 +187,9 @@ end
 
 -- Setup diagnostic-related autocommands
 function M.setup_autocommands()
-  local augroup = vim.api.nvim_create_augroup("DiagnosticConfig", { clear = true })
+  -- 주의: 아래 autocmd를 되살릴 때 augroup을 다시 만들 것.
+  --   local augroup = vim.api.nvim_create_augroup("DiagnosticConfig", { clear = true })
+  -- 사용처가 전부 주석 처리돼 있어 미사용 그룹만 남아 있었으므로 제거했다.
 
   -- Auto-open float on cursor hold (disabled by default to avoid duplication)
   -- Uncomment below if you want automatic float display
