@@ -16,7 +16,7 @@ local config = {
 
   -- 디바운스 설정 (ms)
   debounce = {
-    buffer_enter = 1000,    -- 버퍼 진입 시 지연 시간
+    buffer_enter = 1000, -- 버퍼 진입 시 지연 시간
     diagnostic_changed = 300, -- 진단 변경 시 지연 시간
   },
 
@@ -92,17 +92,33 @@ local function is_linter_runnable(linter)
   return type(cmd) == "string" and vim.fn.executable(cmd) == 1
 end
 
-local function try_lint_safe()
-  lint.try_lint(nil, {
-    filter = function(linter)
-      return is_linter_runnable(linter)
-    end,
-  })
+-- upstream try_lint()은 대상 버퍼와 filetype을 **호출 시점의**
+-- nvim_get_current_buf() / vim.bo.filetype에서 읽고 bufnr 옵션이 없다
+-- (nvim-lint/lua/lint.lua:69의 _resolve_linter_by_ft(vim.bo.filetype),
+--  :89의 api.nvim_get_current_buf()).
+-- 디바운스 타이머가 늦게 발동하는 동안 다른 버퍼로 이동하면 엉뚱한 버퍼를
+-- lint하게 되므로, 캡처한 버퍼를 받아 그 컨텍스트에서 실행한다.
+-- (타이머 콜백은 vim.schedule_wrap 안이라 nvim_buf_call이 안전하다)
+---@param bufnr? integer 대상 버퍼. nil이면 현재 버퍼.
+local function try_lint_safe(bufnr)
+  local function run()
+    lint.try_lint(nil, {
+      filter = function(linter)
+        return is_linter_runnable(linter)
+      end,
+    })
+  end
+
+  if bufnr and vim.api.nvim_buf_is_valid(bufnr) and bufnr ~= vim.api.nvim_get_current_buf() then
+    vim.api.nvim_buf_call(bufnr, run)
+  else
+    run()
+  end
 end
 
 -- 타이머 관리 모듈화
 local timers = {
-  buffer = {},     -- 버퍼별 타이머
+  buffer = {}, -- 버퍼별 타이머
   diagnostic = nil, -- 진단 타이머
 }
 
@@ -166,9 +182,9 @@ end
 
 -- 파일 타입별 린터 설정
 lint.linters_by_ft = {
-  python = { "ruff" },           -- Python 린팅 (ruff)
-  lua = { "luacheck" },          -- Lua 린팅
-  rust = { "clippy" },           -- Rust 린팅 (cargo clippy)
+  python = { "ruff" }, -- Python 린팅 (ruff)
+  lua = { "luacheck" }, -- Lua 린팅
+  rust = { "clippy" }, -- Rust 린팅 (cargo clippy)
   scala = (scalafix_cmd or coursier_cmd) and { "scalafix" } or {}, -- Scala 린팅 (scalafix)
   java = { "java_checkstyle" },
 }
@@ -400,7 +416,7 @@ if config.auto_lint.on_save then
         -- 타이머 생성 및 시작 (저장 후 지연된 린팅 실행)
         timers.start("buffer", bufnr, function()
           if vim.api.nvim_buf_is_valid(bufnr) then
-            try_lint_safe()
+            try_lint_safe(bufnr)
             update_quickfix()
           end
         end)
@@ -425,7 +441,7 @@ if config.auto_lint.on_enter then
       -- 타이머 생성 및 시작
       timers.start("buffer", bufnr, function()
         if vim.api.nvim_buf_is_valid(bufnr) then
-          try_lint_safe()
+          try_lint_safe(bufnr)
         end
       end)
     end,

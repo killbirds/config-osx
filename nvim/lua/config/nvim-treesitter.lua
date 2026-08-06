@@ -4,6 +4,12 @@ local parser_languages = {
   "scala",
   "java",
   "typescript",
+  -- tsx는 typescript와 별개 파서/쿼리다. 빠져 있으면 .tsx 파일에서
+  -- 파서는 tsx로 잡히는데 queries/tsx/highlights.scm이 설치되지 않아
+  -- 구문 강조가 전혀 되지 않는다(get_captures_at_pos가 빈 테이블).
+  -- 부수 효과: JSX의 bo.commentstring 메타데이터도 함께 사라져
+  -- 내장 gc가 JSX에 `//`를 넣었다.
+  "tsx",
   "javascript",
   "rust",
   "toml",

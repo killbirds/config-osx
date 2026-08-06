@@ -69,10 +69,16 @@ M.on_attach = function(client, bufnr)
   -- Inlay Hints 토글 키맵(<leader>th)은 plugins/lsp.lua의 lazy keys에서 정의됨
 
   -- 서버별 조건부 설정 (예시)
+  -- 주의: 이 명령을 "Format"으로 두면 안 된다.
+  -- config/conform.lua가 전역 :Format(범위 지원, formatters_by_ft 경유)을 만드는데,
+  -- 버퍼 로컬 명령이 전역을 가려서 LSP가 붙은 버퍼에서는 :Format이 conform을
+  -- 우회하고 raw LSP 포맷으로 갔다(prettier/stylua/ruff/rustfmt 설정 무시).
+  -- 버퍼 로컬 쪽에는 range가 없어 `1,2Format`도 E481로 실패했다.
+  -- LSP 직접 포맷은 :LspFormat으로 분리한다.
   if client:supports_method("textDocument/formatting") and vim.bo[bufnr].filetype ~= "java" then
-    vim.api.nvim_buf_create_user_command(bufnr, "Format", function()
+    vim.api.nvim_buf_create_user_command(bufnr, "LspFormat", function()
       vim.lsp.buf.format({ async = true })
-    end, { desc = "Format current buffer with LSP" })
+    end, { desc = "Format current buffer with LSP (conform 우회)" })
   end
 
   -- LSP 관리 키맵(<leader>Lc/Ls/Lr)은 전역이므로 config/nvim-lspconfig.lua에서

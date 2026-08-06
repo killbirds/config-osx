@@ -185,11 +185,12 @@ return {
       {
         "<leader>fmt",
         function()
-          require("conform").format({
-            async = true,
-            lsp_fallback = true,
-            range = { vim.fn.line("'<"), vim.fn.line("'>") },
-          })
+          -- 이전 코드는 range = { line("'<"), line("'>") } 평평한 배열을 넘겼는데
+          -- conform의 계약은 { start = {row,col}, ["end"] = {row,col} }이라
+          -- "attempt to index field 'start' (a nil value)"로 실패했다.
+          -- range 구성은 config/conform.lua가 담당한다 (conform 자체의 암시적
+          -- visual 감지는 마지막 행을 놓치므로 쓰지 않는다).
+          require("config.conform").format_visual()
         end,
         mode = "v",
         desc = "Format selected lines",

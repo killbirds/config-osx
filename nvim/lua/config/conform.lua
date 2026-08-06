@@ -57,7 +57,7 @@ require("conform").setup({
       stdin = true,
     },
     rustfmt = {
-      command = "rustfmt",                             -- Rust 기본 포매터
+      command = "rustfmt", -- Rust 기본 포매터
       args = { "--edition", "2024", "--emit", "stdout" }, -- Rust 2024 에디션 사용
     },
     gofmt = {
@@ -72,12 +72,45 @@ require("conform").setup({
   notify_on_error = true, -- 오류 발생 시 알림
 })
 
+-- conform의 range 계약은 { start = {row, col}, ["end"] = {row, col} }이며
+-- row는 1-based, col은 0-based다 (conform/types.lua의 conform.FormatOpts.range,
+-- conform/util.lua:65-67이 range.start[1] / range["end"][2]를 인덱싱).
+-- 이전 코드는 { line1, line2 } 평평한 배열을 넘겨
+-- "attempt to index field 'start' (a nil value)"로 범위 포맷이 실패했다.
+---@param line1 integer 1-based 시작 행
+---@param line2 integer 1-based 끝 행
+local function line_range(line1, line2)
+  local last = vim.api.nvim_buf_get_lines(0, line2 - 1, line2, true)[1] or ""
+  return { start = { line1, 0 }, ["end"] = { line2, #last } }
+end
+
+local M = {}
+
+-- visual 선택 영역 포맷.
+-- conform에 range를 넘기지 않으면 스스로 선택 영역을 계산하지만
+-- (conform/init.lua:440-442의 range_from_selection), V 모드에서 start_col = 1을
+-- 쓰는 탓에 선택의 **마지막 행이 포맷되지 않는다**(실측: 3~4행 선택 시 3행만 적용).
+-- 그래서 마크가 아니라 현재 선택 위치로 range를 직접 만들어 넘긴다.
+function M.format_visual()
+  local l1, l2 = vim.fn.line("v"), vim.fn.line(".")
+  if l1 > l2 then
+    l1, l2 = l2, l1
+  end
+  require("conform").format({
+    async = true,
+    lsp_fallback = should_lsp_fallback(vim.api.nvim_get_current_buf()),
+    range = line_range(l1, l2),
+  })
+end
+
 -- 수동 포매팅 명령 추가 (선택적)
 vim.api.nvim_create_user_command("Format", function(args)
   local bufnr = vim.api.nvim_get_current_buf()
   require("conform").format({
     async = true,
     lsp_fallback = should_lsp_fallback(bufnr),
-    range = args.range ~= 0 and { args.line1, args.line2 } or nil,
+    range = args.range ~= 0 and line_range(args.line1, args.line2) or nil,
   })
 end, { range = true, desc = "Format buffer or range" })
+
+return M
