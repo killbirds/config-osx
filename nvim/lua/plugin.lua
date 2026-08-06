@@ -6,7 +6,7 @@ if not vim.uv.fs_stat(lazypath) then
   if vim.v.shell_error ~= 0 then
     vim.api.nvim_echo({
       { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out,                            "WarningMsg" },
+      { out, "WarningMsg" },
       { "\nPress any key to exit..." },
     }, true, {})
     vim.fn.getchar()
@@ -45,7 +45,7 @@ require("lazy").setup({
   ui = {
     border = "rounded", -- 0.11에서 winborder와 일관성 유지
     title = "Lazy Plugin Manager",
-    backdrop = 80,    -- 배경 어둡게 설정 (0-100)
+    backdrop = 80, -- 배경 어둡게 설정 (0-100)
     -- 0.11에서 개선된 아이콘 지원
     icons = {
       loaded = "●",
@@ -102,8 +102,8 @@ require("lazy").setup({
   -- 0.11 새로운 기능 활용
   dev = {
     path = "~/projects", -- 개발 플러그인 경로
-    patterns = {},     -- 개발 모드에서 로드할 패턴
-    fallback = false,  -- fallback 비활성화로 성능 향상
+    patterns = {}, -- 개발 모드에서 로드할 패턴
+    fallback = false, -- fallback 비활성화로 성능 향상
   },
 })
 

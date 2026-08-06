@@ -1,0 +1,14 @@
+# stylua 설정.
+#
+# 이 파일이 없으면 stylua가 기본값(탭 들여쓰기)을 쓰는데, 이 레포는 파일마다
+# 탭/스페이스가 섞여 있어서 저장할 때마다(conform format_on_save) 파일 전체가
+# 뒤집히는 diff가 났다. 2-space가 다수(29 : 9)라 그쪽으로 고정하고 전부 정규화했다.
+#
+# 적용 범위: stylua는 대상 파일 디렉토리에서 위로 올라가며 이 파일을 찾으므로
+# nvim/ 아래 모든 .lua에 적용된다. 편집기(conform)와 CLI 모두 같은 값을 쓴다.
+
+indent_type = "Spaces"
+indent_width = 2
+
+# lua/init.lua의 colorcolumn = "120"과 맞춘다.
+column_width = 120

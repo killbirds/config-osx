@@ -11,12 +11,8 @@ function M.profile_function(func, name)
   local end_time = vim.uv.hrtime()
   local duration = (end_time - start_time) / 1e6 -- 밀리초로 변환
 
-  if duration > 100 then                        -- 100ms 이상일 때만 경고
-    vim.notify(
-      string.format("%s took %.2fms", name, duration),
-      vim.log.levels.WARN,
-      { title = "Performance Warning" }
-    )
+  if duration > 100 then -- 100ms 이상일 때만 경고
+    vim.notify(string.format("%s took %.2fms", name, duration), vim.log.levels.WARN, { title = "Performance Warning" })
   end
 
   return result
@@ -43,10 +39,7 @@ function M.check_lsp_status()
 
   local status_lines = {}
   for _, client in ipairs(clients) do
-    table.insert(
-      status_lines,
-      string.format("• %s: %s", client.name, client:is_stopped() and "stopped" or "running")
-    )
+    table.insert(status_lines, string.format("• %s: %s", client.name, client:is_stopped() and "stopped" or "running"))
   end
 
   vim.notify(table.concat(status_lines, "\n"), vim.log.levels.INFO, { title = "LSP Status" })

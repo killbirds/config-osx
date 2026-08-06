@@ -150,7 +150,10 @@ function M.setup()
     local ok, parser = pcall(vim.treesitter.get_parser, bufnr, language)
 
     if not ok or not parser then
-      vim.notify("이 기능을 사용하려면 사용 가능한 Treesitter 파서가 필요합니다.", vim.log.levels.WARN)
+      vim.notify(
+        "이 기능을 사용하려면 사용 가능한 Treesitter 파서가 필요합니다.",
+        vim.log.levels.WARN
+      )
       return
     end
 
@@ -173,10 +176,10 @@ function M.setup()
     for _, node, _ in query:iter_captures(root, bufnr, 0, -1) do
       local node_type = node:type()
       if
-          node_type == "function"
-          or node_type == "method"
-          or node_type:match("function")
-          or node_type:match("method")
+        node_type == "function"
+        or node_type == "method"
+        or node_type:match("function")
+        or node_type:match("method")
       then
         local start_row, _, end_row, _ = node:range()
 

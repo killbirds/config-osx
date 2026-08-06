@@ -53,10 +53,10 @@ local fzf_actions = require("fzf-lua.actions")
 -- ctrl-t에 걸어 둔 file_tabedit을 덮어쓴다.
 local trouble_open = nil
 do
-	local ok, trouble_fzf = pcall(require, "trouble.sources.fzf")
-	if ok and trouble_fzf.actions then
-		trouble_open = trouble_fzf.actions.open
-	end
+  local ok, trouble_fzf = pcall(require, "trouble.sources.fzf")
+  if ok and trouble_fzf.actions then
+    trouble_open = trouble_fzf.actions.open
+  end
 end
 
 -- telescope-smart-history + sqlite.lua 대체.
@@ -68,96 +68,96 @@ vim.fn.mkdir(history_dir, "p")
 
 ---@param name string picker 이름 (히스토리 파일명으로 쓰인다)
 local function history(name)
-	return {
-		["--history"] = history_dir .. "/" .. name,
-		["--history-size"] = 100,
-	}
+  return {
+    ["--history"] = history_dir .. "/" .. name,
+    ["--history-size"] = 100,
+  }
 end
 
 fzf.setup({
-	"telescope", -- 베이스 프로필
+  "telescope", -- 베이스 프로필
 
-	-- vim.ui.select을 fzf-lua로 (telescope-ui-select 대체).
-	-- 기존 ui-select 설정의 dropdown 느낌(width 0.8 + previewer 없음)을 옮긴다.
-	-- 시그니처는 opts(ui_opts, items) (providers/ui_select.lua:109).
-	ui_select = function(ui_opts, items)
-		return vim.tbl_deep_extend("force", ui_opts or {}, {
-			winopts = {
-				width = 0.8,
-				-- 항목 수에 맞춰 높이를 줄여 dropdown처럼 보이게 한다
-				height = math.min(#items + 4, math.floor(vim.o.lines * 0.8)),
-				preview = { hidden = true },
-			},
-		})
-	end,
+  -- vim.ui.select을 fzf-lua로 (telescope-ui-select 대체).
+  -- 기존 ui-select 설정의 dropdown 느낌(width 0.8 + previewer 없음)을 옮긴다.
+  -- 시그니처는 opts(ui_opts, items) (providers/ui_select.lua:109).
+  ui_select = function(ui_opts, items)
+    return vim.tbl_deep_extend("force", ui_opts or {}, {
+      winopts = {
+        width = 0.8,
+        -- 항목 수에 맞춰 높이를 줄여 dropdown처럼 보이게 한다
+        height = math.min(#items + 4, math.floor(vim.o.lines * 0.8)),
+        preview = { hidden = true },
+      },
+    })
+  end,
 
-	winopts = {
-		-- keys.lua가 터미널 모드 전역으로 <C-h>/<C-j>/<C-k>/<C-l>을 wincmd h/j/k/l에
-		-- 묶어 두었다(keys.lua의 terminal 매핑). telescope 시절엔 prompt가 일반 버퍼라
-		-- insert 모드 매핑이어서 충돌이 없었지만, fzf picker는 터미널 버퍼라서 이 전역
-		-- 매핑이 fzf보다 먼저 키를 먹는다. 그대로 두면 <C-j>가 항목 이동이 아니라
-		-- 아래 창으로 포커스를 옮겨 picker를 떠나 버린다(실측 확인).
-		--
-		-- fzf-lua가 <Esc>에 쓰는 것과 같은 passthrough 매핑으로 무력화한다
-		-- (fzf-lua/lua/fzf-lua/win.lua:317-320이 "t", "<Esc>", "<Esc>"를 buffer-local로
-		--  걸어 전역 매핑을 덮는 방식). <C-h>는 아래 keymap.builtin이 buffer-local
-		-- toggle-help를 걸어 주므로 이미 해결된다.
-		on_create = function(e)
-			for _, key in ipairs({ "<C-j>", "<C-k>" }) do
-				vim.keymap.set("t", key, key, { buffer = e.bufnr, nowait = true })
-			end
-		end,
-	},
+  winopts = {
+    -- keys.lua가 터미널 모드 전역으로 <C-h>/<C-j>/<C-k>/<C-l>을 wincmd h/j/k/l에
+    -- 묶어 두었다(keys.lua의 terminal 매핑). telescope 시절엔 prompt가 일반 버퍼라
+    -- insert 모드 매핑이어서 충돌이 없었지만, fzf picker는 터미널 버퍼라서 이 전역
+    -- 매핑이 fzf보다 먼저 키를 먹는다. 그대로 두면 <C-j>가 항목 이동이 아니라
+    -- 아래 창으로 포커스를 옮겨 picker를 떠나 버린다(실측 확인).
+    --
+    -- fzf-lua가 <Esc>에 쓰는 것과 같은 passthrough 매핑으로 무력화한다
+    -- (fzf-lua/lua/fzf-lua/win.lua:317-320이 "t", "<Esc>", "<Esc>"를 buffer-local로
+    --  걸어 전역 매핑을 덮는 방식). <C-h>는 아래 keymap.builtin이 buffer-local
+    -- toggle-help를 걸어 주므로 이미 해결된다.
+    on_create = function(e)
+      for _, key in ipairs({ "<C-j>", "<C-k>" }) do
+        vim.keymap.set("t", key, key, { buffer = e.bufnr, nowait = true })
+      end
+    end,
+  },
 
-	keymap = {
-		builtin = {
-			true, -- 프로필/기본 키맵 상속 (F1~F9, <C-d>/<C-u> preview 스크롤 등)
-			-- 기존 telescope <C-h> = actions.which_key
-			["<C-h>"] = "toggle-help",
-		},
-		fzf = {
-			true, -- 기본 fzf 바인딩 상속
-		},
-	},
+  keymap = {
+    builtin = {
+      true, -- 프로필/기본 키맵 상속 (F1~F9, <C-d>/<C-u> preview 스크롤 등)
+      -- 기존 telescope <C-h> = actions.which_key
+      ["<C-h>"] = "toggle-help",
+    },
+    fzf = {
+      true, -- 기본 fzf 바인딩 상속
+    },
+  },
 
-	actions = {
-		files = {
-			true, -- 기본 파일 액션 상속 (enter, ctrl-s/v, alt-q, alt-i/h/f 등)
-			-- 기존 telescope <C-o> = actions.select_default
-			["ctrl-o"] = fzf_actions.file_edit_or_qf,
-			-- 기존 telescope <C-t> = open_with_trouble
-			-- trouble의 액션은 { fn = ..., prefix = ..., desc = ... } table인데
-			-- fzf-lua의 주석은 fun(...)만 허용해 타입 경고가 난다. fzf-lua는 실제로
-			-- action table을 받으므로(동작 확인됨) 경고만 억제한다.
-			---@diagnostic disable-next-line: assign-type-mismatch
-			["ctrl-t"] = trouble_open,
-		},
-	},
+  actions = {
+    files = {
+      true, -- 기본 파일 액션 상속 (enter, ctrl-s/v, alt-q, alt-i/h/f 등)
+      -- 기존 telescope <C-o> = actions.select_default
+      ["ctrl-o"] = fzf_actions.file_edit_or_qf,
+      -- 기존 telescope <C-t> = open_with_trouble
+      -- trouble의 액션은 { fn = ..., prefix = ..., desc = ... } table인데
+      -- fzf-lua의 주석은 fun(...)만 허용해 타입 경고가 난다. fzf-lua는 실제로
+      -- action table을 받으므로(동작 확인됨) 경고만 억제한다.
+      ---@diagnostic disable-next-line: assign-type-mismatch
+      ["ctrl-t"] = trouble_open,
+    },
+  },
 
-	-- 기존 telescope file_ignore_patterns를 옮긴다.
-	-- 주의: fzf-lua의 file_ignore_patterns도 Lua 패턴이므로 .은 %.로 이스케이프한다
-	-- (기존 설정에 남아 있던 주석과 같은 이유다).
-	defaults = {
-		file_ignore_patterns = { "node_modules/", "%.git/", "yarn%.lock", "%.cache/" },
-	},
+  -- 기존 telescope file_ignore_patterns를 옮긴다.
+  -- 주의: fzf-lua의 file_ignore_patterns도 Lua 패턴이므로 .은 %.로 이스케이프한다
+  -- (기존 설정에 남아 있던 주석과 같은 이유다).
+  defaults = {
+    file_ignore_patterns = { "node_modules/", "%.git/", "yarn%.lock", "%.cache/" },
+  },
 
-	files = {
-		fzf_opts = history("files"),
-	},
+  files = {
+    fzf_opts = history("files"),
+  },
 
-	grep = {
-		fzf_opts = history("grep"),
-		-- rg는 이미 .gitignore를 존중한다. hidden 파일은 alt-h로 토글.
-	},
+  grep = {
+    fzf_opts = history("grep"),
+    -- rg는 이미 .gitignore를 존중한다. hidden 파일은 alt-h로 토글.
+  },
 
-	buffers = {
-		fzf_opts = history("buffers"),
-		-- 기존 telescope buffers: sort_mru = true, ignore_current_buffer = true
-		sort_lastused = true,
-		ignore_current_buffer = true,
-	},
+  buffers = {
+    fzf_opts = history("buffers"),
+    -- 기존 telescope buffers: sort_mru = true, ignore_current_buffer = true
+    sort_lastused = true,
+    ignore_current_buffer = true,
+  },
 
-	helptags = {
-		fzf_opts = history("helptags"),
-	},
+  helptags = {
+    fzf_opts = history("helptags"),
+  },
 })

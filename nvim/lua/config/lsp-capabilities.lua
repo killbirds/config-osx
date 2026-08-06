@@ -25,11 +25,11 @@ local M = {}
 ---@param override? lsp.ClientCapabilities blink 기본값 위에 덮어쓸 capability
 ---@return lsp.ClientCapabilities
 function M.default_capabilities(override)
-	local ok, blink = pcall(require, "blink.cmp")
-	if not ok then
-		return vim.lsp.protocol.make_client_capabilities()
-	end
-	return blink.get_lsp_capabilities(override)
+  local ok, blink = pcall(require, "blink.cmp")
+  if not ok then
+    return vim.lsp.protocol.make_client_capabilities()
+  end
+  return blink.get_lsp_capabilities(override)
 end
 
 return M

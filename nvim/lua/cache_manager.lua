@@ -236,7 +236,7 @@ function M.setup_performance_monitoring()
     local start_time = vim.uv.hrtime()
 
     vim.api.nvim_create_autocmd("VimEnter", {
-      once = true,                                             -- 한 번만 실행
+      once = true, -- 한 번만 실행
       callback = function()
         local load_time = (vim.uv.hrtime() - start_time) / 1e6 -- ms로 변환
         vim.schedule(function()

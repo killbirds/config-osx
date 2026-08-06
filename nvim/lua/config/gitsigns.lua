@@ -1,11 +1,11 @@
 -- 하이라이트 그룹 정의
 local function setup_gitsigns_highlights()
-  vim.api.nvim_set_hl(0, "GitSignsAdd", { fg = "#2ecc71" })         -- 추가된 부분 (녹색)
-  vim.api.nvim_set_hl(0, "GitSignsChange", { fg = "#f1c40f" })      -- 변경된 부분 (노란색)
-  vim.api.nvim_set_hl(0, "GitSignsDelete", { fg = "#e74c3c" })      -- 삭제된 부분 (빨간색)
+  vim.api.nvim_set_hl(0, "GitSignsAdd", { fg = "#2ecc71" }) -- 추가된 부분 (녹색)
+  vim.api.nvim_set_hl(0, "GitSignsChange", { fg = "#f1c40f" }) -- 변경된 부분 (노란색)
+  vim.api.nvim_set_hl(0, "GitSignsDelete", { fg = "#e74c3c" }) -- 삭제된 부분 (빨간색)
   vim.api.nvim_set_hl(0, "GitSignsChangedelete", { fg = "#f1c40f" }) -- 변경+삭제 (노란색)
-  vim.api.nvim_set_hl(0, "GitSignsTopdelete", { fg = "#e74c3c" })   -- 상단 삭제 (빨간색)
-  vim.api.nvim_set_hl(0, "GitSignsUntracked", { fg = "#95a5a6" })   -- 추적되지 않음 (회색)
+  vim.api.nvim_set_hl(0, "GitSignsTopdelete", { fg = "#e74c3c" }) -- 상단 삭제 (빨간색)
+  vim.api.nvim_set_hl(0, "GitSignsUntracked", { fg = "#95a5a6" }) -- 추적되지 않음 (회색)
 end
 
 -- 하이라이트 설정 적용
@@ -40,13 +40,13 @@ require("gitsigns").setup({
   current_line_blame = false, -- 현재 줄 blame 비활성화
   current_line_blame_opts = {
     virt_text = true,
-    virt_text_pos = "eol",  -- 줄 끝에 표시
-    delay = 500,            -- 500ms 지연 후 표시
+    virt_text_pos = "eol", -- 줄 끝에 표시
+    delay = 500, -- 500ms 지연 후 표시
     ignore_whitespace = true, -- 공백 변경 무시
   },
   current_line_blame_formatter = "<author>, <author_time:%Y-%m-%d> - <summary>",
-  sign_priority = 6,      -- 표시 우선순위
-  update_debounce = 100,  -- 업데이트 디바운스 시간 감소 (ms)
+  sign_priority = 6, -- 표시 우선순위
+  update_debounce = 100, -- 업데이트 디바운스 시간 감소 (ms)
   status_formatter = nil, -- 기본 포매터 사용
   max_file_length = 40000, -- 처리할 최대 파일 길이 제한
   preview_config = {

@@ -8,7 +8,7 @@ vim.opt.showmode = false
 
 -- 0.11에서 개선된 커서 설정
 vim.opt.guicursor =
-	"n-v-c-sm:block-blinkwait300-blinkon200-blinkoff150,i-ci-ve:ver25-blinkwait300-blinkon200-blinkoff150,r-cr-o:hor20"
+  "n-v-c-sm:block-blinkwait300-blinkon200-blinkoff150,i-ci-ve:ver25-blinkwait300-blinkon200-blinkoff150,r-cr-o:hor20"
 vim.opt.visualbell = true
 vim.opt.autoread = true
 vim.opt.autowrite = true
@@ -47,21 +47,21 @@ vim.opt.undofile = true
 
 -- 파일 시스템 성능 최적화
 vim.opt.wildignore:append({
-	"**/.git/*",
-	"**/.cache/*",
-	"**/node_modules/*",
-	"**/target/*",
-	"**/.DS_Store",
-	"**/.vscode/*",
-	"**/dist/*",
-	"**/build/*",
+  "**/.git/*",
+  "**/.cache/*",
+  "**/node_modules/*",
+  "**/target/*",
+  "**/.DS_Store",
+  "**/.vscode/*",
+  "**/dist/*",
+  "**/build/*",
 })
 
 -- 그립(grep) 관련 성능 설정
 if vim.fn.executable("rg") == 1 then
-	-- 리플그립(ripgrep)이 설치된 경우 사용
-	vim.o.grepprg = "rg --vimgrep --no-heading --smart-case"
-	vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m"
+  -- 리플그립(ripgrep)이 설치된 경우 사용
+  vim.o.grepprg = "rg --vimgrep --no-heading --smart-case"
+  vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m"
 end
 
 -- 성능 관련 설정
@@ -105,66 +105,66 @@ local augroup = vim.api.nvim_create_augroup("UserAutoCommands", { clear = true }
 
 -- 0.11 최적화된 텍스트 yank 하이라이트
 vim.api.nvim_create_autocmd("TextYankPost", {
-	group = augroup,
-	pattern = "*",
-	callback = function()
-		vim.hl.on_yank({ timeout = 200 })
-	end,
+  group = augroup,
+  pattern = "*",
+  callback = function()
+    vim.hl.on_yank({ timeout = 200 })
+  end,
 })
 
 -- autoread는 외부 명령 실행 시에만 동작하므로, 포커스 복귀/버퍼 진입 시
 -- 파일 변경 여부를 직접 확인해 외부 수정 사항을 반영한다.
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
-	group = augroup,
-	callback = function()
-		if vim.api.nvim_get_mode().mode ~= "c" and vim.fn.getcmdwintype() == "" then
-			vim.cmd("checktime")
-		end
-	end,
+  group = augroup,
+  callback = function()
+    if vim.api.nvim_get_mode().mode ~= "c" and vim.fn.getcmdwintype() == "" then
+      vim.cmd("checktime")
+    end
+  end,
 })
 
 -- 버퍼 메모리 관리는 cache_manager.lua에서 중앙 관리됨
 
 -- 파일 타입별 설정
 vim.filetype.add({
-	extension = {
-		mdx = "markdown",
-	},
+  extension = {
+    mdx = "markdown",
+  },
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-	group = augroup,
-	pattern = { "lua" },
-	callback = function()
-		vim.opt_local.shiftwidth = 2
-		vim.opt_local.tabstop = 2
-		-- 0.11에서 개선된 Lua omnifunc 활용
-		vim.opt_local.omnifunc = "v:lua.vim.lua_omnifunc"
-		-- 0.11 기본 foldexpr 활용
-		vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-		vim.opt_local.foldmethod = "expr"
-	end,
+  group = augroup,
+  pattern = { "lua" },
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    -- 0.11에서 개선된 Lua omnifunc 활용
+    vim.opt_local.omnifunc = "v:lua.vim.lua_omnifunc"
+    -- 0.11 기본 foldexpr 활용
+    vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+    vim.opt_local.foldmethod = "expr"
+  end,
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-	group = augroup,
-	pattern = { "python" },
-	callback = function()
-		vim.opt_local.shiftwidth = 4
-		vim.opt_local.tabstop = 4
-	end,
+  group = augroup,
+  pattern = { "python" },
+  callback = function()
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.tabstop = 4
+  end,
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-	group = augroup,
-	pattern = { "java" },
-	callback = function()
-		vim.opt_local.shiftwidth = 2
-		vim.opt_local.softtabstop = 2
-		vim.opt_local.tabstop = 2
-		vim.opt_local.expandtab = true
-		vim.opt_local.colorcolumn = "100"
-	end,
+  group = augroup,
+  pattern = { "java" },
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.softtabstop = 2
+    vim.opt_local.tabstop = 2
+    vim.opt_local.expandtab = true
+    vim.opt_local.colorcolumn = "100"
+  end,
 })
 
 -- 대용량 파일 처리는 cache_manager.lua에서 중앙 관리됨
@@ -173,21 +173,21 @@ vim.api.nvim_create_autocmd("FileType", {
 -- (기존에 config/nvim-cmp.lua가 들고 있던 autocmd다. 자동완성과 무관한 UI 설정이라
 --  blink.cmp로 이전할 때 이쪽으로 옮겼다.)
 vim.api.nvim_create_autocmd("CmdwinEnter", {
-	group = augroup,
-	callback = function()
-		vim.opt_local.cursorline = false
-	end,
+  group = augroup,
+  callback = function()
+    vim.opt_local.cursorline = false
+  end,
 })
 
 -- 터미널 설정 자동화
 vim.api.nvim_create_autocmd("TermOpen", {
-	group = augroup,
-	pattern = "*",
-	callback = function()
-		-- 0.11에서 터미널 기본 설정은 자동으로 적용됨
-		vim.opt_local.relativenumber = false
-		vim.opt_local.number = false
-	end,
+  group = augroup,
+  pattern = "*",
+  callback = function()
+    -- 0.11에서 터미널 기본 설정은 자동으로 적용됨
+    vim.opt_local.relativenumber = false
+    vim.opt_local.number = false
+  end,
 })
 
 -- 들여쓰기 설정
