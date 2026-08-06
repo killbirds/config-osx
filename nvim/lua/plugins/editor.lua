@@ -20,15 +20,13 @@ return {
 	{
 		"mg979/vim-visual-multi",
 		branch = "master",
-		-- VM 진입 키. 이 키들이 g:VM_maps에 정의된 전역 매핑과 일치해야 한다.
-		keys = {
-			"<C-n>",
-			"<C-Down>",
-			"<C-Up>",
-			{ "<C-a>", mode = "x" },
-			{ "<C-f>", mode = "x" },
-			{ "<C-d>", mode = "x" },
-		},
+		-- keys 트리거는 쓰지 않는다. VM 진입점은 위 6개 말고도 11개가 더 있다:
+		-- 리더 기반(\\A Select All, \\\\ Add Cursor At Pos, \\gS, \\/),
+		-- <S-Left>/<S-Right>, VM_mouse_mappings로 켜지는 <C-LeftMouse> 계열,
+		-- visual \\c / \\/. keys에 하나라도 빠지면 그 진입점은 조용히 죽는다.
+		-- 목록을 손으로 유지하는 대신 VeryLazy로 UI 준비 직후 로드해 전부 살린다.
+		-- (VeryLazy는 UIEnter 후에 뜨므로 startup 시간에는 잡히지 않는다)
+		event = "VeryLazy",
 		-- 주의: g:VM_maps 등 설정은 반드시 init(플러그인 로드 **전**)에서 해야 한다.
 		-- vim-visual-multi는 plugin/ 스크립트가 로드될 때 이 전역들을 읽어 매핑을
 		-- 만들기 때문에, config(로드 **후**)에 두면 매핑이 적용되지 않는다.

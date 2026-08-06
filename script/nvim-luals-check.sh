@@ -21,8 +21,11 @@ CHECK_LEVEL="${1:-Warning}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 NVIM_DIR="$REPO_ROOT/nvim"
 
-LUALS="$(command -v lua-language-server || true)"
-[ -n "$LUALS" ] || LUALS="$HOME/.local/share/nvim/mason/bin/lua-language-server"
+# Mason 설치본을 우선한다. 편집기(Neovim)는 Mason이 PATH를 prepend하므로 Mason 것을
+# 쓰는데, 여기서 PATH를 먼저 보면 Homebrew 등 다른 설치본을 골라 편집기와 다른 서버로
+# 검사하게 된다(실측: 두 바이너리의 SHA-256이 다름).
+LUALS="$HOME/.local/share/nvim/mason/bin/lua-language-server"
+[ -x "$LUALS" ] || LUALS="$(command -v lua-language-server || true)"
 if [ ! -x "$LUALS" ]; then
   echo "lua-language-server를 찾을 수 없습니다. :MasonInstall lua-language-server 로 설치하세요." >&2
   exit 1
@@ -60,19 +63,31 @@ PY
 
 echo "검사 대상: $NVIM_DIR  (checklevel=$CHECK_LEVEL)"
 OUT="$WORK/check.json"
-# 진행률 출력이 길어 마지막 줄만 보여주되, 파이프가 종료코드를 삼키지 않게
-# 결과 판정은 아래 check.json 파싱으로만 한다.
+# 진행률 출력이 길어 보기 어려우므로 전문은 파일에 남기고 마지막 줄만 보여준다.
+# 주의: 파이프로 넘기면 종료코드가 tail 것이 되므로 lua_ls 자체 실패를 놓친다.
+# (잘못된 checklevel, crash, config 로드 실패 등은 check.json을 아예 만들지 않는다)
+RAW="$WORK/luals.out"
 set +e
 "$LUALS" --check "$NVIM_DIR" \
   --configpath "$WORK/luarc.json" \
   --checklevel "$CHECK_LEVEL" \
   --logpath "$WORK/log" \
-  --check_out_path "$OUT" 2>&1 | tr '\r' '\n' | tail -1
+  --check_out_path "$OUT" > "$RAW" 2>&1
+LUALS_RC=$?
 set -e
+tr '\r' '\n' < "$RAW" | tail -1
+
+if [ "$LUALS_RC" -ne 0 ]; then
+  echo "lua-language-server 실행 실패 (exit $LUALS_RC):" >&2
+  tr '\r' '\n' < "$RAW" | tail -5 >&2
+  exit 1
+fi
 
 if [ ! -f "$OUT" ]; then
-  echo "진단 없음"
-  exit 0
+  # 성공했는데 결과 파일이 없는 경우는 계약 위반이므로 실패로 본다
+  echo "lua-language-server가 결과 파일을 만들지 않았습니다: $OUT" >&2
+  tr '\r' '\n' < "$RAW" | tail -5 >&2
+  exit 1
 fi
 
 python3 - "$OUT" "$NVIM_DIR" <<'PY'
