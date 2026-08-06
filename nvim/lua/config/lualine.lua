@@ -1,3 +1,7 @@
+-- lualine은 M = { setup = setup, ... } 형태로 테이블을 통째로 만들어 반환해서
+-- lua_ls가 setup 필드를 정적으로 못 본다(undefined-field). 런타임에는 존재하고
+-- statusline도 정상 설정됨을 확인했다.
+---@diagnostic disable-next-line: undefined-field
 require("lualine").setup({
   options = {
     icons_enabled = true,

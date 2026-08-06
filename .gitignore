@@ -1,5 +1,8 @@
 .metals
 .bloop
 .luarc.json
+# nvim 설정용 lua_ls 설정은 편집기와 script/nvim-luals-check.sh가 공유해야 하므로 추적한다.
+# (위 .luarc.json 무시는 도구가 레포 루트에 자동 생성하는 것을 막기 위한 것)
+!nvim/.luarc.json
 .bsp/
 .scala-build/

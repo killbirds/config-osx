@@ -147,6 +147,13 @@ local servers = {
 	lua_ls = {
 		on_init = function(client)
 			-- 프로젝트 설정 파일 존재 여부 확인
+			--
+			-- 주의: 이 설정 레포에는 nvim/.luarc.json이 있으므로 여기서 early return 한다.
+			-- 즉 아래 Lua 설정은 **이 레포에서는 적용되지 않고** .luarc.json이 대신한다.
+			-- (.luarc.json은 lua_ls root_markers 1순위라 root_dir도 nvim/으로 잡힌다)
+			-- 아래 블록을 고칠 일이 생기면 nvim/.luarc.json도 같이 고쳐야 한다.
+			-- 여기 남겨 두는 이유는 .luarc.json이 없는 다른 프로젝트의 Lua 파일을
+			-- 편집할 때는 여전히 이 경로가 쓰이기 때문이다.
 			if client.workspace_folders then
 				local path = client.workspace_folders[1].name
 				-- Neovim 설정 폴더가 아니면서 자체 .luarc.json 파일이 있으면 기본 설정 유지
