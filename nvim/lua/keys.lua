@@ -113,8 +113,7 @@ vim.keymap.set("n", "<Leader>dm", function()
   require("config.diagnostics").toggle_mode()
 end, { desc = "Toggle diagnostic mode (default/performance/development)" })
 
--- 새로운 gO 매핑과 보완되는 매핑
-vim.keymap.set("n", "<Leader>go", vim.lsp.buf.document_symbol, { desc = "Document symbols (complement to gO)" })
+-- 문서 심볼은 0.11 기본 매핑 gO를 사용한다 (중복 매핑 제거)
 
 -- 주석 토글: Neovim 0.10+ 내장 gc/gcc에 <Leader>l을 연결한다.
 -- 내장 gc/gcc 자체가 매핑이므로 remap = true가 필요하다.

@@ -11,27 +11,12 @@ function M.setup()
   vim.opt.foldenable = false
   vim.opt.foldlevel = 99
 
-  -- 접기 텍스트 사용자 정의
-  vim.opt.foldtext = "v:lua.custom_fold_text()"
+  -- 빈 foldtext는 접힌 첫 줄을 treesitter 하이라이팅 그대로 표시한다 (0.10+).
+  -- vim.treesitter.foldtext()는 0.12에서 제거되어 사용할 수 없다.
+  vim.opt.foldtext = ""
 
   -- 접기 열 너비 설정
   vim.opt.fillchars = "fold: "
-
-  -- 사용자 정의 접기 텍스트 함수
-  _G.custom_fold_text = function()
-    local line = vim.fn.getline(vim.v.foldstart)
-    local line_count = vim.v.foldend - vim.v.foldstart + 1
-    local indent = string.match(line, "^%s*") or ""
-
-    -- 주석 기호 제거
-    line = line:gsub("^%s*[/%-#*]+%s*", "")
-
-    -- 접기 표시 텍스트 생성
-    local fold_info = " ⚡ " .. line_count .. " lines "
-
-    -- 최종 접기 텍스트 생성
-    return indent .. "▶ " .. line .. fold_info
-  end
 
   -- 자동 명령 설정
   local augroup = vim.api.nvim_create_augroup("FoldConfig", { clear = true })

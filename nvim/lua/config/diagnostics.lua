@@ -71,7 +71,8 @@ local default_config = {
   -- Virtual text disabled by default
   virtual_text = false,
 
-  -- Virtual lines disabled globally to prevent duplication with other display methods
+  -- vim.diagnostic.config()는 전달된 키만 대입하고 나머지는 현재 값을 유지하므로,
+  -- 모드 전환이 항상 virtual lines를 끄도록 명시적으로 false를 유지한다.
   virtual_lines = false,
 
   -- Signs in the sign column
@@ -98,7 +99,6 @@ local default_config = {
 -- Only shows ERROR signs and lualine diagnostics
 local performance_config = vim.tbl_deep_extend("force", default_config, {
   virtual_text = false,
-  virtual_lines = false,
   update_in_insert = false,
   signs = {
     priority = 10,
@@ -108,10 +108,9 @@ local performance_config = vim.tbl_deep_extend("force", default_config, {
 })
 
 -- Development configuration with verbose output
--- Shows all diagnostic types with virtual text (virtual lines disabled to prevent duplication)
+-- Shows all diagnostic types with virtual text
 local development_config = vim.tbl_deep_extend("force", default_config, {
   virtual_text = virtual_text_opts,
-  virtual_lines = false, -- Disabled to prevent duplication
   signs = signs_opts,
 })
 
@@ -146,14 +145,7 @@ end
 function M.setup_keymaps()
   local opts = { noremap = true, silent = true }
 
-  -- Diagnostic navigation
-  vim.keymap.set("n", "[d", function()
-    vim.diagnostic.jump({ count = -1 })
-  end, vim.tbl_extend("force", opts, { desc = "Previous diagnostic" }))
-
-  vim.keymap.set("n", "]d", function()
-    vim.diagnostic.jump({ count = 1 })
-  end, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
+  -- 진단 이동은 0.11 기본 매핑 [d / ]d를 사용한다 (중복 매핑 제거)
 
   -- Diagnostic display
   vim.keymap.set(
