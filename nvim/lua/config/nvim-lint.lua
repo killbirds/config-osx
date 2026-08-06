@@ -173,6 +173,21 @@ lint.linters_by_ft = {
   java = { "java_checkstyle" },
 }
 
+-- clippy는 cargo clippy를 실행하므로 Cargo 프로젝트가 아닌 단일 .rs 파일에서는 실패하고,
+-- cwd 지정이 없으면 Neovim의 cwd에서 실행되어 프로젝트 밖 cwd일 때 Cargo.toml을 못 찾는다.
+-- 함수형 정의로 감싸 버퍼 기준 Cargo 루트를 찾아 cwd로 지정하고, 루트가 없으면
+-- condition으로 실행을 건너뛴다 (조건 판정은 try_lint_safe의 filter가 수행).
+local base_clippy = lint.linters.clippy
+lint.linters.clippy = function()
+  local cargo_root = vim.fs.root(0, "Cargo.toml")
+  return vim.tbl_extend("force", base_clippy, {
+    cwd = cargo_root,
+    condition = function()
+      return cargo_root ~= nil
+    end,
+  })
+end
+
 -- 커스텀 린터 설정
 -- 주의: nvim-lint는 args의 문자열을 그대로 전달한다(%filepath 같은 플레이스홀더 치환 없음).
 -- 파일명이 필요하면 args에 함수를 넣거나(호출 시점에 평가됨),
