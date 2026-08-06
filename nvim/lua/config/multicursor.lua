@@ -40,9 +40,32 @@ function M.setup()
     return { desc = "Multicursor: " .. desc }
   end
 
-  -- 주 진입점 (VM <C-n>과 동일: 커서 아래 단어 / 선택 영역의 다음 일치에 커서 추가)
+  -- normal 모드에서 먼저 단어를 선택한 뒤 매칭한다.
+  --
+  -- 이게 없으면 VM과 감각이 다르다. multicursor의 match* 는 선택을 만들지 않고
+  -- 커서만 옮기므로(실측: <C-n> 후 mode="n", visual=false) 커서 블록이 한 글자만
+  -- 덮어 "단어가 아니라 한 글자만 잡힌 것"처럼 보이고, VM처럼 바로 c/d/y를 눌러
+  -- 편집할 수도 없다(cw/ciw를 써야 했다).
+  -- viw로 단어를 잡아 주면 VM과 같아진다.
+  -- 실측: viw+match 3회 -> mode="v", 커서 3개, 그 상태에서 cXYZ -> 3줄 모두 치환.
+  --
+  -- 커서가 비-키워드 문자(;, 공백 등) 위면 viw가 그 문자열을 잡으므로
+  -- 그 문자 기준으로 매칭된다(기존에는 한 글자만 매칭됐다).
+  ---@param dir -1|1
+  local function match_with_word(dir)
+    if vim.api.nvim_get_mode().mode == "n" then
+      -- 빈 줄 등에서 viw가 실패할 수 있으므로 실패해도 계속 진행한다.
+      -- vim.cmd는 __call 테이블이라 pcall에 직접 넘기면 타입이 안 맞는다.
+      pcall(function()
+        vim.cmd("normal! viw")
+      end)
+    end
+    mc.matchAddCursor(dir)
+  end
+
+  -- 주 진입점 (VM Find Under)
   set({ "n", "x" }, "<C-n>", function()
-    mc.matchAddCursor(1)
+    match_with_word(1)
   end, d("다음 일치에 커서 추가"))
 
   -- 위/아래 줄에 커서 추가 (VM <C-Down>/<C-Up>)
@@ -79,7 +102,7 @@ function M.setup()
     mc.matchSkipCursor(1)
   end, d("다음 일치 건너뛰기"))
   set({ "n", "x" }, "<leader>mN", function()
-    mc.matchAddCursor(-1)
+    match_with_word(-1)
   end, d("이전 일치에 커서 추가"))
 
   -- 마우스 (기존 VM_mouse_mappings = 1 대응)
