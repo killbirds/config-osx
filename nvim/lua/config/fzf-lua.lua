@@ -15,15 +15,31 @@
 --    자동 chdir이 다시 필요하면 nvim-tree의 VimEnter cd(plugins/explorer.lua)와
 --    LSP root 기반 cd로 대체할 수 있다.
 --
--- 3. "telescope" 프로필을 베이스로 쓴다. 레이아웃(width 0.8 / height 0.9,
---    flex preview)과 Telescope* 하이라이트 그룹을 그대로 물려받으므로
---    catppuccin이 이미 테마링한 색을 계속 쓴다.
+-- 3. "telescope" 프로필을 베이스로 쓴다. 실제로 물려받는 것은 레이아웃
+--    (width 0.8 / height 0.9, flex preview)이다. 하이라이트는 아래 6번 참고.
 --
--- 4. 손버릇은 대부분 fzf 기본값으로 공짜 보존된다 (man fzf 기준):
---      <C-j>/<C-k>  항목 이동   -> fzf 기본 down/up
+-- 4. 손버릇 보존 (man fzf 기준):
 --      <C-n>/<C-p>  히스토리    -> --history 설정 시 next/prev-history로 자동 재매핑
 --      <esc>        닫기        -> fzf 기본 abort (ctrl-c/ctrl-g/ctrl-q/esc)
---    나머지 <C-h>(도움말), <C-o>(선택), <C-t>(trouble)만 아래에서 명시한다.
+--      <C-j>/<C-k>  항목 이동   -> fzf 기본 down/up이지만 그냥 두면 동작하지 않는다.
+--                                 아래 winopts.on_create 주석 참고.
+--    <C-h>(도움말), <C-o>(선택), <C-t>(trouble)는 아래에서 명시한다.
+--
+-- 6. picker 창 색은 Telescope* 그룹을 물려받지 않는다.
+--    telescope 프로필은 Telescope 하이라이트가 살아 있을 때만 쓰는데
+--    (profiles/telescope.lua의 hl_validate), catppuccin은 lazy의 plugin spec
+--    이름으로 integration을 자동 탐지하므로 telescope spec이 사라진 뒤에는
+--    Telescope* 그룹을 만들지 않는다. 실측: catppuccin 컴파일 캐시를 지우면
+--    TelescopeNormal 등이 전부 UNDEFINED가 된다.
+--    대신 catppuccin의 fzf integration이 FzfLua* 그룹을 테마링한다
+--    (FzfLuaNormal -> NormalFloat, FzfLuaBorder -> FloatBorder 등).
+--    즉 프로필의 hls / fzf_colors 블록은 no-op이고, 레이아웃(width/height,
+--    flex preview)만 실제로 물려받는다.
+--
+-- 7. <leader>fP는 의미가 바뀌었다. 이전 `Telescope pickers`는 cache_picker
+--    (num_pickers = 10)로 캐시된 최근 picker를 쿼리·결과까지 재개하는 기능이었다.
+--    fzf-lua의 resume은 단일 슬롯(config.__resume_data)뿐이고 `builtin`은
+--    사용 가능한 picker 목록을 새로 실행하는 것이다. 멀티 슬롯 재개는 대응물이 없다.
 --
 -- 5. 주의: keymap/actions 테이블은 [1] = true 가 없으면 기본값과 병합되지 않고
 --    통째로 교체된다 (fzf-lua/lua/fzf-lua/config.lua:89, 100).
@@ -74,6 +90,24 @@ fzf.setup({
 			},
 		})
 	end,
+
+	winopts = {
+		-- keys.lua가 터미널 모드 전역으로 <C-h>/<C-j>/<C-k>/<C-l>을 wincmd h/j/k/l에
+		-- 묶어 두었다(keys.lua의 terminal 매핑). telescope 시절엔 prompt가 일반 버퍼라
+		-- insert 모드 매핑이어서 충돌이 없었지만, fzf picker는 터미널 버퍼라서 이 전역
+		-- 매핑이 fzf보다 먼저 키를 먹는다. 그대로 두면 <C-j>가 항목 이동이 아니라
+		-- 아래 창으로 포커스를 옮겨 picker를 떠나 버린다(실측 확인).
+		--
+		-- fzf-lua가 <Esc>에 쓰는 것과 같은 passthrough 매핑으로 무력화한다
+		-- (fzf-lua/lua/fzf-lua/win.lua:317-320이 "t", "<Esc>", "<Esc>"를 buffer-local로
+		--  걸어 전역 매핑을 덮는 방식). <C-h>는 아래 keymap.builtin이 buffer-local
+		-- toggle-help를 걸어 주므로 이미 해결된다.
+		on_create = function(e)
+			for _, key in ipairs({ "<C-j>", "<C-k>" }) do
+				vim.keymap.set("t", key, key, { buffer = e.bufnr, nowait = true })
+			end
+		end,
+	},
 
 	keymap = {
 		builtin = {
