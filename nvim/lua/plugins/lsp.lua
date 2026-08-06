@@ -73,6 +73,10 @@ return {
   -- Mason (저장소가 williamboman → mason-org 조직으로 이관됨)
   {
     "mason-org/mason.nvim",
+    -- 트리거가 없으면 startup에 로드된다. 아래 mason-lspconfig가 BufReadPre에
+    -- dependency로 끌어올리므로 파일을 열 때는 어차피 로드되고,
+    -- 파일 인자 없이 nvim만 띄우는 경우에만 로드를 건너뛴다.
+    cmd = { "Mason", "MasonInstall", "MasonUninstall", "MasonUninstallAll", "MasonLog", "MasonUpdate" },
     config = function()
       require("config.mason")
     end,
