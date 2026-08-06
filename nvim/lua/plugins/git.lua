@@ -1,8 +1,6 @@
 return {
   -- Git
-  -- fugitive/flog는 트리거가 없으면 startup에 로드된다. 명령으로만 쓰므로 cmd로 미룬다.
-  -- 목록은 각 플러그인이 실제로 정의하는 명령에서 뽑았다
-  -- (vim-fugitive/plugin/fugitive.vim, vim-flog/plugin/flog.vim).
+  -- fugitive는 트리거가 없으면 startup에 로드된다. 명령으로만 쓰므로 cmd로 미룬다.
   {
     "tpope/vim-fugitive",
     -- 목록은 fugitive를 강제 로드한 뒤 nvim_get_commands()로 실제 정의된 것을 뽑았다.
@@ -46,11 +44,9 @@ return {
       "Gbrowse",
     },
   },
-  {
-    "rbong/vim-flog",
-    dependencies = "tpope/vim-fugitive",
-    cmd = { "Flog", "Flogsplit", "Floggit" },
-  },
+  -- (rbong/vim-flog 제거함. 명령 전용(:Flog/:Flogsplit/:Floggit)이고 키맵이 없는데
+  --  명령 히스토리 1000건과 검색 히스토리 어디에도 호출 흔적이 없었다.
+  --  git 로그 그래프가 다시 필요하면 되살릴 것)
   {
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPre", "BufNewFile" },

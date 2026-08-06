@@ -149,12 +149,11 @@ vim.keymap.set("n", "<Leader>w", ":w<CR>", { noremap = true, silent = true, desc
 vim.keymap.set("n", "<Leader>Q", ":q<CR>", { noremap = true, silent = true, desc = "Quit" })
 vim.keymap.set("n", "<Leader>x", ":x<CR>", { noremap = true, silent = true, desc = "Save and quit" })
 
--- vim-visual-multi 관련 설명
--- 기본 키 매핑:
--- <C-n>: 커서 아래 단어 선택 및 다음 일치 항목 찾기
--- <C-Down>/<C-Up>: 커서를 아래/위로 추가 (<C-j>/<C-k>는 창 이동에 사용)
--- <S-Left/Right>: 선택 영역 확장/축소
--- 자세한 설정은 config/vim-visual-multi.lua 파일 참조
+-- 멀티커서(multicursor.nvim) 키:
+-- <C-n>: 커서 아래 단어/선택의 다음 일치에 커서 추가
+-- <C-Down>/<C-Up>: 아래/위 줄에 커서 추가 (<C-j>/<C-k>는 창 이동이라 피함)
+-- <C-a>(visual): 모든 일치에 커서 추가, <leader>m*: 나머지
+-- 자세한 설정은 config/multicursor.lua 참조
 
 -- 오타 방지 명령어
 vim.api.nvim_create_user_command("W", "w", {})

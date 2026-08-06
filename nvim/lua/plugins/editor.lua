@@ -17,21 +17,15 @@ return {
   --  실측: typescriptreact/javascriptreact -> {/* */}, rust/java/js/ts -> //.
   --  vue/svelte/terraform 같은 다른 filetype을 쓰게 되면 다시 필요할 수 있다)
 
+  -- 멀티커서. vim-visual-multi에서 이전함 — VM은 upstream이 2024-09에 멈췄고
+  -- (우리 핀 = upstream HEAD) 자체 모드를 만드는 구조라 blink.cmp/스니펫과
+  -- 겉돌 여지가 있다. multicursor.nvim은 Neovim API 기반이고 활발히 유지된다.
   {
-    "mg979/vim-visual-multi",
-    branch = "master",
-    -- keys 트리거는 쓰지 않는다. VM 진입점은 위 6개 말고도 11개가 더 있다:
-    -- 리더 기반(\\A Select All, \\\\ Add Cursor At Pos, \\gS, \\/),
-    -- <S-Left>/<S-Right>, VM_mouse_mappings로 켜지는 <C-LeftMouse> 계열,
-    -- visual \\c / \\/. keys에 하나라도 빠지면 그 진입점은 조용히 죽는다.
-    -- 목록을 손으로 유지하는 대신 VeryLazy로 UI 준비 직후 로드해 전부 살린다.
-    -- (VeryLazy는 UIEnter 후에 뜨므로 startup 시간에는 잡히지 않는다)
+    "jake-stewart/multicursor.nvim",
+    branch = "1.0",
     event = "VeryLazy",
-    -- 주의: g:VM_maps 등 설정은 반드시 init(플러그인 로드 **전**)에서 해야 한다.
-    -- vim-visual-multi는 plugin/ 스크립트가 로드될 때 이 전역들을 읽어 매핑을
-    -- 만들기 때문에, config(로드 **후**)에 두면 매핑이 적용되지 않는다.
-    init = function()
-      require("config.vim-visual-multi").setup()
+    config = function()
+      require("config.multicursor").setup()
     end,
   },
 
