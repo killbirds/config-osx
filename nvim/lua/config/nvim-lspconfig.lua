@@ -1,53 +1,42 @@
 local keys = require("config.nvim-lspconfig-keys")
 local lsp_capabilities = require("config.lsp-capabilities")
 
--- 공통 LSP 설정 함수
-local function setup_lsp(client, bufnr)
-	-- 키맵 및 버퍼 설정
-	keys.on_attach(client, bufnr)
-
-	-- 서버별 추가 설정 (선택적)
-	if client.name == "ts_ls" then
-		client.server_capabilities.documentFormattingProvider = false -- tsserver는 prettier에 위임 가능
-	end
-
-	-- 서버 연결 성공 알림
-	-- vim.notify(string.format("LSP 서버 '%s' 연결 성공", client.name), vim.log.levels.INFO, {
-	--   title = "LSP 연결",
-	--   timeout = 1500,
-	-- })
+-- 서버별 추가 설정 (LspAttach 시 적용)
+local function apply_server_specific_config(client, bufnr)
+  if client.name == "ts_ls" then
+    -- tsserver는 prettier에 포매팅 위임
+    client.server_capabilities.documentFormattingProvider = false
+  end
 end
 
 -- Inlay Hints 토글 키맵(<leader>th)은 plugins/lsp.lua의 lazy keys에서 정의됨
 
--- 공통 옵션 설정
+-- 공통 옵션 설정 (on_attach는 사용하지 않고 LspAttach autocmd로 통일)
 local default_opts = {
-	capabilities = lsp_capabilities.default_capabilities(), -- nvim-cmp와의 통합
-	flags = {
-		debounce_text_changes = 150, -- 텍스트 변경 후 지연 시간 (ms)
-	},
-	on_attach = setup_lsp,
+  capabilities = lsp_capabilities.default_capabilities(), -- nvim-cmp와의 통합
+  flags = {
+    debounce_text_changes = 150, -- 텍스트 변경 후 지연 시간 (ms)
+  },
 }
 
 -- servers 테이블에 없는 서버(mason-lspconfig automatic_enable로 시작되는 서버 포함)에도
 -- nvim-cmp capabilities가 적용되도록 전역 기본값을 등록한다.
--- (on_attach를 "*"에 넣으면 서버별 rtp 기본 on_attach를 덮어쓸 수 있으므로
---  공통 키맵은 아래 LspAttach autocmd로 적용한다)
 vim.lsp.config("*", {
-	capabilities = lsp_capabilities.default_capabilities(),
+  capabilities = lsp_capabilities.default_capabilities(),
 })
 
 -- 어떤 서버가 붙든 공통 키맵/버퍼 옵션이 적용되도록 보장한다.
--- servers 테이블의 서버는 setup_lsp에서도 keys.on_attach를 호출하지만,
--- 동일한 버퍼 로컬 매핑을 다시 설정할 뿐이라 중복 호출은 무해하다.
+-- on_attach 대신 LspAttach autocmd 하나로 통일하여 중복 호출을 방지한다.
 vim.api.nvim_create_autocmd("LspAttach", {
-	group = vim.api.nvim_create_augroup("UserLspAttachKeys", { clear = true }),
-	callback = function(args)
-		local client = vim.lsp.get_client_by_id(args.data.client_id)
-		if client then
-			keys.on_attach(client, args.buf)
-		end
-	end,
+  group = vim.api.nvim_create_augroup("UserLspAttachKeys", { clear = true }),
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if not client then
+      return
+    end
+    keys.on_attach(client, args.buf)
+    apply_server_specific_config(client, args.buf)
+  end,
 })
 
 -- LSP 서버별 설정
