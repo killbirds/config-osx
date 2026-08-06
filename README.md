@@ -272,20 +272,35 @@ export NVIM_PROFILE=1
 
 ## 주요 플러그인 사용법
 
-### vim-visual-multi (멀티 커서 편집)
+### multicursor.nvim (멀티 커서 편집)
 
-[vim-visual-multi](https://github.com/mg979/vim-visual-multi) 플러그인을 사용하면 여러 위치에서 동시에 텍스트를 편집할 수 있습니다.
+[multicursor.nvim](https://github.com/jake-stewart/multicursor.nvim) 플러그인을 사용하면 여러 위치에서 동시에 텍스트를 편집할 수 있습니다.
+(이전에는 vim-visual-multi를 썼으나 upstream이 2024-09에 멈춰 이전했습니다.)
 
 주요 키 매핑:
 
-- `<C-n>`: 커서 아래 단어 선택 및 다음 일치 항목 찾기
-- `<C-j>/<C-k>`: 커서를 위/아래로 추가
-- `<C-a>`: 모든 일치 항목 선택
-- `<S-Left>/<S-Right>`: 선택 영역 확장/축소
-- `<C-h>/<C-l>`: 모든 커서를 왼쪽/오른쪽으로 이동
-- `<C-x>`: 현재 위치에 커서 추가
+- `<C-n>`: 커서 아래 단어 / 선택 영역의 다음 일치에 커서 추가
+- `<C-Down>`/`<C-Up>`: 아래/위 줄에 커서 추가
+- `<C-a>` (visual): 선택 영역의 모든 일치에 커서 추가
+- `<C-q>`: 커서 일시 비활성/재활성
+- `<C-LeftMouse>`: 클릭 위치에 커서 추가
+- `<leader>ma`: 모든 일치에 커서 추가 (normal)
+- `<leader>mp`: 현재 위치에 커서 추가
+- `<leader>mn`/`<leader>mN`: 다음 일치 건너뛰기 / 이전 일치에 커서 추가
+- `<leader>m/`: 검색 결과 전체에 커서 (`smartcase` 반영)
 
-자세한 설정은 `nvim/lua/config/vim-visual-multi.lua` 파일을 참조하세요.
+커서가 여러 개일 때만 동작하는 키:
+
+- `<leader>m[`/`<leader>m]`: 이전/다음 커서로 전환
+- `<leader>mx`: 주 커서 삭제
+- `<Esc>`: 커서 정리 (비활성 상태면 재활성)
+
+일반 모션(`h`/`l`/`w` 등)과 `u`/`<C-r>`는 모든 커서에 그대로 적용되므로 별도 키가 없습니다.
+
+주의: `<C-n>` 계열은 항상 대소문자를 구분합니다(플러그인이 검색식에 `\C`를 강제).
+대소문자를 무시하려면 `/패턴`으로 검색한 뒤 `<leader>m/`를 쓰세요.
+
+자세한 설정은 `nvim/lua/config/multicursor.lua` 파일을 참조하세요.
 
 ### trouble.nvim (진단 및 참조 뷰어)
 
@@ -300,9 +315,9 @@ export NVIM_PROFILE=1
 - `<leader>xl`: LSP 참조/정의/구현 결과 표시
 - `<leader>xs`: 문서 심볼 표시
 
-Telescope과의 연동:
+fzf-lua와의 연동:
 
-- Telescope로 검색 후 `<C-t>` 키를 누르면 결과가 Trouble 뷰에 표시됩니다.
+- fzf-lua로 검색 후 `<C-t>` 키를 누르면 결과가 Trouble 뷰에 표시됩니다.
 
 Trouble 뷰 내부 키 바인딩:
 

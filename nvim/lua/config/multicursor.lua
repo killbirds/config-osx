@@ -18,7 +18,16 @@
 --   \\\  Add Cursor At Pos -> <leader>mp
 --
 -- 주의: <C-a>/<C-x>는 숫자 증감이라 normal 모드에서 덮지 않는다(VM 설정의 경고와 동일).
--- <Left>/<Right>는 keys.lua가 창 크기 조절에 쓰므로 커서 이동은 <S-Left>/<S-Right>로 둔다.
+--
+-- 보존하지 않은 VM 키와 그 이유:
+--   <C-h>/<C-l> Move Left/Right    -> 불필요. multicursor는 일반 모션이 전 커서에
+--                                     적용된다(실측: llllX가 3줄 모두에 적용).
+--   u / <C-r>   Undo/Redo          -> 불필요. 내장 undo가 멀티커서 편집을 한 단위로
+--                                     되돌린다(실측: cwZZZ 후 u 한 번에 3줄 복원).
+--   <S-Left>/<S-Right> Extend      -> 매핑하지 않고 비워 둔다(아래 layer 주석 참고).
+--   <C-f>/<C-d> Visual Find/Add    -> visual <C-n>(matchAddCursor)과 <leader>mp가
+--                                     역할을 대체한다.
+--   Find Subword Under             -> 대응 없음. matchAddCursor는 단어 경계를 쓴다.
 
 local M = {}
 
@@ -53,6 +62,18 @@ function M.setup()
     mc.addCursor()
   end, d("현재 위치에 커서 추가"))
 
+  -- 대소문자: match* 계열은 검색식에 \C를 강제로 넣어 **항상 대소문자를 구분**한다
+  -- (multicursor-nvim/examples.lua:641,655,657,741,743 — 옵션으로 끌 수 없다).
+  -- 구 VM은 VM_case_setting = "smart"였으므로 이 부분은 동작이 다르다.
+  -- 실측: "foo/Foo/foo/FOO"에서 matchAllAddCursors -> 커서 2개(구분),
+  --       searchAllAddCursors -> 4개(ignorecase/smartcase 반영).
+  -- 이름 바꾸기 용도로는 대소문자 구분이 안전해 기본 키는 match* 그대로 두고,
+  -- smart-case가 필요할 때 쓰라고 검색 기반 경로를 따로 둔다(/패턴 입력 후 사용).
+  set({ "n", "x" }, "<leader>m/", mc.searchAllAddCursors, d("검색 결과 전체에 커서 (smartcase)"))
+  set({ "n", "x" }, "<leader>mj", function()
+    mc.searchAddCursor(1)
+  end, d("다음 검색 결과에 커서 (smartcase)"))
+
   -- 건너뛰기 / 역방향 (VM에는 없던 기능이지만 matchAddCursor의 짝이라 함께 둔다)
   set({ "n", "x" }, "<leader>mn", function()
     mc.matchSkipCursor(1)
@@ -71,9 +92,12 @@ function M.setup()
 
   -- 아래 매핑은 커서가 여러 개일 때만 적용된다(layer). 평소 키를 가리지 않는다.
   mc.addKeymapLayer(function(layer)
-    -- 주 커서 이동. <Left>/<Right>는 keys.lua의 창 크기 조절이라 피한다.
-    layer({ "n", "x" }, "<S-Left>", mc.prevCursor, d("이전 커서로"))
-    layer({ "n", "x" }, "<S-Right>", mc.nextCursor, d("다음 커서로"))
+    -- 주 커서 이동.
+    -- <S-Left>/<S-Right>는 쓰지 않는다: VM에서 그 키가 "선택 영역 확장/축소"였기
+    -- 때문에 같은 상황(커서 여러 개)에서 정반대 의미로 재사용하면 손이 헷갈린다.
+    -- <Left>/<Right>도 keys.lua의 창 크기 조절이라 피한다.
+    layer({ "n", "x" }, "<leader>m[", mc.prevCursor, d("이전 커서로"))
+    layer({ "n", "x" }, "<leader>m]", mc.nextCursor, d("다음 커서로"))
     layer({ "n", "x" }, "<leader>mx", mc.deleteCursor, d("주 커서 삭제"))
 
     -- <Esc>: 비활성 상태면 되살리고, 아니면 커서를 정리한다.
