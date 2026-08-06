@@ -34,7 +34,7 @@ return {
 		opts = {
 			-- 성능 최적화 옵션 추가
 			check_ts = true, -- treesitter 통합
-			disable_filetype = { "TelescopePrompt", "spectre_panel" },
+			disable_filetype = { "fzf", "spectre_panel" },
 			fast_wrap = {
 				map = "<M-e>",
 				chars = { "{", "[", "(", '"', "'" },
@@ -58,7 +58,7 @@ return {
 				delay = 200, -- 100에서 200으로 증가 (성능 개선)
 				filetypes_denylist = {
 					"NvimTree",
-					"Telescope",
+					"fzf",
 					"lazy",
 					"mason",
 					"help",

@@ -55,58 +55,24 @@ return {
     end,
   },
 
-  -- Telescope
+  -- Fuzzy finder (telescope 대체)
   {
-    "nvim-telescope/telescope.nvim",
-    cmd = "Telescope",
+    "ibhagwan/fzf-lua",
+    cmd = "FzfLua",
     keys = {
-      { "<C-p>", "<cmd>Telescope find_files<cr>", desc = "Find files" },
-      { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find files" },
-      { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
-      { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "Find buffers" },
-      { "<leader>fp", "<cmd>Telescope projects<cr>", desc = "Find projects" },
-      { "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "Help tags" },
-      { ",ag", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
-      { "<leader>fr", "<cmd>Telescope resume<cr>", desc = "Resume Telescope" },
-      { "<leader>fP", "<cmd>Telescope pickers<cr>", desc = "Telescope pickers" },
-      {
-        "<leader>ag",
-        function()
-          local current_word = vim.fn.expand("<cword>")
-          require("telescope.builtin").live_grep({ default_text = current_word })
-        end,
-        desc = "Search for selected word",
-      },
-    },
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope-fzf-native.nvim",
-      "nvim-telescope/telescope-ui-select.nvim",
-      {
-        "nvim-telescope/telescope-smart-history.nvim",
-        dependencies = { "kkharji/sqlite.lua" },
-      },
-      "ahmedkhalf/project.nvim",
+      { "<C-p>", "<cmd>FzfLua files<cr>", desc = "Find files" },
+      { "<leader>ff", "<cmd>FzfLua files<cr>", desc = "Find files" },
+      { "<leader>fg", "<cmd>FzfLua live_grep<cr>", desc = "Live grep" },
+      { "<leader>fb", "<cmd>FzfLua buffers<cr>", desc = "Find buffers" },
+      { "<leader>fh", "<cmd>FzfLua helptags<cr>", desc = "Help tags" },
+      { ",ag", "<cmd>FzfLua live_grep<cr>", desc = "Live grep" },
+      { "<leader>fr", "<cmd>FzfLua resume<cr>", desc = "Resume last picker" },
+      { "<leader>fP", "<cmd>FzfLua builtin<cr>", desc = "FzfLua pickers" },
+      { "<leader>ag", "<cmd>FzfLua grep_cword<cr>", desc = "Search word under cursor" },
+      { "<leader>ag", "<cmd>FzfLua grep_visual<cr>", mode = "v", desc = "Search selection" },
     },
     config = function()
-      require("config.telescope")
-    end,
-  },
-  { "nvim-telescope/telescope-fzf-native.nvim", build = "make", lazy = true },
-
-  -- 프로젝트 관리
-  {
-    "ahmedkhalf/project.nvim",
-    lazy = true,
-    config = function()
-      require("project_nvim").setup({
-        detection_methods = { "pattern", "lsp" }, -- LSP 기반 탐지 추가
-        patterns = { ".git", "Makefile", "package.json", "Cargo.toml", "pyproject.toml", "build.gradle" },
-        show_hidden = true,
-        silent_chdir = true,
-        scope_chdir = "global",
-        datapath = vim.fn.stdpath("data"),
-      })
+      require("config.fzf-lua")
     end,
   },
 }

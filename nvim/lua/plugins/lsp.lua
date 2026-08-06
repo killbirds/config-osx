@@ -61,7 +61,8 @@ return {
   },
   {
     "scalameta/nvim-metals",
-    dependencies = "nvim-lua/plenary.nvim",
+    -- plenary 의존은 제거함: nvim-metals 소스에 plenary 참조가 0건이다.
+    -- (telescope가 유일한 실사용처였고 함께 제거됨)
     ft = { "scala", "sbt", "java" },
     cmd = { "MetalsStart" },
     config = function()

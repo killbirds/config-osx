@@ -12,7 +12,8 @@ local protected_filetypes = {
   "qf",             -- Quickfix 목록
   "terminal",       -- 내장 터미널
   "prompt",         -- 프롬프트 입력
-  "TelescopePrompt", -- Telescope 검색
+  "fzf",            -- fzf-lua picker (buftype=terminal이라 위 "terminal"과 중복 방어)
+  "fzflua_backdrop", -- fzf-lua 배경 창
   "lazy",           -- Lazy 플러그인 관리자
   "lspinfo",        -- LSP 정보 창
   "toggleterm",     -- ToggleTerm 터미널
