@@ -39,8 +39,10 @@ cmp.setup({
     ["<Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
+      -- expand_or_jumpable() = expandable() or jumpable(1).
+      -- 인자 없는 jumpable()은 backward(-1) 검사가 되므로 쓰면 안 된다.
       elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump() -- 스니펫 확장 또는 점프
+        luasnip.expand_or_jump()
       else
         fallback()
       end
@@ -127,9 +129,11 @@ cmp.setup({
         treesitter = "[TS]",
       },
       before = function(entry, vim_item)
-        -- 함수 호출에서 인자 이름 표시
-        if entry.completion_item.detail then
-          vim_item.menu = entry.completion_item.detail
+        -- lspkind가 설정한 menu([LSP], [Snip] 등)를 보존하면서
+        -- detail이 있으면 abbr에 추가 표시
+        local detail = entry.completion_item.detail
+        if detail then
+          vim_item.abbr = vim_item.abbr .. " " .. detail
         end
         return vim_item
       end,
