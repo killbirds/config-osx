@@ -147,7 +147,8 @@ vim.keymap.set("n", "<Leader>w", ":w<CR>", { noremap = true, silent = true, desc
 -- <Leader>q는 config/diagnostics.lua에서 진단 관련으로 사용됨.
 -- <Leader>qq를 쓰면 <Leader>q가 timeoutlen만큼 대기하므로 종료는 <Leader>Q를 사용한다.
 vim.keymap.set("n", "<Leader>Q", ":q<CR>", { noremap = true, silent = true, desc = "Quit" })
-vim.keymap.set("n", "<Leader>x", ":x<CR>", { noremap = true, silent = true, desc = "Save and quit" })
+-- 같은 이유로, trouble의 <leader>x* 6개 때문에 <Leader>x도 timeoutlen을 기다린다.
+vim.keymap.set("n", "<Leader>X", ":x<CR>", { noremap = true, silent = true, desc = "Save and quit" })
 
 -- 멀티커서(multicursor.nvim) 키:
 -- <C-n>: 커서 아래 단어/선택의 다음 일치에 커서 추가
