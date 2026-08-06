@@ -1,20 +1,29 @@
 return {
-  -- nvim-cmp & LSP
+  -- 자동완성 & LSP
   {
-    "hrsh7th/nvim-cmp",
+    "saghen/blink.cmp",
+    -- v2(main)는 breaking change가 진행 중이고 blink.lib 의존이 추가되므로 v1에 고정한다.
+    version = "1.*",
+    -- prebuilt 바이너리를 GitHub에서 내려받는 대신 로컬 cargo로 빌드한다.
+    -- (사내망에서 release 다운로드가 막혀도 동작하고, 결과가 결정적이다)
+    build = "cargo build --release",
+    dependencies = { "rafamadriz/friendly-snippets" },
+    -- 지연 로딩 주의사항:
+    -- blink의 plugin/blink-cmp.lua가 vim.lsp.config("*", { capabilities = ... })를
+    -- 자동 등록한다. 이게 LSP 클라이언트가 뜨기 전에 실행되지 않으면 서버가
+    -- snippetSupport / resolveSupport / labelDetails를 모르는 상태로 initialize된다.
+    --
+    -- 그래서 InsertEnter만으로는 늦다. 대신 config/lsp-capabilities.lua가
+    -- require("blink.cmp")를 호출하고, 그 파일은 nvim-lspconfig(event = BufReadPre)가
+    -- 로드한다. lazy.nvim의 require 훅이 이때 blink을 끌어올리므로 클라이언트 시작 전에
+    -- capabilities 등록이 끝난다.
+    --
+    -- 이 방식이 lazy = false보다 나은 점: 파일 인자 없이 nvim만 띄우는 경우
+    -- blink을 로드하지 않아 startup이 이전 그대로다.
+    -- (12회 측정 median: 이 방식 24.4ms / lazy = false 36ms / 이전 nvim-cmp 26ms)
     event = { "InsertEnter", "CmdlineEnter" },
-    dependencies = {
-      "L3MON4D3/LuaSnip",
-      "saadparwaiz1/cmp_luasnip",
-      "onsails/lspkind-nvim",
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-nvim-lua",
-      "hrsh7th/cmp-path",
-      "hrsh7th/cmp-buffer",
-      "hrsh7th/cmp-cmdline",
-    },
-    config = function()
-      require("config.nvim-cmp")
+    opts = function()
+      return require("config.blink-cmp")
     end,
   },
   -- Neovim 설정/플러그인 Lua 편집용 lua_ls 자동 구성
