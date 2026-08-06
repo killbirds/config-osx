@@ -120,6 +120,7 @@ require("gitsigns").setup({
       end,
     })
   end,
-  -- 성능 최적화 설정
-  _threaded_diff = true, -- 쓰레드로 diff 계산
+  -- NOTE: _threaded_diff는 gitsigns의 private API (underscore prefix)이다.
+  -- 업데이트 시 동작이 변경되거나 제거될 수 있으므로 버전 업그레이드 후 동작 확인 필요.
+  _threaded_diff = true,
 })

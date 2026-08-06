@@ -11,9 +11,9 @@ require("mason-tool-installer").setup({
     -- 필요할 때 주석 해제
     -- "gofumpt", -- Go
   },
-  auto_update = false,          -- 자동 업데이트 비활성화
-  run_on_start = false,         -- 시작 시 실행하지 않고 필요할 때만 수동으로 실행
-  start_delay = 10000,          -- 지연 시간 10초로 증가 (3초에서 10초로)
-  debounce_hours = 48,          -- 최소 48시간 설치/업데이트 시도 간격 (24시간에서 48시간으로)
-  max_concurrent_installers = 2, -- 동시 설치 가능한 도구 수 제한 (4에서 2로)
+  auto_update = false,
+  run_on_start = false,
+  debounce_hours = 48,
+  -- max_concurrent_installers는 이 플러그인이 아니라 mason.nvim의 옵션이다.
+  -- config/mason.lua의 require("mason").setup()에서 설정한다.
 })

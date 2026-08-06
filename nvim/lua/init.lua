@@ -3,7 +3,8 @@ vim.opt.mouse = "a"
 vim.opt.number = true
 vim.opt.history = 1000
 vim.opt.showcmd = true
-vim.opt.showmode = true
+-- lualine이 모드를 표시하므로 내장 showmode는 끈다 (중복 표시 방지)
+vim.opt.showmode = false
 
 -- 0.11에서 개선된 커서 설정
 vim.opt.guicursor =
@@ -11,7 +12,6 @@ vim.opt.guicursor =
 vim.opt.visualbell = true
 vim.opt.autoread = true
 vim.opt.autowrite = true
-vim.opt.ruler = true
 vim.opt.title = true
 vim.opt.cursorline = true
 vim.opt.hidden = true
@@ -72,10 +72,19 @@ vim.opt.updatetime = 200 -- 스왑 파일 쓰기 및 CursorHold 이벤트 트리
 -- 추가 성능 최적화 설정
 vim.opt.maxmempattern = 5000000 -- 패턴 매칭 메모리 제한 (단위 KB — 사실상 무제한으로 상향)
 vim.opt.ttimeoutlen = 5 -- 키 코드 대기 시간 단축 (빠른 응답)
-vim.opt.ttyfast = true -- 빠른 터미널 연결 가정
 
 -- LSP 성능 최적화
 vim.lsp.log.set_level("WARN") -- LSP 로그 레벨을 WARN으로 설정 (ERROR보다 약간 더 많은 정보)
+
+-- LSP 로그 파일이 과도하게 커지는 것을 방지 (시작 시 50MB 초과면 로테이션).
+-- truncate 대신 rename을 쓰는 이유: 실행 중인 다른 Neovim 인스턴스는 열어둔 fd로
+-- 옮겨진 파일에 계속 쓰므로 진행 중인 로그를 잃지 않는다.
+local lsp_log_path = vim.fn.stdpath("state") .. "/lsp.log"
+local log_max_bytes = 50 * 1024 * 1024
+local log_stat = vim.uv.fs_stat(lsp_log_path)
+if log_stat and log_stat.size > log_max_bytes then
+  os.rename(lsp_log_path, lsp_log_path .. ".old")
+end
 
 -- 검색 설정 개선
 vim.opt.ignorecase = true -- 검색 시 대소문자 무시
