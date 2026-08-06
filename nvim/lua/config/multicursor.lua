@@ -40,32 +40,22 @@ function M.setup()
     return { desc = "Multicursor: " .. desc }
   end
 
-  -- normal 모드에서 먼저 단어를 선택한 뒤 매칭한다.
-  --
-  -- 이게 없으면 VM과 감각이 다르다. multicursor의 match* 는 선택을 만들지 않고
-  -- 커서만 옮기므로(실측: <C-n> 후 mode="n", visual=false) 커서 블록이 한 글자만
-  -- 덮어 "단어가 아니라 한 글자만 잡힌 것"처럼 보이고, VM처럼 바로 c/d/y를 눌러
-  -- 편집할 수도 없다(cw/ciw를 써야 했다).
-  -- viw로 단어를 잡아 주면 VM과 같아진다.
-  -- 실측: viw+match 3회 -> mode="v", 커서 3개, 그 상태에서 cXYZ -> 3줄 모두 치환.
-  --
-  -- 커서가 비-키워드 문자(;, 공백 등) 위면 viw가 그 문자열을 잡으므로
-  -- 그 문자 기준으로 매칭된다(기존에는 한 글자만 매칭됐다).
-  ---@param dir -1|1
-  local function match_with_word(dir)
-    if vim.api.nvim_get_mode().mode == "n" then
-      -- 빈 줄 등에서 viw가 실패할 수 있으므로 실패해도 계속 진행한다.
-      -- vim.cmd는 __call 테이블이라 pcall에 직접 넘기면 타입이 안 맞는다.
-      pcall(function()
-        vim.cmd("normal! viw")
-      end)
-    end
-    mc.matchAddCursor(dir)
-  end
-
   -- 주 진입점 (VM Find Under)
+  --
+  -- 주의: 여기서 viw로 단어를 먼저 선택하면 안 된다.
+  -- matchAddCursor는 선택이 있으면 regex를 `\C\V<선택문자열>`(단어 경계 없음)로,
+  -- 없으면 `\v<\C\V단어\v>`(단어 경계)로 만든다
+  -- (multicursor-nvim/examples.lua:637-660).
+  -- 실측: "foo/foobar/foo/barfoo"에서
+  --   viw 후 매칭  -> 커서 4개, cZ가 foobar/barfoo의 부분까지 바꿈
+  --   그냥 매칭    -> 커서 2개, 온전한 foo만 바뀜
+  -- 구 VM의 Find Under는 단어 경계였으므로 그냥 호출하는 쪽이 맞다.
+  --
+  -- VM은 <C-n>이 단어를 시각적으로 선택해서 바로 c를 눌렀지만 여기서는 커서만
+  -- 놓인다. 같은 감각이 필요하면 커서를 다 모은 뒤 viw를 한 번 누르면 모든
+  -- 커서에 적용되고(실측 확인), 그 상태에서 c를 누르면 된다. ciw도 같다.
   set({ "n", "x" }, "<C-n>", function()
-    match_with_word(1)
+    mc.matchAddCursor(1)
   end, d("다음 일치에 커서 추가"))
 
   -- 위/아래 줄에 커서 추가 (VM <C-Down>/<C-Up>)
@@ -102,7 +92,7 @@ function M.setup()
     mc.matchSkipCursor(1)
   end, d("다음 일치 건너뛰기"))
   set({ "n", "x" }, "<leader>mN", function()
-    match_with_word(-1)
+    mc.matchAddCursor(-1)
   end, d("이전 일치에 커서 추가"))
 
   -- 마우스 (기존 VM_mouse_mappings = 1 대응)
