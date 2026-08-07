@@ -25,6 +25,14 @@ create_backup() {
     cp -r "$HOME/.config/nvim" "$BACKUP_DIR/"
   fi
 
+  # zsh 설치 단계는 홈의 runcom 6개를 지우고 다시 링크한다. 심링크가 아니라
+  # 로컬 수정이 담긴 실체 파일일 수 있으므로 -L로 역참조해 사본을 남긴다.
+  mkdir -p "$BACKUP_DIR/zsh"
+  for zf in .zshenv .zprofile .zshrc .zpreztorc .zlogin .zlogout; do
+    [ -e "$HOME/$zf" ] || continue
+    cp -L "$HOME/$zf" "$BACKUP_DIR/zsh/$zf" 2>/dev/null || cp "$HOME/$zf" "$BACKUP_DIR/zsh/$zf"
+  done
+
   # herdr은 설정과 런타임 상태(session.json, 로그, 소켓)가 한 디렉토리에 섞여 있으므로
   # 설치가 덮어쓰는 config.toml만 백업한다.
   if [ -f "$HOME/.config/herdr/config.toml" ]; then
@@ -38,27 +46,30 @@ create_backup() {
 # 메인 설치 과정
 main_install() {
   echo "스크립트 설치 중..."
-  (cd script; $install ~/bin)
+  (cd "$cur/script" && $install ~/bin) || exit 1
 
   echo "설정 파일 설치 중..."
-  (cd settings; $install ~)
+  (cd "$cur/settings" && $install ~) || exit 1
 
   echo "Neovim 설정 설치 중..."
   (mkdir -p ~/.config/nvim)
-  (cd nvim; $install ~/.config/nvim)
+  (cd "$cur/nvim" && $install ~/.config/nvim) || exit 1
 
   echo "zsh 설정 설치 중..."
   # prezto의 runcoms를 ~/.zprezto 클론 안에서 직접 고치면 prezto 업데이트 때
   # 충돌하거나 날아간다. 저장소가 원본을 갖고 홈으로 링크해, ~/.zprezto는
   # upstream 그대로 두고 언제든 git pull 할 수 있게 한다.
   # 비밀정보는 추적하지 않는 ~/.zshenv.local에 두고 zsh/.zshenv가 source 한다.
-  (cd zsh; $install ~)
+  (cd "$cur/zsh" && $install ~) || exit 1
 
   echo "herdr 설정 설치 중..."
   # ~/.config/herdr에는 herdr이 만드는 런타임 파일(session.json, *.log, *.sock)이 함께 있으므로
   # 디렉토리 전체가 아니라 herdr/ 안의 파일만 개별 심링크한다.
   mkdir -p ~/.config/herdr
-  (cd herdr; $install ~/.config/herdr)
+  # 디렉토리 순회(=$install)를 쓰면 나중에 herdr/에 파일이 추가될 때 그것까지
+  # ~/.config/herdr로 링크되어 동명 런타임 파일을 지운다. 대상을 고정한다.
+  rm -rf ~/.config/herdr/config.toml
+  ln -s "$cur/herdr/config.toml" ~/.config/herdr/config.toml
   if command -v herdr &> /dev/null; then
     herdr config check || echo "경고: herdr 설정 검증에 실패했습니다. herdr/config.toml을 확인하세요."
     # 서버가 떠 있으면 재시작 없이 반영 (떠 있지 않으면 실패해도 무방)

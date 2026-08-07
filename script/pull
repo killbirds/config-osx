@@ -10,6 +10,12 @@ set -u
 # 글로브를 쓰면 디렉토리만, 숨김 항목과 '.' / '..' 없이 얻는다.
 shopt -s nullglob
 
+# 하나가 실패해도 나머지는 계속 받되, 종료 코드에는 반영한다.
+# 예전에는 pull 실패가 무시되고 마지막 sleep이 성공하면 전체가 0으로 끝나,
+# 자동화에서 이 스크립트로 갱신 성공 여부를 판단할 수 없었다.
+status=0
+failed=()
+
 for PROJECT in */; do
   PROJECT="${PROJECT%/}"
 
@@ -17,8 +23,20 @@ for PROJECT in */; do
   [ -e "$PROJECT/.git" ] || continue
 
   echo "current dir: $(cd "$PROJECT" && pwd)"
-  (cd "$PROJECT" && git pull --all --recurse-submodules --log)
+  if ! (cd "$PROJECT" && git pull --all --recurse-submodules --log); then
+    status=1
+    failed+=("$PROJECT")
+    echo "  !! pull 실패: $PROJECT"
+  fi
   echo "--------------------------------------"
 
   sleep 5
 done
+
+if (( ${#failed[@]} )); then
+  echo
+  echo "실패한 저장소 ${#failed[@]}개:"
+  printf '  %s\n' "${failed[@]}"
+fi
+
+exit "$status"

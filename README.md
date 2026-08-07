@@ -144,7 +144,13 @@ Scala/sbt 포매팅은 conform이 아니라 nvim-metals의 저장 시 포맷이 
 - Git 글로벌 설정 적용
 - Neovim 플러그인 설치
 
-설정을 갱신할 때도 같은 명령을 다시 실행하면 됩니다. `install`은 기존 대상을 지우고 다시 링크하므로 반복 실행해도 안전합니다.
+설정을 갱신할 때도 같은 명령을 다시 실행하면 됩니다.
+
+> **덮어쓰기 범위에 주의하세요.** `install`은 대상 파일을 **지운 뒤** 다시 링크합니다.
+> 백업(`~/.config/backup_<타임스탬프>/`)에 담기는 것은 Neovim 설정, herdr `config.toml`,
+> zsh runcom 6개뿐입니다. `settings/`가 홈에 놓는 파일, `~/bin`의 동명 스크립트,
+> `~/.sbt/1.0`의 동명 항목은 **백업 없이** 교체됩니다.
+> 이 저장소가 관리하지 않는 동명 파일이 홈에 있다면 먼저 옮겨두세요.
 
 ## zsh 설정
 
@@ -161,10 +167,17 @@ zsh/.zshenv  → ~/.zshenv  →  이하 동일하게 .zprofile .zshrc .zpreztorc
 - 설정 전체가 서드파티 저장소 안의 uncommitted 수정으로만 존재 → `git pull`이나 `git checkout .` 한 번에 사라짐
 - 백업은 `zprezto.patch` 하나뿐이었는데, 이 패치는 실제 설정과 어긋나 있었음 (`runcoms/zshenv`가 통째로 빠져 있었고 내용도 달랐음)
 
-지금은 저장소가 원본을 갖고 `~/.zprezto`는 **upstream 그대로** 두므로, prezto 업데이트가 자유롭습니다.
+지금은 저장소가 원본을 갖고 새 runcom이 **더 이상 `~/.zprezto`를 수정하지 않습니다.**
+
+다만 `./install`이 기존 `~/.zprezto`를 정리해주지는 않습니다. 예전 방식으로 쓰던 장비에서는
+홈의 심링크만 바뀌고 클론 안의 로컬 수정은 그대로 남아 pull 때 계속 충돌합니다.
+장비마다 한 번씩 직접 확인하세요.
 
 ```bash
-git -C ~/.zprezto pull   # 충돌 걱정 없음 — 로컬 수정이 없다
+git -C ~/.zprezto status --short   # 수정이 남아 있으면 아래로 정리
+git -C ~/.zprezto diff > ~/zprezto-local.patch   # 필요하면 먼저 보관
+git -C ~/.zprezto checkout -- runcoms/
+git -C ~/.zprezto pull
 ```
 
 ### 비밀정보는 저장소에 넣지 않습니다
@@ -183,10 +196,21 @@ if [[ -f "$HOME/.zshenv.local" ]]; then
 fi
 ```
 
-새 장비에서는 `~/.zshenv.local`을 직접 만들어야 합니다. 커밋 전에는 반드시 확인하세요.
+**사내 전용 설정도 마찬가지입니다.** 사내 호스트명·URL·프로파일은 토큰이 아니어도 조직 내부
+구조를 드러내므로 추적하지 않습니다. 세 곳으로 나눠 둡니다.
+
+| 파일 | 용도 | 읽는 곳 |
+| --- | --- | --- |
+| `~/.zshenv.local` | API 키 등 비밀정보 | `zsh/.zshenv` |
+| `~/.zprofile.local` | 사내 URL·AWS 프로파일 | `zsh/.zprofile` |
+| `~/.zshrc.local` | 사내 SSH 별칭 등 | `zsh/.zshrc` |
+
+새 장비에서는 이 세 파일을 직접 만들어야 합니다. 커밋 전에는 반드시 확인하세요.
 
 ```bash
 grep -rniE "(export|typeset)[[:space:]]+[A-Za-z_]*(TOKEN|SECRET|API_?KEY|PASSWORD|CREDENTIAL)" zsh/
+# 사내 호스트명·URL도 함께 본다 (토큰만 찾으면 놓친다)
+grep -rniE "kakaocorp|kakao\.com|daum|9rum|agit|StrictHostKeyChecking|/Users/[a-z]+" zsh/
 ```
 
 ### 설정 변경

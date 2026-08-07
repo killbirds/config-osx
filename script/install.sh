@@ -19,7 +19,8 @@ isIgnored() {
 }
 
 install() {
-  pushd "$1" > /dev/null
+  # 진입 실패를 전파하지 않으면 호출자의 현재 디렉토리를 대상에 설치해버린다.
+  pushd "$1" > /dev/null || return 1
 
   local base="$2"
   local recursive="${3:-$(isRecursive)}"
