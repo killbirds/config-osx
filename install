@@ -47,6 +47,13 @@ main_install() {
   (mkdir -p ~/.config/nvim)
   (cd nvim; $install ~/.config/nvim)
 
+  echo "zsh 설정 설치 중..."
+  # prezto의 runcoms를 ~/.zprezto 클론 안에서 직접 고치면 prezto 업데이트 때
+  # 충돌하거나 날아간다. 저장소가 원본을 갖고 홈으로 링크해, ~/.zprezto는
+  # upstream 그대로 두고 언제든 git pull 할 수 있게 한다.
+  # 비밀정보는 추적하지 않는 ~/.zshenv.local에 두고 zsh/.zshenv가 source 한다.
+  (cd zsh; $install ~)
+
   echo "herdr 설정 설치 중..."
   # ~/.config/herdr에는 herdr이 만드는 런타임 파일(session.json, *.log, *.sock)이 함께 있으므로
   # 디렉토리 전체가 아니라 herdr/ 안의 파일만 개별 심링크한다.
