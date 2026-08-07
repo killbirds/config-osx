@@ -97,6 +97,21 @@ if (( $+commands[zoxide] )); then
   alias j='zi'
 fi
 
+# fzf 키바인딩과 자동완성
+#   ^R      히스토리 퍼지 검색  (vi 삽입 모드에서 ^R은 원래 redisplay로 비어 있었다)
+#   ^T      현재 트리에서 파일 선택 후 커맨드라인에 삽입
+#   alt+c   하위 디렉토리 선택 후 cd
+#   **<TAB> 경로 퍼지 완성
+#
+# 경로를 고정한다. `$(brew --prefix fzf)`로 쓰면 서브프로세스 때문에 셸 시작이
+# 70ms 늘어난다(실측 0.240s -> 0.310s). 위치가 바뀌면 아래 조건에서 걸러진다.
+_fzf_shell="/opt/homebrew/opt/fzf/shell"
+if [[ -d "$_fzf_shell" ]]; then
+  source "$_fzf_shell/key-bindings.zsh"
+  source "$_fzf_shell/completion.zsh"
+fi
+unset _fzf_shell
+
 # SDKMAN
 # 원래 "THIS MUST BE AT THE END OF THE FILE" 주석이 붙어 있었으나 아래로 PATH
 # 조작이 계속 이어져 사실이 아니었다. 실제로 옮기면 SDKMAN 후보가 .local/bin,

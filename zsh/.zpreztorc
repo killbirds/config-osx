@@ -42,6 +42,7 @@ zstyle ':prezto:load' pmodule \
   'node' \
   'syntax-highlighting' \
   'history-substring-search' \
+  'autosuggestions' \
   'prompt'
 
 #
@@ -49,7 +50,8 @@ zstyle ':prezto:load' pmodule \
 #
 
 # Set the query found color.
-# zstyle ':prezto:module:autosuggestions:color' found ''
+# 기본값 fg=8은 어두운 배경에서 거의 보이지 않는다. 한 단계 밝게 둔다.
+zstyle ':prezto:module:autosuggestions:color' found 'fg=244'
 
 #
 # Completions
