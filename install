@@ -25,6 +25,13 @@ create_backup() {
     cp -r "$HOME/.config/nvim" "$BACKUP_DIR/"
   fi
 
+  # herdr은 설정과 런타임 상태(session.json, 로그, 소켓)가 한 디렉토리에 섞여 있으므로
+  # 설치가 덮어쓰는 config.toml만 백업한다.
+  if [ -f "$HOME/.config/herdr/config.toml" ]; then
+    mkdir -p "$BACKUP_DIR/herdr"
+    cp "$HOME/.config/herdr/config.toml" "$BACKUP_DIR/herdr/"
+  fi
+
   echo "백업 완료: $BACKUP_DIR"
 }
 
@@ -39,6 +46,17 @@ main_install() {
   echo "Neovim 설정 설치 중..."
   (mkdir -p ~/.config/nvim)
   (cd nvim; $install ~/.config/nvim)
+
+  echo "herdr 설정 설치 중..."
+  # ~/.config/herdr에는 herdr이 만드는 런타임 파일(session.json, *.log, *.sock)이 함께 있으므로
+  # 디렉토리 전체가 아니라 herdr/ 안의 파일만 개별 심링크한다.
+  mkdir -p ~/.config/herdr
+  (cd herdr; $install ~/.config/herdr)
+  if command -v herdr &> /dev/null; then
+    herdr config check || echo "경고: herdr 설정 검증에 실패했습니다. herdr/config.toml을 확인하세요."
+    # 서버가 떠 있으면 재시작 없이 반영 (떠 있지 않으면 실패해도 무방)
+    herdr server reload-config &> /dev/null || true
+  fi
 
   echo "SBT 설정 설치 중..."
   mkdir -p ~/.sbt/1.0

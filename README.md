@@ -10,6 +10,7 @@
 - [주요 플러그인 사용법](#주요-플러그인-사용법)
 - [설정 커스터마이징](#설정-커스터마이징)
 - [iTerm2 설정](#iterm2-설정)
+- [herdr 설정](#herdr-설정)
 - [문제 해결](#문제-해결)
 - [디렉토리 구조](#디렉토리-구조)
 - [라이선스](#라이선스)
@@ -17,6 +18,7 @@
 ## 주요 기능
 
 - Neovim 설정 (플러그인, 테마, 한글 입력 지원 등)
+- herdr 설정 (터미널 워크스페이스 키바인딩)
 - 개발 도구 설정 (SBT, Scala, Java 등)
 - 유용한 유틸리티 스크립트
 
@@ -135,6 +137,7 @@ Scala/sbt 포매팅은 conform이 아니라 nvim-metals의 저장 시 포맷이 
 - 스크립트를 ~/bin에 설치
 - 설정 파일을 홈 디렉토리에 설치
 - Neovim 설정을 ~/.config/nvim에 설치
+- herdr 설정(`config.toml`)을 ~/.config/herdr에 설치
 - SBT 설정을 ~/.sbt/1.0에 설치
 - Git 글로벌 설정 적용
 - Neovim 플러그인 설치
@@ -411,6 +414,182 @@ iTerm2에서는 키보드만으로 텍스트를 선택하고 복사할 수 있�
 
 복사 모드 중에는 터미널 내용이 업데이트되지 않으며, 키보드만으로 효율적으로 텍스트를 선택하고 복사할 수 있습니다.
 
+## herdr 설정
+
+[herdr](https://herdr.dev)는 코딩 에이전트용 터미널 워크스페이스 매니저입니다.
+이 저장소는 `herdr/config.toml` 하나만 관리하며, `./install`이 이를 `~/.config/herdr/config.toml`로 심링크합니다.
+
+```bash
+brew install herdr   # homebrew/core
+```
+
+### 디렉토리 전체가 아니라 파일 하나만 링크하는 이유
+
+`~/.config/herdr`에는 설정 외에 herdr이 직접 만드는 런타임 파일이 함께 들어갑니다.
+
+```
+~/.config/herdr/
+├── config.toml        # ← 저장소가 관리 (심링크)
+├── session.json       # 런타임 상태 (레이아웃/탭/패인)
+├── herdr-server.log   # 로그
+├── herdr.sock         # 유닉스 소켓
+└── release-notes.json
+```
+
+디렉토리를 통째로 링크하면 이 상태 파일들이 저장소로 흘러들어오므로, `config.toml`만 개별 심링크합니다.
+
+### 설정 변경 방법
+
+심링크이므로 어느 쪽을 고쳐도 같은 파일입니다. 저장소에서 고치는 쪽을 권장합니다.
+
+```bash
+$EDITOR herdr/config.toml
+herdr config check          # 문법·키바인딩 검증
+herdr server reload-config  # 실행 중인 서버에 재시작 없이 반영
+git diff herdr/config.toml
+```
+
+기본값 전체를 확인하려면 `herdr --default-config`를 실행하세요(324줄). 저장소에는 기본값과 다른 항목만 둡니다.
+
+### 현재 커스터마이징 요약
+
+- **prefix-free 키바인딩**: 각 액션에 `prefix+키`(herdr 기본값)와 `ctrl+alt+키`(prefix 없이 바로) 두 가지를 등록
+- **pane**: `ctrl+alt+h/j/k/l` 이동, `ctrl+alt+v` 세로 분할, `ctrl+alt+shift+v` 가로 분할, `ctrl+alt+x` 닫기
+- **tab(가로축)**: `ctrl+alt+;` / `ctrl+alt+'` 로 이전/다음 — HHKB의 `Fn+[;'/` 방향키 위치를 Fn 없이 그대로 사용
+- **workspace(세로축)**: `ctrl+alt+[` / `ctrl+alt+/` 로 이전/다음
+- `switch_ascii_input_source_in_prefix = true`: prefix 진입 시 영문 입력으로 자동 전환 (한글 입력 중 단축키 오작동 방지)
+- 사운드 비활성화, 패인 테두리의 에이전트 라벨 숨김
+
+`ctrl+alt` 계열을 쓰는 이유는 iTerm2 / Neovim / macOS 기본 단축키와 충돌하지 않기 때문입니다
+([공식 문서](https://herdr.dev/docs/keyboard/#going-prefix-free)).
+
+`ctrl+alt+minus`는 터미널에 따라 전달이 불안정해서 가로 분할만 `ctrl+alt+shift+v`로 두었습니다.
+
+### iTerm2 키 설정 (필수)
+
+**iTerm2 설정을 맞추지 않으면 이 저장소의 prefix-free 단축키 상당수가 조용히 동작하지 않습니다.**
+바인딩이 잘못된 게 아니라 iTerm2가 키를 herdr에 전달하지 못하는 것이므로, 오류 메시지도 나오지 않습니다.
+
+#### 왜 필요한가
+
+herdr은 실행될 때 바깥 터미널에 **keyboard enhancement(kitty keyboard protocol)** 를 요청하고,
+지원되지 않으면 legacy 인코딩으로 떨어집니다(`src/pane/kitty_keyboard.rs`, `TerminalKey` 인코딩의 `Legacy`/`Kitty` 구분).
+legacy 인코딩에서는 아래 키들이 **바이트 수준에서 표현 자체가 불가능**합니다.
+
+| 바인딩 | legacy에서 안 되는 이유 |
+| --- | --- |
+| `ctrl+alt+;` `ctrl+alt+'` | `Ctrl`+구두점에 대응하는 제어문자가 없음 |
+| `ctrl+alt+1..9` | `Ctrl`+숫자에 대응하는 제어문자가 없음 |
+| `ctrl+alt+shift+v` `…+shift+x/c/d` | `Ctrl+Shift+V`와 `Ctrl+V`가 둘 다 `0x16` — 구분 불가 |
+
+즉 **탭 전환(`ctrl+alt+;` `ctrl+alt+'`), 탭 번호 점프, shift 계열(가로 분할·탭 닫기·워크스페이스 생성/닫기)이 통째로 죽습니다.**
+`ctrl+alt+h/j/k/l`이나 화살표 계열만 되고 나머지가 안 된다면 거의 확실히 이 문제입니다.
+
+#### 설정 방법
+
+iTerm2 **3.5 이상**이 필요합니다(`iTerm2 → About iTerm2`). 아래는 **Settings → Profiles → Keys → General**입니다.
+
+| 항목 | 값 | 이유 |
+| --- | --- | --- |
+| Left Option Key | `Esc+` | `Normal`이면 Option이 문자 조합(´, ¨)으로 소비되어 alt 계열이 전달되지 않음 |
+| Right Option Key | `Esc+` | 위와 동일 |
+| Apps can change how keys are reported | **켬** (기본값) | 꺼져 있으면 herdr이 kitty 프로토콜을 켤 수 없어 legacy로 떨어짐 |
+| Report modifiers using CSI u | **끔** (기본값) | iTerm2 공식 문서가 구식이라 권장하지 않는 옵션. 켜면 `\|`, `>` 입력이 Esc처럼 동작하는 부작용이 있음 |
+
+`Meta`는 상위 비트를 세우는 옛 방식이라 쓰지 마세요. `Esc+`가 표준입니다.
+
+> **주의: 이 설정은 프로파일별입니다.** 프로파일을 여러 개 쓴다면 **herdr을 띄우는 프로파일**에 적용해야 합니다.
+> 기본 프로파일이 무엇인지는 Settings → Profiles 목록에서 확인하거나 아래로 GUID를 대조하세요.
+>
+> ```bash
+> /usr/libexec/PlistBuddy -c "Print :'Default Bookmark Guid'" ~/Library/Preferences/com.googlecode.iterm2.plist
+> ```
+
+#### 화살표 키 매핑 (Key Bindings)
+
+`Option Key Sends = Esc+`만 설정하면 `ctrl+alt+↑`가 `ESC` + `ESC [1;5A`(esc 접두 + ctrl+↑)로 전달되어
+herdr이 이를 `ctrl+alt+up`으로 보지 못합니다. **Settings → Profiles → Keys → Key Bindings**에 아래 4개를 추가하세요.
+
+| 조합 | Action | Esc+ 뒤에 넣을 값 | 최종 전송 바이트 |
+| --- | --- | --- | --- |
+| `^⌥↑` | Send Escape Sequence | `[1;7A` | `ESC [1;7A` |
+| `^⌥↓` | Send Escape Sequence | `[1;7B` | `ESC [1;7B` |
+| `^⌥←` | Send Escape Sequence | `[1;7D` | `ESC [1;7D` |
+| `^⌥→` | Send Escape Sequence | `[1;7C` | `ESC [1;7C` |
+
+수식자 파라미터 `7`은 `1 + alt(2) + ctrl(4)`로, ctrl+alt+화살표의 표준 인코딩입니다.
+kitty 프로토콜이 켜져 있으면 iTerm2가 알아서 같은 시퀀스를 보내므로 이 매핑은 중복이지만,
+**프로토콜이 꺼진 상황(tmux 경유, 원격 접속, 위 옵션이 꺼진 프로파일)에서도 화살표 계열이 살아 있게 해주는 안전망**이라 남겨 둡니다.
+
+> **Key Bindings는 kitty 프로토콜보다 우선합니다.** 여기에 등록한 조합은 프로토콜이 켜져 있어도
+> 등록한 바이트가 그대로 나갑니다. 그래서 `ctrl+alt+;`처럼 legacy 표현이 없는 키는 여기에 넣지 마세요
+> (넣으려면 CSI u 시퀀스를 직접 작성해야 하고, 그 순간 프로토콜의 이점이 사라집니다).
+
+현재 등록 상태는 아래로 확인할 수 있습니다.
+
+```bash
+python3 - <<'PY'
+import plistlib, pathlib, os
+p = plistlib.loads(pathlib.Path(os.path.expanduser(
+    "~/Library/Preferences/com.googlecode.iterm2.plist")).read_bytes())
+for b in p.get("New Bookmarks", []):
+    if b.get("Guid") != p.get("Default Bookmark Guid"):
+        continue
+    print("profile:", b.get("Name"), "| Option Key Sends:", b.get("Option Key Sends"), "(2=Esc+)")
+    for combo, act in sorted(b.get("Keyboard Map", {}).items()):
+        print(f"  {combo}: action={act.get('Action')} text={act.get('Text')!r}")
+PY
+```
+
+이 매핑은 iTerm2 plist에 저장되므로 **이 저장소가 공유하지 않습니다.** 새 장비에서는 위 표대로 직접 등록해야 합니다.
+
+#### 실제로 전달되는지 확인
+
+kitty 프로토콜을 수동으로 켠 상태에서 키를 눌러 봅니다.
+
+```bash
+printf '\033[>1u'   # kitty keyboard protocol 켜기 (스택에 push)
+cat -v              # 키를 눌러 확인, Ctrl-C로 종료
+printf '\033[<u'    # 반드시 원복 (스택에서 pop)
+```
+
+- `ctrl+alt+;` → `^[[59;7u` 같은 **CSI u 시퀀스**가 보이면 정상 (`59`=`;`의 코드포인트, `7`=ctrl+alt)
+- 아무것도 안 나오거나 `^[;`만 나오면 프로토콜이 켜지지 않은 것 → 위 표의 "Apps can change how keys are reported" 확인
+- `´`, `¨` 같은 문자가 나오면 Option Key가 `Normal`인 것 → `Esc+`로 변경
+
+마지막 `printf '\033[<u'`를 빼먹으면 해당 셸이 kitty 모드에 남아 다른 프로그램의 키 입력이 이상해질 수 있습니다.
+
+#### 단축키가 여전히 안 먹을 때 — 어느 계층이 가로챘는지
+
+herdr 공식 문서의 표현대로, 직접 chord가 아무것도 하지 않으면 herdr이 보기 전에 누군가 이미 삼킨 것입니다.
+바깥쪽부터 순서대로 확인하세요.
+
+1. **macOS** — 시스템 설정 → 키보드 → 키보드 단축키
+   (Mission Control이 쓰는 `ctrl+←/→/↑`는 Option이 없어서 `ctrl+alt+화살표`와 충돌하지 않지만, 직접 커스텀했다면 확인)
+2. **iTerm2** — Settings → Keys → Key Bindings(전역), Settings → Profiles → Keys → Key Mappings(프로파일별)
+3. **herdr** — `herdr config check`
+4. **패인 안에서 도는 프로그램** — 반대 방향 충돌입니다. herdr이 먼저 잡으므로, Neovim 등에 걸어둔 같은 `ctrl+alt+*` 매핑이 죽습니다
+
+어느 계층이든 한쪽을 비워야 합니다. herdr 쪽을 바꾸겠다면 `herdr/config.toml`에서 해당 chord를 다른 것으로 교체하세요.
+
+#### 한글 입력과 함께 쓸 때
+
+`switch_ascii_input_source_in_prefix = true`가 켜져 있어 **prefix(`ctrl+b`) 진입 시** 자동으로 영문 입력으로 전환됩니다.
+direct chord(`ctrl+alt+*`)는 문자 입력이 아니라 이 전환이 적용되지 않지만, 한글 입력 중에도 그대로 전달됩니다.
+Neovim 쪽 한글 처리는 [한글 입력 지원 도구 설치](#한글-입력-지원-도구-설치)의 macism 설정을 참고하세요.
+
+### 주의: herdr이 심링크를 덮어쓸 수 있음
+
+herdr은 온보딩 완료 여부 등 일부 상태를 `config.toml`에 직접 기록하고, `herdr config reset-keys`는 이 파일을 다시 씁니다.
+기록 방식에 따라 심링크가 일반 파일로 바뀔 수 있으니, 설정이 저장소에 반영되지 않는다면 확인하세요.
+
+```bash
+ls -l ~/.config/herdr/config.toml   # '-> .../config-osx/herdr/config.toml' 이어야 정상
+```
+
+일반 파일로 바뀌었다면 그 내용을 `herdr/config.toml`에 반영한 뒤 `./install`을 다시 실행하면 됩니다
+(`./install`은 덮어쓰기 전에 `~/.config/backup_<타임스탬프>/herdr/`로 백업합니다).
+
 ## 문제 해결
 
 ### 플러그인 설치 오류
@@ -447,6 +626,7 @@ macism com.apple.keylayout.ABC  # 영문 입력으로 전환
 - `script/`: 유틸리티 스크립트
 - `settings/`: 다양한 도구의 설정 파일
 - `nvim/`: Neovim 설정 파일
+- `herdr/`: herdr 설정 파일 (`config.toml`)
 - `sbt/`: SBT(Scala Build Tool) 설정
 
 ## 라이선스
