@@ -1,12 +1,28 @@
 onboarding = false
+
 [ui]
 agent_panel_sort = "spaces"
+show_agent_labels_on_pane_borders = false
+hide_tab_bar_when_single_tab = true   # 탭이 하나뿐이면 탭 바를 숨겨 한 줄 확보
+
+[ui.sound]
+enabled = false
+
+# 백그라운드 워크스페이스의 에이전트가 끝나거나 입력을 요구할 때의 알림.
+# 기본값은 delivery = "off"라 소리까지 끄면 아무 신호도 남지 않는다.
+# "terminal" = 바깥 터미널(iTerm2)에 데스크톱 알림을 요청 — iTerm2 알림 권한을 그대로 쓴다.
+# 알림이 안 보이면 "herdr"(인앱 토스트)로 바꾸면 확실하다. "system"은 OS 알림 서비스 직접 호출.
+[ui.toast]
+delivery = "terminal"
 
 # ── 키바인딩 ──────────────────────────────────────────────
 # 배열의 첫 항목은 herdr 기본값(prefix 바인딩) 유지용, 두 번째가 prefix 없는 direct 단축키.
 # ctrl+alt 조합은 iTerm2/neovim/macOS 기본 단축키와 충돌하지 않는 안전한 modifier 계열
 # (공식 문서 권장: https://herdr.dev/docs/keyboard/#going-prefix-free)
-show_agent_labels_on_pane_borders = false
+#
+# 주의: ctrl+alt+;  ctrl+alt+'  ctrl+alt+1..9  ctrl+alt+shift+* 는 legacy 인코딩으로
+# 표현할 수 없어 kitty keyboard protocol이 필요하다. iTerm2 설정은 README의
+# "iTerm2 키 설정" 절 참고.
 [keys]
 # prefix는 기본값(ctrl+b) 그대로 사용 — 설정하지 않음
 
@@ -15,6 +31,7 @@ focus_pane_left = ["prefix+h", "ctrl+alt+h"]
 focus_pane_down = ["prefix+j", "ctrl+alt+j"]
 focus_pane_up = ["prefix+k", "ctrl+alt+k"]
 focus_pane_right = ["prefix+l", "ctrl+alt+l"]
+last_pane = ["ctrl+alt+o"]                           # 직전 패인으로 토글 (o = other)
 split_vertical = ["prefix+v", "ctrl+alt+v"]          # 오른쪽으로 분할
 split_horizontal = ["prefix+minus", "ctrl+alt+shift+v"] # 아래로 분할 (ctrl+alt+minus는 터미널에 따라 전달이 불안정해서 shift+v 사용)
 close_pane = ["prefix+x", "ctrl+alt+x"]
@@ -37,8 +54,22 @@ previous_workspace = ["ctrl+alt+[", "ctrl+alt+up"]    # 기본 바인딩 없음 
 workspace_picker = ["prefix+w", "ctrl+alt+w"]
 close_workspace = ["prefix+shift+d", "ctrl+alt+shift+d"]
 
+# 팝업 커맨드 예시 — 해당 도구를 설치한 뒤 주석을 풀면 된다 (현재 미설치).
+# [[keys.command]]
+# key = "prefix+alt+g"
+# type = "popup"
+# command = "lazygit"
+# width = "80%"
+# height = "80%"
+
 [experimental]
+# prefix 진입 시 ASCII 입력으로 전환했다가 빠져나올 때 되돌린다.
+# 한글 입력 중에도 prefix 커맨드가 먹히게 한다.
 switch_ascii_input_source_in_prefix = true
 
-[ui.sound]
-enabled = false
+# TUI가 자체 커서를 그리면 macOS 입력기가 커서 위치를 놓쳐 한글 후보창이 엉뚱한 데 뜬다.
+# 포커스된 패인의 커서를 바깥 터미널에 노출해 입력기가 계속 추적하게 한다.
+# 트레이드오프는 커서를 숨기고 대체 커서를 그리지 않는 앱(vim 노멀 모드 등)에서
+# 커서가 하나 더 보이는 것 — 아래 허용 목록으로 에이전트 패인에만 적용해 회피한다.
+reveal_hidden_cursor_for_cjk_ime = true
+cjk_ime_agents = ["claude", "codex", "opencode", "gemini"]
