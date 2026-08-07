@@ -162,6 +162,7 @@ Scala/sbt 포매팅은 conform이 아니라 nvim-metals의 저장 시 포맷이 
 - Neovim 설정을 ~/.config/nvim에 설치
 - herdr 설정(`config.toml`)을 ~/.config/herdr에 설치
 - SBT 설정을 ~/.sbt/1.0에 설치
+- fasd 히스토리를 zoxide로 이관 (한 번만)
 - Git 글로벌 설정 적용
 - Neovim 플러그인 설치
 
@@ -267,6 +268,37 @@ prezto completion 모듈이 이 옵션을 켜므로(`~/.zprezto/modules/completi
 nvm current          # system 이면 default가 적용되지 않은 것
 nvm_alias default    # bad pattern: #* 이 나오면 EXTENDED_GLOB 문제
 ```
+
+### 디렉토리 점프와 검색
+
+| 키/명령 | 동작 |
+| --- | --- |
+| `z <검색어>` | 방문 빈도·최근성 기준으로 바로 이동 (zoxide) |
+| `zi <검색어>` / `j` | fzf로 후보를 골라 이동 |
+| `^R` | 히스토리 퍼지 검색 (fzf) |
+| `^T` | 파일 선택 후 커맨드라인에 삽입 |
+| `alt+c` | 하위 디렉토리 선택 후 cd |
+| `Up` / `Down` | 입력한 접두어로 히스토리 검색 (prezto) |
+| `^F` / `^E` | 인라인 추천 한 단어 / 줄 끝까지 수락 |
+
+이전에는 prezto의 fasd 모듈을 썼고 대화형 점프 `j` 하나만 등록되어 있었습니다.
+습관을 유지하려고 `j`를 zoxide의 `zi`에 붙였습니다.
+
+**fasd 히스토리 이관은 `./install`이 자동으로 합니다.** 직접 돌릴 수도 있습니다.
+
+```bash
+./script/zoxide-import-fasd.sh --dry-run   # 어느 DB를 읽을지 확인
+./script/zoxide-import-fasd.sh             # 이관 (마커로 한 번만)
+```
+
+> `zoxide import fasd`를 직접 쓰지 마세요. **두 도구의 기본 DB 경로가 다릅니다.**
+> fasd는 `$XDG_CACHE_HOME/fasd` 또는 `~/.cache/fasd`를 쓰는데 zoxide의 임포터는
+> `~/.fasd`를 읽습니다. 인자 없이 실행하면 활성 DB가 아니라 오래된 잔재를 가져옵니다.
+> 실제로 그렇게 해서 8개월 묵은 DB(유효 디렉토리 61개)만 넘어간 적이 있고,
+> 활성 DB로 다시 하니 156개였습니다. 스크립트가 이 순서를 대신 처리합니다.
+>
+> `--merge`는 기존 점수에 더하는 방식이라 반복 실행하면 점수가 부풀려집니다.
+> 스크립트가 마커 파일(`~/.cache/zsh/.fasd-imported-to-zoxide`)로 한 번만 돌게 막습니다.
 
 ### 설정 변경
 
@@ -853,5 +885,6 @@ Scala 빌드 도구 설정
 - `install.sh`: 디렉토리 트리를 대상 경로에 심링크하는 공용 설치기 (`_recursive_` 마커가 있으면 하위 디렉토리까지 재귀)
 - `nvim-luals-check.sh`: `nvim/.luarc.json` 기준으로 Neovim 설정 Lua를 lua_ls로 정적 검사
 - `iterm2-herdr-setup.sh`: herdr용 iTerm2 프로파일 설정 일괄 적용 (Option Key = Esc+, 스크롤백 제한)
+- `zoxide-import-fasd.sh`: fasd 디렉토리 히스토리를 zoxide로 이관 (`./install`이 자동 호출, 마커로 한 번만)
 - `pull`: 현재 디렉토리 아래의 모든 git 저장소를 순회하며 `git pull`
 - `p4merge.sh`: p4merge를 git mergetool로 쓰기 위한 래퍼

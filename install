@@ -88,6 +88,13 @@ main_install() {
   # 비밀정보는 추적하지 않는 ~/.zshenv.local에 두고 zsh/.zshenv가 source 한다.
   (cd "$cur/zsh" && $install ~) || exit 1
 
+  # fasd -> zoxide 히스토리 이관. 마커 파일로 한 번만 돌고, zoxide가 없거나
+  # 이관할 DB가 없으면 스스로 건너뛴다. 실패해도 설치를 멈추지 않는다.
+  if [ -x "$cur/script/zoxide-import-fasd.sh" ]; then
+    echo "zoxide 히스토리 이관 확인 중..."
+    "$cur/script/zoxide-import-fasd.sh" || true
+  fi
+
   echo "herdr 설정 설치 중..."
   # ~/.config/herdr에는 herdr이 만드는 런타임 파일(session.json, *.log, *.sock)이 함께 있으므로
   # 디렉토리 전체가 아니라 herdr/ 안의 파일만 개별 심링크한다.
