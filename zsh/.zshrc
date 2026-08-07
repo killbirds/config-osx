@@ -39,6 +39,7 @@ if (( $+commands[kubectl] )); then
 fi
 
 fpath=("$_zsh_comp_cache" $fpath)
+unset _zsh_comp_cache   # fpath에 값이 복사된 뒤이므로 더 필요 없다
 
 # Source Prezto.
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
@@ -157,12 +158,20 @@ fi
 #   alt+c   하위 디렉토리 선택 후 cd
 #   **<TAB> 경로 퍼지 완성
 #
-# 경로를 고정한다. `$(brew --prefix fzf)`로 쓰면 서브프로세스 때문에 셸 시작이
-# 70ms 늘어난다(실측 0.240s -> 0.310s). 위치가 바뀌면 아래 조건에서 걸러진다.
-_fzf_shell="/opt/homebrew/opt/fzf/shell"
+# 경로는 .zprofile의 `brew shellenv`가 export하는 $HOMEBREW_PREFIX로 만든다.
+# `$(brew --prefix fzf)`를 쓰면 서브프로세스가 붙고(단독 약 20ms), /opt/homebrew를
+# 하드코딩하면 Intel Homebrew(/usr/local)나 custom prefix에서 조용히 비활성된다.
+# HOMEBREW_PREFIX는 이미 환경에 있으므로 비용 0이면서 이식성이 있다.
+_fzf_shell="${HOMEBREW_PREFIX:-/opt/homebrew}/opt/fzf/shell"
 if [[ -d "$_fzf_shell" ]]; then
   source "$_fzf_shell/key-bindings.zsh"
   source "$_fzf_shell/completion.zsh"
+
+  # fzf는 ^R을 viins뿐 아니라 vicmd에도 바인딩한다(key-bindings.zsh:195).
+  # vicmd의 ^R은 vi의 redo라서 그대로 두면 편집 기능이 사라진다.
+  # viins의 ^R은 원래 redisplay로 비어 있었으니 fzf가 가져가는 것이 맞고,
+  # vicmd만 되돌린다.
+  bindkey -M vicmd '^R' redo
 fi
 unset _fzf_shell
 

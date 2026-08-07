@@ -300,6 +300,39 @@ nvm_alias default    # bad pattern: #* 이 나오면 EXTENDED_GLOB 문제
 > `--merge`는 기존 점수에 더하는 방식이라 반복 실행하면 점수가 부풀려집니다.
 > 스크립트가 마커 파일(`~/.cache/zsh/.fasd-imported-to-zoxide`)로 한 번만 돌게 막습니다.
 
+### 알아두어야 할 정책 결정
+
+**`EDITOR`/`VISUAL`을 무조건 덮어씁니다.** prezto 기본값은 `[[ -z "$EDITOR" ]]` 가드를
+두지만 이 저장소는 쓰지 않습니다. 외부에서 `EDITOR=vim`을 설정해도 로그인 셸에서
+`nvim`으로 바뀝니다. herdr 서버 프로세스에 이전 값이 굳어 있으면 가드가 있는 한
+서버를 재시작할 때까지 새 값이 반영되지 않기 때문입니다.
+세션 단위로 다른 에디터가 필요하면 명령에 직접 붙이세요: `EDITOR=vim git commit`
+
+**히스토리를 모든 패인이 공유합니다.** prezto history 모듈이 `SHARE_HISTORY`를 켜므로
+(`~/.zprezto/modules/history/init.zsh`) 패인 A에서 친 명령이 패인 B의 `Up`·인라인 추천·
+`^R` 검색에 즉시 나타납니다. herdr로 에이전트를 여러 패인에서 돌리면 서로 무관한 명령이
+섞이고, 실수로 재실행할 여지가 생깁니다.
+
+민감한 값을 명령줄에 직접 쓰면 `~/.zsh_history`(권한 600)에 남아 모든 패인의 추천과
+검색에 노출됩니다. 앞에 **공백 한 칸**을 두면 `HIST_IGNORE_SPACE`로 기록되지 않습니다.
+
+패인별로 독립시키려면 prezto 로드 **뒤에** 끕니다. prezto history 모듈은
+`setopt SHARE_HISTORY`를 하드코딩하므로(`~/.zprezto/modules/history/init.zsh:15`)
+zstyle로는 끌 수 없습니다.
+
+```zsh
+# zsh/.zshrc — prezto source 뒤 아무 곳
+unsetopt share_history
+```
+
+종료 시 병합은 유지됩니다(`APPEND_HISTORY` ON, `INC_APPEND_HISTORY` off — 실측 확인).
+
+**`zsh -i -c`에서 stderr에 경고 두 줄이 나옵니다.**
+`(eval):1: can't change option: zle` — fzf의 두 스크립트가 옵션을 저장·복구할 때
+ZLE이 활성화되지 않은 셸에서 `zle` 옵션을 건드리려 해서 생깁니다.
+실제 터미널 세션과 비인터랙티브 셸에는 영향이 없고, `zle` 옵션이 두 경우 모두 ON이라
+가드로 구분할 수 없습니다. 자동화에서 `zsh -i -c`를 쓸 때 stderr를 걸러야 합니다.
+
 ### 설정 변경
 
 심링크이므로 어느 쪽을 고쳐도 같은 파일입니다.
