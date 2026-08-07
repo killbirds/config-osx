@@ -85,6 +85,10 @@ brew install ripgrep  # rg
 brew install --cask temurin@17
 brew install google-java-format
 brew install checkstyle
+
+# Scala 도구
+brew install coursier/formulas/coursier
+coursier install scalafix
 ```
 
 #### Java 개발 도구
@@ -107,6 +111,10 @@ echo $JAVA_HOME
 `zprezto.patch`를 별도로 적용해 사용하는 경우에는 `java_ls`, `java_use 17` 헬퍼도 함께 사용할 수 있습니다.
 
 #### Scala 개발 도구
+
+Scala 린트는 `scalafix`로 실행합니다. Neovim 설정은 `scalafix`를 먼저 찾고, 없으면 `coursier launch scalafix`로 대신 실행합니다(`nvim/lua/config/nvim-lint.lua`).
+**둘 다 없으면 Scala 린터 목록이 빈 테이블이 되어 아무 알림 없이 비활성화**되므로, Scala를 다룬다면 위 도구 설치 단계의 `coursier` / `scalafix` 두 명령을 반드시 실행하세요.
+Scala/sbt 포매팅은 conform이 아니라 nvim-metals의 저장 시 포맷이 담당합니다(이중 포맷 방지).
 
 ```bash
 # Metals (Scala 언어 서버) 설정

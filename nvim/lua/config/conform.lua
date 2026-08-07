@@ -39,10 +39,12 @@ require("conform").setup({
 
   -- 포매터별 커스터마이징 (선택적)
   formatters = {
-    prettier = {
-      command = "prettier",
-      args = { "--stdin-filepath", "$FILENAME" },
-    },
+    -- prettier는 conform 내장 정의를 그대로 쓴다.
+    -- 내장은 command = util.from_node_modules("prettier")라 파일 위치에서 위로 올라가며
+    -- node_modules/.bin/prettier를 먼저 찾는다. 여기서 command = "prettier"로 덮어쓰면
+    -- 그 탐색이 없어져 전역(mason) prettier로 고정되고, 프로젝트가 핀한 버전과
+    -- 그 프로젝트에 설치된 플러그인(tailwindcss, import sort 등)이 적용되지 않아
+    -- 팀/CI 포맷 결과와 어긋난다. args도 내장과 동일했으므로 오버라이드는 순손해였다.
     ["google-java-format"] = {
       command = "google-java-format",
       args = { "--assume-filename", "$FILENAME", "-" },
