@@ -135,7 +135,7 @@ Scala/sbt 포매팅은 conform이 아니라 nvim-metals의 저장 시 포맷이 
 - 스크립트를 ~/bin에 설치
 - 설정 파일을 홈 디렉토리에 설치
 - Neovim 설정을 ~/.config/nvim에 설치
-- SBT 설정을 ~/.sbt/0.13 및 ~/.sbt/1.0에 설치
+- SBT 설정을 ~/.sbt/1.0에 설치
 - Git 글로벌 설정 적용
 - Neovim 플러그인 설치
 
