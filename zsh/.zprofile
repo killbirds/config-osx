@@ -41,8 +41,14 @@ fi
 # Language
 #
 
+# ko_KR.UTF-8을 의도적으로 쓴다.
+# prezto 기본값은 en_US.UTF-8인데, 실제로는 iTerm2가 "Set locale variables
+# automatically"로 ko_KR.UTF-8을 주입하므로 이 블록이 한 번도 발동하지 않아
+# 선언이 사실과 달랐다. 선언을 실제 값에 맞춘다.
+# 이렇게 두면 iTerm2 밖(다른 터미널, 원격 접속, launchd)에서도 같은 로케일이 된다.
+# 영향: ls/sort 정렬 순서가 로케일 규칙을 따르고, 일부 CLI 메시지가 한국어로 나온다.
 if [[ -z "$LANG" ]]; then
-  export LANG='en_US.UTF-8'
+  export LANG='ko_KR.UTF-8'
 fi
 
 #
