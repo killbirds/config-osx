@@ -17,12 +17,22 @@ fi
 # Editors
 #
 
-if [[ -z "$EDITOR" ]]; then
+# nvim을 쓰므로 EDITOR/VISUAL도 nvim을 가리켜야 한다.
+# prezto 기본값은 'vi'인데, 셸 alias(vi=nvim)는 다른 프로그램이 $EDITOR를 exec할 때
+# 적용되지 않는다. macOS에서 vi/vim은 Homebrew vim 9.2로 해석되므로 git commit,
+# crontab -e, kubectl edit 등이 전부 vim으로 열려 이 저장소의 nvim 설정이
+# 적용되지 않았다.
+# prezto 기본값은 `[[ -z "$EDITOR" ]]` 가드를 두지만 여기서는 쓰지 않는다.
+# herdr 서버 프로세스의 환경에 이전 값(EDITOR=vi)이 굳어 있고 모든 패인이 그것을
+# 상속하므로, 가드가 있으면 서버를 재시작할 때까지 새 값이 영원히 적용되지 않는다.
+# (실측: herdr server의 환경에 EDITOR=vi VISUAL=vi 가 남아 있었다)
+# 세션 단위로 다른 에디터를 쓰려면 명령 앞에 붙이면 된다: EDITOR=vim git commit
+if (( $+commands[nvim] )); then
+  export EDITOR='nvim'
+else
   export EDITOR='vi'
 fi
-if [[ -z "$VISUAL" ]]; then
-  export VISUAL='vi'
-fi
+export VISUAL="$EDITOR"
 if [[ -z "$PAGER" ]]; then
   export PAGER='less'
 fi
