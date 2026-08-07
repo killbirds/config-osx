@@ -85,8 +85,7 @@ brew install neovim
 brew install ag  # The Silver Searcher
 brew install ripgrep  # rg
 
-# Java / JVM 도구
-brew install --cask temurin@17
+# Java / JVM 도구 (JDK는 brew가 아니라 SDKMAN으로 — 아래 "Java 개발 도구" 참고)
 brew install google-java-format
 brew install checkstyle
 
@@ -101,17 +100,35 @@ coursier install scalafix
 Java 들여쓰기는 2칸(`shiftwidth=2`, `softtabstop=2`, `tabstop=2`, `expandtab=true`)으로 맞추고, Java 린트는 `./install` 시 홈 디렉토리에 설치되는 `~/.custom_java_checks.xml`을 사용하는 `checkstyle` 기준으로 실행합니다.
 Java 포매팅은 `google-java-format` 경로가 준비되지 않으면 즉시 실패하도록 두고, Java에서 Metals 포매팅으로 자동 fallback 하지는 않습니다.
 
+**JDK는 SDKMAN으로 관리합니다.** `JAVA_HOME`은 SDKMAN이 셸 시작 시 설정하므로 직접 export할 필요가 없습니다.
+
 ```bash
-# 기본 JDK 선택 (셸 설정에 추가 권장)
-export JAVA_HOME=$(/usr/libexec/java_home -v 17)
-export PATH="$JAVA_HOME/bin:$PATH"
+sdk install java 21.0.1-tem   # 또는 원하는 버전
+sdk default java 21.0.1-tem
 
 # 확인
 java -version
-echo $JAVA_HOME
+echo $JAVA_HOME    # ~/.sdkman/candidates/java/current
 ```
 
-`SDKMAN`으로 JDK를 관리하더라도 최종적으로 `JAVA_HOME`이 올바른 JDK를 가리켜야 Metals가 정상 동작합니다.
+> **`/usr/libexec/java_home`을 쓰지 마세요.** 이전 문서는
+> `export JAVA_HOME=$(/usr/libexec/java_home -v 17)`을 안내했는데, 이 방식은
+> macOS에 **시스템 등록된** JDK가 있을 때만 동작합니다. SDKMAN으로 설치한 JDK는
+> `/Library/Java/JavaVirtualMachines`에 등록되지 않으므로 `java_home`이 아무것도
+> 찾지 못하고 `JAVA_HOME`이 **빈 값**이 됩니다. 그러면 `java`도 함께 죽습니다.
+>
+> ```bash
+> $ /usr/libexec/java_home -V
+> Unable to locate a Java Runtime.
+> ```
+
+`java`가 PATH상으로는 `/usr/bin/java`(macOS 스텁)로 해석되지만, 이 스텁은 `JAVA_HOME`이
+가리키는 JVM을 실행합니다. 실측으로 확인했습니다 — `JAVA_HOME`을 SDKMAN의 17 / 21 / 25로
+바꾸면 `java -version`도 각각 따라 바뀌고, 유효하지 않은 값이면 실패합니다.
+즉 **`JAVA_HOME`이 유일한 제어점이며, Metals도 이 값을 따릅니다.**
+
+`sbt`, `scala`, `gradle`, `mvn`은 PATH상 SDKMAN 후보가 첫 번째입니다.
+Coursier로도 `sbt`/`scala`를 설치했다면 SDKMAN 쪽이 이깁니다(`whence -a sbt`로 확인 가능).
 
 #### Scala 개발 도구
 

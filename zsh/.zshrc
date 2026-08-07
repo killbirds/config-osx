@@ -5,6 +5,24 @@
 #   Sorin Ionescu <sorin.ionescu@gmail.com>
 #
 
+# 자동완성 캐시 디렉토리를 fpath에 먼저 넣는다.
+# prezto completion 모듈이 compinit을 실행하므로 그보다 앞이어야 한다.
+_zsh_comp_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/completions"
+
+# kubectl 자동완성 — 매 시작 `kubectl completion zsh`를 실행하면 22~23ms가 든다(실측).
+# 생성물을 _kubectl 함수 파일로 캐시한다. 출력 첫 줄이 이미 `#compdef kubectl`이라
+# fpath autoload 파일로 그대로 쓸 수 있다.
+# 재생성 판정은 kubectl 바이너리가 캐시보다 새로운지로 한다(stat 한 번, 프로세스 미실행).
+# prezto가 자기 캐시에 쓰는 것과 같은 방식이다(modules/fasd/init.zsh의 -nt 비교).
+if (( $+commands[kubectl] )); then
+  if [[ ! -s "$_zsh_comp_cache/_kubectl" || "$commands[kubectl]" -nt "$_zsh_comp_cache/_kubectl" ]]; then
+    mkdir -p "$_zsh_comp_cache"
+    kubectl completion zsh >| "$_zsh_comp_cache/_kubectl"
+  fi
+fi
+
+fpath=("$_zsh_comp_cache" $fpath)
+
 # Source Prezto.
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
@@ -66,10 +84,6 @@ nvm() {
   nvm "$@"
 }
 
-# kubectl 자동완성
-# https://kubernetes.io/ko/docs/tasks/tools/included/optional-kubectl-configs-zsh/
-(( $+commands[kubectl] )) && source <(kubectl completion zsh)
-
 # zoxide — 디렉토리 점프 (fasd 대체)
 # fasd는 2018년 이후 유지보수가 끊겼다. prezto fasd 모듈이 제공한 사용자 명령은
 # 대화형 점프 `j` 하나뿐이었으므로 zoxide의 `zi`에 같은 이름을 붙여 습관을 유지한다.
@@ -80,32 +94,40 @@ if (( $+commands[zoxide] )); then
   alias j='zi'
 fi
 
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+# SDKMAN
+# 원래 "THIS MUST BE AT THE END OF THE FILE" 주석이 붙어 있었으나 아래로 PATH
+# 조작이 계속 이어져 사실이 아니었다. 실제로 옮기면 SDKMAN 후보가 .local/bin,
+# bun 등보다 앞서게 되어 우선순위가 바뀌므로 위치는 그대로 두고 주석만 고친다.
+# 현재 gradle, mvn, scala, sbt는 SDKMAN이 PATH상 첫 번째다(java/javac은
+# /usr/bin 스텁이 먼저지만 JAVA_HOME을 따라 같은 JDK를 실행한다).
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # export NVIM_AVANTE_PROVIDER=copilot
 
-# for metals, bloop
-export PATH="$PATH:$HOME/Library/Application Support/Coursier/bin"
+# ── PATH ──────────────────────────────────────────────────
+# `export PATH="...:$PATH"` 문자열 대입은 .zprofile의 `typeset -gU path`를
+# 우회해 중복이 쌓인다(실측: zsh 5.9에서 배열 대입은 중복 제거, 문자열 대입은 유지).
+# 배열로 대입하면 중복이 자동 제거된다. 앞의 항목이 남으므로 prepend/append
+# 방향을 그대로 옮기면 기존 명령 우선순위가 보존된다.
 
-# for krew
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+# metals, bloop — append (기존 경로가 우선)
+path=($path "$HOME/Library/Application Support/Coursier/bin")
 
+# krew
+path=("${KREW_ROOT:-$HOME/.krew}/bin" $path)
 
-# Added by Antigravity
-export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
-
-# bun completions
-[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+# Antigravity
+path=("$HOME/.antigravity/antigravity/bin" $path)
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
+path=("$BUN_INSTALL/bin" $path)
+[[ -s "$HOME/.bun/_bun" ]] && source "$HOME/.bun/_bun"
 
-# Added by codebase-memory-mcp install
-export PATH="$HOME/.local/bin:$PATH"
+# 로컬 bin — Antigravity와 codebase-memory-mcp 설치 스크립트가 각각 추가해
+# 같은 줄이 두 번 있었다. 한 번만 두고 가장 앞에 유지한다.
+path=("$HOME/.local/bin" $path)
 
 
 # 사내 전용 설정은 추적하지 않는 ~/.zshrc.local에 둔다 (공개 저장소 유입 방지).
