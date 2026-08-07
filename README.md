@@ -612,8 +612,13 @@ legacy 인코딩에서는 아래 키들이 **바이트 수준에서 표현 자�
 ```
 
 **iTerm2가 실행 중이면 스크립트가 거부합니다.** 실행 중에 plist를 고치면 iTerm2가 종료할 때
-메모리 상태로 덮어써서 변경이 조용히 사라지기 때문입니다. 스크립트는 `defaults export`/`import`로
+메모리 상태로 덮어써서 변경이 사라질 수 있기 때문입니다. 스크립트는 `defaults export`/`import`로
 왕복해 cfprefsd 캐시와 어긋나지 않게 하고, 마지막에 `killall cfprefsd`로 캐시를 비웁니다.
+
+> **herdr을 iTerm2 안에서 쓰고 있다면 종료 순서에 주의하세요.** herdr 서버는 iTerm2의 자식
+> 프로세스라(`iTerm2 → iTermServer → login → zsh → herdr → herdr server`) iTerm2를 종료하면
+> herdr 세션과 그 안에서 돌던 에이전트가 함께 죽습니다. 실행 중인 작업을 먼저 정리하고 종료하세요.
+> 종료 후에는 다른 터미널(Terminal.app 등)에서 위 스크립트를 실행하면 됩니다.
 
 스크립트는 스크롤백도 함께 손봅니다. herdr은 대체 화면에 그리므로 **패인 내용은 iTerm2
 스크롤백에 애초에 들어가지 않습니다** — 스크롤백은 herdr이 자체 관리합니다
