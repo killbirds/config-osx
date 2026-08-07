@@ -12,13 +12,30 @@ _zsh_comp_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/completions"
 # kubectl 자동완성 — 매 시작 `kubectl completion zsh`를 실행하면 22~23ms가 든다(실측).
 # 생성물을 _kubectl 함수 파일로 캐시한다. 출력 첫 줄이 이미 `#compdef kubectl`이라
 # fpath autoload 파일로 그대로 쓸 수 있다.
-# 재생성 판정은 kubectl 바이너리가 캐시보다 새로운지로 한다(stat 한 번, 프로세스 미실행).
-# prezto가 자기 캐시에 쓰는 것과 같은 방식이다(modules/fasd/init.zsh의 -nt 비교).
+#
+# 재생성 판정에 `-nt`를 쓰면 안 된다. zsh의 -nt는 심링크를 역참조하므로
+# /opt/homebrew/bin/kubectl 대신 Cellar 바이너리의 mtime(=bottle 빌드 날짜)을 본다.
+# 빌드 날짜는 항상 설치 날짜보다 이전이라, 캐시가 새 버전의 빌드 날짜보다 나중이면
+# 업그레이드를 감지하지 못하고 stale completion이 남는다. 실측으로 재현했다:
+#   바이너리 빌드일 2026-01-01 / 심링크 재생성 지금 / 캐시 2026-08-07
+#     [[ link -nt cache ]] -> 거짓 (재사용, 잘못됨)
+#     zstat -L 비교         -> 재생성 필요 (정확)
+# lstat(zstat -L)으로 심링크 자체의 mtime을 본다. brew는 업그레이드 때 심링크를
+# 다시 만들므로 그 mtime이 곧 설치 시각이다. 심링크가 아니어도 같은 값이 나온다.
+# zstat은 zsh/stat 모듈의 빌트인이라 서브프로세스를 띄우지 않는다.
 if (( $+commands[kubectl] )); then
-  if [[ ! -s "$_zsh_comp_cache/_kubectl" || "$commands[kubectl]" -nt "$_zsh_comp_cache/_kubectl" ]]; then
+  zmodload -F zsh/stat b:zstat
+  () {
+    local cache="$_zsh_comp_cache/_kubectl"
+    local -a bin_mt cache_mt
+    if [[ -s "$cache" ]]; then
+      zstat -L -A bin_mt   +mtime "$commands[kubectl]" 2>/dev/null || return
+      zstat    -A cache_mt +mtime "$cache"             2>/dev/null || return
+      (( bin_mt[1] > cache_mt[1] )) || return
+    fi
     mkdir -p "$_zsh_comp_cache"
-    kubectl completion zsh >| "$_zsh_comp_cache/_kubectl"
-  fi
+    kubectl completion zsh >| "$cache"
+  }
 fi
 
 fpath=("$_zsh_comp_cache" $fpath)
