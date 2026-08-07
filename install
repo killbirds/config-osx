@@ -12,7 +12,33 @@ check_dependencies() {
       exit 1
     fi
   done
-  echo "모든 의존성이 설치되어 있습니다."
+  echo "필수 의존성이 설치되어 있습니다."
+
+  # zsh 설정이 참조하지만 없어도 설치는 진행되는 도구들.
+  # (( $+commands[...] )) 가드로 감싸 두었기 때문에 없으면 해당 기능만 조용히
+  # 빠진다. 조용히 빠지는 것이 문제라서 여기서 알려 준다.
+  local -a missing=()
+  local cmd pkg
+  for pkg in \
+    "zoxide:zoxide:디렉토리 점프 (z, zi, j)" \
+    "fzf:fzf:^R 히스토리 검색, ^T 파일 선택, alt+c cd"
+  do
+    cmd="${pkg%%:*}"
+    if ! command -v "$cmd" &> /dev/null; then
+      missing+=("$pkg")
+    fi
+  done
+
+  if [ ${#missing[@]} -gt 0 ]; then
+    echo
+    echo "참고: 아래 도구가 없어 해당 기능은 비활성 상태로 설치됩니다."
+    for pkg in "${missing[@]}"; do
+      cmd="${pkg%%:*}"
+      local rest="${pkg#*:}"
+      printf "  %-9s (brew install %-16s) %s\n" "$cmd" "${rest%%:*}" "${rest#*:}"
+    done
+    echo
+  fi
 }
 
 # 백업 생성

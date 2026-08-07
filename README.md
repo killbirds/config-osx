@@ -85,6 +85,10 @@ brew install neovim
 brew install ag  # The Silver Searcher
 brew install ripgrep  # rg
 
+# 셸 도구 — zsh/.zshrc가 이들을 참조한다. 없으면 조용히 기능만 빠진다
+brew install zoxide   # 디렉토리 점프 (z, zi, j). 없으면 세 명령 전부 사라짐
+brew install fzf      # ^R 히스토리 퍼지 검색, ^T 파일 선택, alt+c cd, zoxide의 zi
+
 # Java / JVM 도구 (JDK는 brew가 아니라 SDKMAN으로 — 아래 "Java 개발 도구" 참고)
 brew install google-java-format
 brew install checkstyle
