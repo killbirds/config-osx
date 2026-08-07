@@ -6,7 +6,7 @@
 - [주요 기능](#주요-기능)
 - [설치 전 준비사항](#설치-전-준비사항)
 - [설치 방법](#설치-방법)
-- [Neovim 설정](#neovim-설정)
+- [Neovim 설정](#neovim-설정-012-기반)
 - [주요 플러그인 사용법](#주요-플러그인-사용법)
 - [설정 커스터마이징](#설정-커스터마이징)
 - [iTerm2 설정](#iterm2-설정)
@@ -142,25 +142,19 @@ Scala/sbt 포매팅은 conform이 아니라 nvim-metals의 저장 시 포맷이 
 - Git 글로벌 설정 적용
 - Neovim 플러그인 설치
 
-업데이트를 수행하려면 다음 명령어를 실행하세요:
+설정을 갱신할 때도 같은 명령을 다시 실행하면 됩니다. `install`은 기존 대상을 지우고 다시 링크하므로 반복 실행해도 안전합니다.
 
-```bash
-./install --update
-# 또는
-./install -u
-```
-
-## Neovim 설정 (0.11 기반)
+## Neovim 설정 (0.12 기반)
 
 ### 주요 특징
 
-- **Neovim 0.11 기반**: 모든 최신 기능과 성능 개선을 표준으로 활용
+- **Neovim 0.12 기반**: 최소 지원 버전을 0.12로 두고 버전 분기 없이 최신 기능을 사용
 - **비동기 처리 최적화**: Treesitter, LSP, 진단 등 모든 주요 기능이 비동기로 처리
 - **향상된 LSP 통합**: 0.11의 새로운 LSP 기능과 기본 매핑 활용
 - **지능형 캐시 관리**: 대용량 파일과 프로젝트에 최적화된 메모리 관리
 - **성능 모니터링**: 선택적 성능 추적 및 최적화
 
-### 0.11 핵심 기능 활용
+### 핵심 기능 활용
 
 #### LSP 향상
 - 기본 LSP 매핑: `grn` (rename), `grr` (references), `gri` (implementation), `gO` (symbols), `gra` (code action)
@@ -196,42 +190,44 @@ Scala/sbt 포매팅은 conform이 아니라 nvim-metals의 저장 시 포맷이 
 
 ```
 nvim/
-├── init.lua                 # 0.11 최적화된 메인 설정
-├── lua/
-│   ├── init.lua            # 핵심 설정 (0.11 기능 활용)
-│   ├── keys.lua            # 키매핑 (0.11 기본 매핑과 호환)
-│   ├── plugin.lua          # lazy.nvim 플러그인 관리자
-│   ├── utils.lua           # 유틸리티 함수
-│   ├── cache_manager.lua   # 0.11 최적화된 캐시 관리
-│   ├── config/             # 플러그인별 설정
-│   ├── diagnostics.lua # 중앙화된 진단 설정
-│   └── plugins/            # 플러그인 정의
+├── init.lua                # 메인 설정
+├── .luarc.json             # lua_ls 설정 (에디터와 script/nvim-luals-check.sh가 공유)
+├── stylua.toml             # Lua 포매터 설정
+├── lazy-lock.json          # 플러그인 버전 고정
+└── lua/
+    ├── init.lua            # 핵심 설정 (옵션, autocmd)
+    ├── keys.lua            # 키매핑 (기본 매핑과 충돌하지 않게 구성)
+    ├── plugin.lua          # lazy.nvim 플러그인 관리자
+    ├── utils.lua           # 유틸리티 함수
+    ├── cache_manager.lua   # 대용량 파일/버퍼 캐시 관리
+    ├── config/             # 플러그인별 설정 (diagnostics.lua = 중앙화된 진단 설정)
+    └── plugins/            # 플러그인 정의
 ```
 
 ### 설치 및 사용
 
-1. **Neovim 0.11 이상 설치 확인**
+1. **Neovim 0.12 이상 설치 확인**
    ```bash
-   nvim --version  # v0.11.0 이상이어야 함
+   nvim --version  # v0.12.0 이상이어야 함
    ```
 
-2. **기존 설정 백업 (선택사항)**
+2. **설정 설치**
    ```bash
-   mv ~/.config/nvim ~/.config/nvim.backup
+   ./install
    ```
+   `./install`이 기존 설정을 `~/.config/backup_<타임스탬프>/`로 백업한 뒤
+   `nvim/` 안의 항목을 `~/.config/nvim`으로 **심링크**합니다.
 
-3. **설정 파일 복사**
-   ```bash
-   cp -r nvim ~/.config/
-   ```
+   > `cp -r nvim ~/.config/`로 복사하지 마세요. 복사하면 저장소와 연결이 끊겨
+   > 이후 `git pull`이 반영되지 않고, 편집한 내용도 저장소에 남지 않습니다.
 
-4. **Neovim 실행 및 플러그인 설치**
+3. **Neovim 실행 및 플러그인 설치**
    ```bash
    nvim
    # lazy.nvim이 자동으로 플러그인을 설치합니다
    ```
 
-5. **린터·포매터 설치 (수동, 필수)**
+4. **린터·포매터 설치 (수동, 필수)**
    ```vim
    :MasonToolsInstall
    ```
@@ -263,7 +259,7 @@ export NVIM_PROFILE=1
 
 ### 주요 키매핑
 
-#### 0.11 기본 매핑 (자동 제공)
+#### Neovim 기본 매핑 (0.11+에서 자동 제공)
 - `grn`: LSP 이름 변경
 - `grr`: LSP 참조 찾기
 - `gri`: LSP 구현 찾기
@@ -286,12 +282,12 @@ export NVIM_PROFILE=1
 
 ### 호환성
 
-- **최소 버전**: Neovim 0.11.0
+- **최소 버전**: Neovim 0.12.0
 - **권장 버전**: 최신 stable 버전
 
 ---
 
-이 설정은 Neovim 0.11의 모든 최신 기능을 표준으로 활용하여 개발 생산성을 극대화하도록 최적화되었습니다.
+이 설정은 Neovim 0.12를 최소 버전으로 두고, 버전 분기 없이 최신 기능을 그대로 활용하도록 구성되어 있습니다.
 
 ## 주요 플러그인 사용법
 
@@ -628,6 +624,7 @@ macism com.apple.keylayout.ABC  # 영문 입력으로 전환
 - `nvim/`: Neovim 설정 파일
 - `herdr/`: herdr 설정 파일 (`config.toml`)
 - `sbt/`: SBT(Scala Build Tool) 설정
+- `vscode/`: Cursor의 Vim 플러그인 설정 (`./install`이 다루지 않음 — 수동 복사)
 
 ## 라이선스
 
@@ -638,11 +635,17 @@ macism com.apple.keylayout.ABC  # 영문 입력으로 전환
 ### SBT 설정
 Scala 빌드 도구 설정
 
-### VSCode 설정
-Visual Studio Code 사용자 설정
+### vscode/
+디렉토리 이름과 달리 **Cursor의 Vim 플러그인 설정**입니다(`vscode/README.md` 참고).
+`./install`이 다루지 않으므로 `settings.json` / `keybindings.json`을 Cursor 설정에 직접 붙여넣어야 합니다.
 
 ### zprezto.patch
 Zsh 프레임워크 패치
 
 ### 설치 스크립트
-macOS 개발 환경 자동 설정을 위한 스크립트들
+`script/`의 스크립트는 `./install`이 `~/bin`에 심링크합니다.
+
+- `install.sh`: 디렉토리 트리를 대상 경로에 심링크하는 공용 설치기 (`_recursive_` 마커가 있으면 하위 디렉토리까지 재귀)
+- `nvim-luals-check.sh`: `nvim/.luarc.json` 기준으로 Neovim 설정 Lua를 lua_ls로 정적 검사
+- `pull`: 현재 디렉토리 아래의 모든 git 저장소를 순회하며 `git pull`
+- `p4merge.sh`: p4merge를 git mergetool로 쓰기 위한 래퍼

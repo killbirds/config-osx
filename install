@@ -6,7 +6,7 @@ install="$cur/script/install.sh"
 # 의존성 확인
 check_dependencies() {
   echo "의존성 확인 중..."
-  for cmd in git curl nvim; do
+  for cmd in git nvim; do
     if ! command -v $cmd &> /dev/null; then
       echo "오류: $cmd가 설치되어 있지 않습니다."
       exit 1

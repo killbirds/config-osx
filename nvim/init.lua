@@ -14,7 +14,8 @@ require("plugin")
 -- fold settings
 require("config.fold").setup()
 
--- 0.11 기능 활용 (최소 버전이므로 분기 불필요)
+-- 최소 지원 버전은 0.12이므로 아래 기능들은 버전 분기 없이 그대로 쓴다.
+-- (개별 기능이 도입/개선된 버전은 각 주석에 그대로 남겨 둔다)
 -- UI 개선 사항
 vim.o.mousemoveevent = true -- 마우스 이벤트 기능 활성화 (부동 창 호버 기능 등)
 

@@ -2,11 +2,26 @@
 
 이 디렉토리는 Cursor 에디터에서 Vim 플러그인을 위한 최적화된 설정을 제공합니다. NeoVim의 키 바인딩과 유사한 환경을 구성하여 사용자의 워크플로우를 향상시킵니다.
 
+## 구성 파일
+
+이 디렉토리는 **`./install`이 다루지 않습니다.** 두 파일 모두 손으로 복사해야 합니다.
+
+| 파일 | 붙여넣을 곳 | 내용 |
+| --- | --- | --- |
+| `settings.json` | `Preferences: Open Settings (JSON)` | Vim 플러그인 설정 (리더 키, 모드별 키 바인딩, 커서 스타일 등) |
+| `keybindings.json` | `Preferences: Open Keyboard Shortcuts (JSON)` | Vim 플러그인이 다루지 못하는 에디터 자체 단축키 |
+
+`keybindings.json`이 필요한 이유는 Vim 플러그인의 키 바인딩이 에디터 버퍼 안에서만 동작하기 때문입니다.
+탐색기나 터미널에 포커스가 있을 때는 VS Code/Cursor의 키 바인딩 계층에서 처리해야 합니다.
+
+- 탐색기에서 `o`: 파일이면 열고 에디터로 포커스 이동, 폴더면 펼치기/접기
+- 터미널·사이드바에서 `Ctrl+h/j/k/l`: 창 그룹 간 이동 (에디터 안에서의 `Ctrl+h/j/k/l`과 동작을 일치시킴)
+
 ## 설치 방법
 
 1. Cursor 에디터에서 `Ctrl+Shift+P`를 눌러 명령 팔레트를 엽니다.
-2. `Preferences: Open Settings (JSON)`을 검색하여 선택합니다.
-3. `settings.json` 파일의 내용을 Cursor의 설정 파일에 복사합니다.
+2. `Preferences: Open Settings (JSON)`을 검색하여 선택하고 `settings.json` 내용을 복사합니다.
+3. 같은 팔레트에서 `Preferences: Open Keyboard Shortcuts (JSON)`을 선택하고 `keybindings.json` 내용을 복사합니다.
 4. 파일을 저장하고 Cursor를 재시작합니다.
 
 ## 주요 기능
