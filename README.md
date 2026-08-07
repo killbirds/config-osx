@@ -6,6 +6,7 @@
 - [주요 기능](#주요-기능)
 - [설치 전 준비사항](#설치-전-준비사항)
 - [설치 방법](#설치-방법)
+- [zsh 설정](#zsh-설정)
 - [Neovim 설정](#neovim-설정-012-기반)
 - [주요 플러그인 사용법](#주요-플러그인-사용법)
 - [설정 커스터마이징](#설정-커스터마이징)
@@ -17,6 +18,7 @@
 
 ## 주요 기능
 
+- zsh 설정 (prezto runcoms — 저장소가 원본을 보유)
 - Neovim 설정 (플러그인, 테마, 한글 입력 지원 등)
 - herdr 설정 (터미널 워크스페이스 키바인딩)
 - 개발 도구 설정 (SBT, Scala, Java 등)
@@ -110,7 +112,6 @@ echo $JAVA_HOME
 ```
 
 `SDKMAN`으로 JDK를 관리하더라도 최종적으로 `JAVA_HOME`이 올바른 JDK를 가리켜야 Metals가 정상 동작합니다.
-`zprezto.patch`를 별도로 적용해 사용하는 경우에는 `java_ls`, `java_use 17` 헬퍼도 함께 사용할 수 있습니다.
 
 #### Scala 개발 도구
 
@@ -136,6 +137,7 @@ Scala/sbt 포매팅은 conform이 아니라 nvim-metals의 저장 시 포맷이 
 
 - 스크립트를 ~/bin에 설치
 - 설정 파일을 홈 디렉토리에 설치
+- zsh 설정(prezto runcoms)을 홈 디렉토리에 설치
 - Neovim 설정을 ~/.config/nvim에 설치
 - herdr 설정(`config.toml`)을 ~/.config/herdr에 설치
 - SBT 설정을 ~/.sbt/1.0에 설치
@@ -143,6 +145,59 @@ Scala/sbt 포매팅은 conform이 아니라 nvim-metals의 저장 시 포맷이 
 - Neovim 플러그인 설치
 
 설정을 갱신할 때도 같은 명령을 다시 실행하면 됩니다. `install`은 기존 대상을 지우고 다시 링크하므로 반복 실행해도 안전합니다.
+
+## zsh 설정
+
+[prezto](https://github.com/sorin-ionescu/prezto)를 쓰며, **runcoms 원본을 이 저장소가 보유**하고 `./install`이 홈으로 심링크합니다.
+
+```
+zsh/.zshenv  → ~/.zshenv  →  이하 동일하게 .zprofile .zshrc .zpreztorc .zlogin .zlogout
+```
+
+### 왜 저장소가 갖고 있나
+
+이전에는 `~/.zprezto/runcoms/`를 직접 고치고 `~/.zshrc`가 그 안을 가리켰습니다. 문제는 `~/.zprezto`가 **upstream prezto의 클론**이라는 점입니다.
+
+- 설정 전체가 서드파티 저장소 안의 uncommitted 수정으로만 존재 → `git pull`이나 `git checkout .` 한 번에 사라짐
+- 백업은 `zprezto.patch` 하나뿐이었는데, 이 패치는 실제 설정과 어긋나 있었음 (`runcoms/zshenv`가 통째로 빠져 있었고 내용도 달랐음)
+
+지금은 저장소가 원본을 갖고 `~/.zprezto`는 **upstream 그대로** 두므로, prezto 업데이트가 자유롭습니다.
+
+```bash
+git -C ~/.zprezto pull   # 충돌 걱정 없음 — 로컬 수정이 없다
+```
+
+### 비밀정보는 저장소에 넣지 않습니다
+
+**이 저장소는 GitHub 공개 저장소입니다.** API 키·토큰은 추적하지 않는 `~/.zshenv.local`에 두고, `zsh/.zshenv`가 있을 때만 읽습니다.
+
+```bash
+# ~/.zshenv.local  (권한 600, git 추적 대상 아님)
+export SOME_API_KEY=...
+```
+
+```zsh
+# zsh/.zshenv 끝부분
+if [[ -f "$HOME/.zshenv.local" ]]; then
+  source "$HOME/.zshenv.local"
+fi
+```
+
+새 장비에서는 `~/.zshenv.local`을 직접 만들어야 합니다. 커밋 전에는 반드시 확인하세요.
+
+```bash
+grep -rniE "(export|typeset)[[:space:]]+[A-Za-z_]*(TOKEN|SECRET|API_?KEY|PASSWORD|CREDENTIAL)" zsh/
+```
+
+### 설정 변경
+
+심링크이므로 어느 쪽을 고쳐도 같은 파일입니다.
+
+```bash
+$EDITOR zsh/.zshrc
+exec zsh -l        # 새 셸로 확인
+git diff zsh/
+```
 
 ## Neovim 설정 (0.12 기반)
 
@@ -453,8 +508,49 @@ git diff herdr/config.toml
 - **pane**: `ctrl+alt+h/j/k/l` 이동, `ctrl+alt+v` 세로 분할, `ctrl+alt+shift+v` 가로 분할, `ctrl+alt+x` 닫기
 - **tab(가로축)**: `ctrl+alt+;` / `ctrl+alt+'` 로 이전/다음 — HHKB의 `Fn+[;'/` 방향키 위치를 Fn 없이 그대로 사용
 - **workspace(세로축)**: `ctrl+alt+[` / `ctrl+alt+/` 로 이전/다음
+- **pane**: `ctrl+alt+o` 로 직전 패인 토글 (o = other)
 - `switch_ascii_input_source_in_prefix = true`: prefix 진입 시 영문 입력으로 자동 전환 (한글 입력 중 단축키 오작동 방지)
-- 사운드 비활성화, 패인 테두리의 에이전트 라벨 숨김
+- `reveal_hidden_cursor_for_cjk_ime = true`: 한글 후보창이 커서를 따라오게 함 (아래 참고)
+- `[ui.toast] delivery = "terminal"`: 백그라운드 에이전트 알림을 iTerm2 데스크톱 알림으로
+- 사운드 비활성화, 패인 테두리의 에이전트 라벨 숨김, 탭이 하나면 탭 바 숨김
+
+### 한글 입력 (CJK IME)
+
+Claude Code나 codex 같은 TUI는 커서를 직접 그립니다. 그러면 macOS 입력기가 커서 위치를 놓쳐
+**한글 후보창이 엉뚱한 위치에 뜹니다.** herdr에는 이를 위한 옵션이 있습니다.
+
+```toml
+[experimental]
+reveal_hidden_cursor_for_cjk_ime = true
+cjk_ime_agents = ["claude", "codex", "opencode", "gemini"]
+```
+
+트레이드오프는 **커서를 숨기고 대체 커서를 그리지 않는 앱(vim 노멀 모드 등)에서 커서가 하나 더
+보이는 것**입니다. `cjk_ime_agents` 허용 목록을 쓰면 감지된 에이전트 패인에만 적용되므로 vim은
+영향을 받지 않습니다. 목록을 비우면 모든 패인에 적용됩니다.
+
+허용되는 이름: `pi`, `claude`, `codex`, `gemini`, `cursor`, `devin`, `cline`, `opencode`,
+`copilot`, `kimi`, `kiro`, `droid`, `amp`, `grok`, `hermes`, `kilo`, `qodercli`, `qoder`.
+**유효한 이름이 하나도 없으면 이 기능은 아예 적용되지 않으므로** 오타에 주의하세요.
+
+`switch_ascii_input_source_in_prefix`는 별개입니다. prefix 진입 시 입력 소스를 ASCII로 바꿔
+한글 입력 중에도 prefix 커맨드가 먹히게 하는 것이고, direct chord(`ctrl+alt+*`)에는 적용되지
+않습니다(문자 입력이 아니라 그대로 전달됨).
+
+### 알림
+
+기본값은 `[ui.toast] delivery = "off"`입니다. 소리까지 끄면 백그라운드 워크스페이스의 에이전트가
+끝나거나 입력을 요구해도 **아무 신호가 없습니다.**
+
+| 값 | 동작 |
+| --- | --- |
+| `"terminal"` | 바깥 터미널(iTerm2)에 데스크톱 알림 요청 — iTerm2 알림 권한을 그대로 사용 |
+| `"herdr"` | 인앱 토스트 — herdr 화면을 보고 있을 때만 보이지만 확실히 동작 |
+| `"system"` | OS 알림 서비스 직접 호출 |
+| `"off"` | 비활성 (기본값) |
+
+`"terminal"`로 두었습니다. 알림이 보이지 않으면 iTerm2의 알림 권한(시스템 설정 → 알림)을
+확인하거나 `"herdr"`로 바꾸세요.
 
 `ctrl+alt` 계열을 쓰는 이유는 iTerm2 / Neovim / macOS 기본 단축키와 충돌하지 않기 때문입니다
 ([공식 문서](https://herdr.dev/docs/keyboard/#going-prefix-free)).
@@ -483,7 +579,24 @@ legacy 인코딩에서는 아래 키들이 **바이트 수준에서 표현 자�
 
 #### 설정 방법
 
-iTerm2 **3.5 이상**이 필요합니다(`iTerm2 → About iTerm2`). 아래는 **Settings → Profiles → Keys → General**입니다.
+아래 표의 Option Key 설정과 스크롤백 제한은 스크립트로 일괄 적용할 수 있습니다.
+
+```bash
+./script/iterm2-herdr-setup.sh --dry-run   # 무엇이 바뀌는지 확인
+# iTerm2를 Cmd+Q로 완전히 종료한 뒤
+./script/iterm2-herdr-setup.sh
+```
+
+**iTerm2가 실행 중이면 스크립트가 거부합니다.** 실행 중에 plist를 고치면 iTerm2가 종료할 때
+메모리 상태로 덮어써서 변경이 조용히 사라지기 때문입니다. 스크립트는 `defaults export`/`import`로
+왕복해 cfprefsd 캐시와 어긋나지 않게 하고, 마지막에 `killall cfprefsd`로 캐시를 비웁니다.
+
+스크립트는 스크롤백도 함께 손봅니다. herdr은 대체 화면에 그리므로 **패인 내용은 iTerm2
+스크롤백에 애초에 들어가지 않습니다** — 스크롤백은 herdr이 자체 관리합니다
+(`advanced.scrollback_limit_bytes`, 기본 10MB/패인). 무제한 설정은 herdr 실행 전 셸 출력만
+담으면서 메모리는 계속 늘어나므로 10,000줄로 제한합니다.
+
+수동으로 하려면 iTerm2 **3.5 이상**에서(`iTerm2 → About iTerm2`) **Settings → Profiles → Keys → General**입니다.
 
 | 항목 | 값 | 이유 |
 | --- | --- | --- |
@@ -622,6 +735,7 @@ macism com.apple.keylayout.ABC  # 영문 입력으로 전환
 - `script/`: 유틸리티 스크립트
 - `settings/`: 다양한 도구의 설정 파일
 - `nvim/`: Neovim 설정 파일
+- `zsh/`: prezto runcoms (`.zshrc`, `.zshenv`, `.zprofile`, `.zpreztorc`, `.zlogin`, `.zlogout`)
 - `herdr/`: herdr 설정 파일 (`config.toml`)
 - `sbt/`: SBT(Scala Build Tool) 설정
 - `vscode/`: Cursor의 Vim 플러그인 설정 (`./install`이 다루지 않음 — 수동 복사)
@@ -639,13 +753,11 @@ Scala 빌드 도구 설정
 디렉토리 이름과 달리 **Cursor의 Vim 플러그인 설정**입니다(`vscode/README.md` 참고).
 `./install`이 다루지 않으므로 `settings.json` / `keybindings.json`을 Cursor 설정에 직접 붙여넣어야 합니다.
 
-### zprezto.patch
-Zsh 프레임워크 패치
-
 ### 설치 스크립트
 `script/`의 스크립트는 `./install`이 `~/bin`에 심링크합니다.
 
 - `install.sh`: 디렉토리 트리를 대상 경로에 심링크하는 공용 설치기 (`_recursive_` 마커가 있으면 하위 디렉토리까지 재귀)
 - `nvim-luals-check.sh`: `nvim/.luarc.json` 기준으로 Neovim 설정 Lua를 lua_ls로 정적 검사
+- `iterm2-herdr-setup.sh`: herdr용 iTerm2 프로파일 설정 일괄 적용 (Option Key = Esc+, 스크롤백 제한)
 - `pull`: 현재 디렉토리 아래의 모든 git 저장소를 순회하며 `git pull`
 - `p4merge.sh`: p4merge를 git mergetool로 쓰기 위한 래퍼
