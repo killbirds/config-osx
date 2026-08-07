@@ -230,6 +230,40 @@ grep -rniE "(export|typeset)[[:space:]]+[A-Za-z_]*(TOKEN|SECRET|API_?KEY|PASSWOR
 grep -rniE "kakaocorp|kakao\.com|daum|9rum|agit|StrictHostKeyChecking|/Users/[a-z]+" zsh/
 ```
 
+### Node 버전 — 터미널과 스크립트가 다릅니다 (의도된 것)
+
+`nvm`은 `.zshrc`에서 설정되고 `.zshrc`는 **인터랙티브 셸에서만** 읽힙니다. 그래서 Node 제공자가 갈립니다.
+
+| 실행 형태 | Node |
+| --- | --- |
+| 터미널 (`zsh -l -i`) | nvm의 기본 버전 (`~/.nvm/alias/default`) |
+| 스크립트 (`zsh -c`, `zsh -l -c`) | Homebrew node |
+
+nvm이 원래 인터랙티브 전용으로 설계된 결과이며, **이 저장소는 이 비대칭을 그대로 유지합니다.**
+통일하려면 PATH 주입을 `zsh/.zshenv`로 올려야 하는데(모든 스크립트 실행에 영향) 그렇게 하지 않았습니다.
+
+빌드 스크립트나 CI에서 특정 Node 버전이 필요하면 그 안에서 명시적으로 지정하세요.
+터미널에서 보이는 버전을 전제하면 안 됩니다.
+
+```bash
+node -v                 # 터미널: nvm 기본 버전
+zsh -c 'node -v'        # 스크립트: Homebrew node
+```
+
+### nvm이 조용히 깨질 수 있는 지점
+
+`nvm.sh`는 `EXTENDED_GLOB` 아래에서 `${NVM_ALIAS_LINE%%#*}`가 `bad pattern: #*`로 실패합니다.
+prezto completion 모듈이 이 옵션을 켜므로(`~/.zprezto/modules/completion/init.zsh:38`)
+아무 대책 없이 `nvm.sh`를 source하면 **`~/.nvm/alias/default`가 무시되고 조용히 system node로 떨어집니다.**
+오류도 표시되지 않습니다.
+
+`zsh/.zshrc`가 로드 시점과 이후 모든 `nvm` 호출에서 이 옵션을 끕니다. 증상이 의심되면:
+
+```bash
+nvm current          # system 이면 default가 적용되지 않은 것
+nvm_alias default    # bad pattern: #* 이 나오면 EXTENDED_GLOB 문제
+```
+
 ### 설정 변경
 
 심링크이므로 어느 쪽을 고쳐도 같은 파일입니다.
@@ -239,6 +273,16 @@ $EDITOR zsh/.zshrc
 exec zsh -l        # 새 셸로 확인
 git diff zsh/
 ```
+
+시작 시간이 신경 쓰이면 `zprof`로 봅니다. **`total` 열이 아니라 `self` 열을 보세요** —
+`total`은 자식 함수 시간을 포함하므로 부모(`pmodload` 등)와 자식을 함께 더하면 중복 계상됩니다.
+
+```bash
+zsh -dfic 'zmodload zsh/zprof; source ~/.zshrc; zprof' | head -12
+```
+
+`zsh -dfic`로 시작 파일을 건너뛰고 명시적으로 source해야 합니다. 그러지 않으면 prezto가
+두 번 로드되어 수치가 부풀려집니다.
 
 ## Neovim 설정 (0.12 기반)
 

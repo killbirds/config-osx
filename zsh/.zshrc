@@ -85,8 +85,11 @@ nvm() {
 }
 
 # zoxide — 디렉토리 점프 (fasd 대체)
-# fasd는 2018년 이후 유지보수가 끊겼다. prezto fasd 모듈이 제공한 사용자 명령은
-# 대화형 점프 `j` 하나뿐이었으므로 zoxide의 `zi`에 같은 이름을 붙여 습관을 유지한다.
+# prezto fasd 모듈이 제공한 사용자 명령은 대화형 점프 `j` 하나뿐이었으므로
+# zoxide의 `zi`에 같은 이름을 붙여 습관을 유지한다.
+# (fasd가 "2018년 이후 유지보수 중단"이라는 것은 upstream clvv/fasd 얘기다.
+#  prezto가 쓰는 것은 서브모듈 whjvenyl/fasd이고 2025-09에도 태그가 있었다.
+#  교체 사유는 zoxide 쪽이 더 활발히 관리되고 도구 생태계가 낫다는 것이다.)
 #   z <검색어>   빈도·최근성 기준으로 바로 이동
 #   zi <검색어>  fzf로 후보를 골라 이동 (기존 j와 같은 동작)
 if (( $+commands[zoxide] )); then
