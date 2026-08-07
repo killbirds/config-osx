@@ -70,15 +70,46 @@ export NVM_SH="/opt/homebrew/opt/nvm/nvm.sh"
 # 그래서 두 갈래로 나눈다.
 #   (1) 기본 버전의 bin만 PATH에 직접 넣어 node/npm/npx를 즉시 쓸 수 있게 한다.
 #   (2) nvm 명령 자체는 처음 호출될 때 로드한다.
+#
+# (1)은 nvm의 alias 해석을 흉내내는 것이므로 다룰 수 있는 형태를 좁게 제한한다.
+# nvm은 주석 제거, alias chain, `node`/`stable`/`lts/*` 같은 이름까지 해석하는데
+# (nvm.sh의 nvm_alias/nvm_resolve_alias) 그걸 전부 재구현하지 않는다.
+# 대신 "순수 버전 문자열"만 빠른 경로로 처리하고, 그 밖의 값은 nvm.sh를 실제로
+# 로드해 nvm이 직접 해석하게 한다. 느려지지만 틀리지 않는다.
+# 실측으로 확인한 실패 형태 — 이 가드가 없으면 전부 조용히 미적용된다:
+#   "24 # comment"  후보 0개
+#   "lts/*"         후보 0개
+#   "node"/"stable" 후보 0개
+#   빈 값           후보 3개 -> 아무 버전이나 선택 (더 나쁘다)
 () {
   [[ -r "$NVM_DIR/alias/default" ]] || return
-  local want="$(<"$NVM_DIR/alias/default")"
+
+  # 첫 줄만 취하고 주석(#...)과 앞뒤 공백을 제거한다
+  local -a lines
+  lines=("${(f)$(<"$NVM_DIR/alias/default")}")
+  local want="${lines[1]%%\#*}"
+  want="${want##[[:space:]]##}"
+  want="${want%%[[:space:]]##}"
+
+  # 순수 버전 문자열만 빠른 경로. 그 밖(빈 값, lts/*, node, stable, alias 이름)은
+  # nvm에게 맡긴다.
+  if [[ -z "$want" || "$want" != (v|)<->(.<->)#(-*|) ]]; then
+    setopt local_options no_extended_glob
+    source "$NVM_SH"
+    return
+  fi
+
   local -a cands
   # alias가 "24"처럼 major만 가리킬 수 있으므로 설치된 매칭 버전 중 최신을 고른다.
   # numeric_glob_sort가 없으면 v24.9.0이 v24.13.0보다 뒤로 정렬된다.
   setopt local_options numeric_glob_sort
   cands=("$NVM_DIR/versions/node/v${want#v}"*(/N))
-  (( $#cands )) || return
+  if (( ! $#cands )); then
+    # 버전 형태인데 설치본이 없다 — 조용히 넘기지 말고 nvm이 판단하게 한다
+    setopt local_options no_extended_glob
+    source "$NVM_SH"
+    return
+  fi
   path=("${cands[-1]}/bin" $path)
 }
 
@@ -93,9 +124,15 @@ nvm() {
   [[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ]] && \
     source "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
   # 로드 후에도 nvm 내부가 EXTENDED_GLOB에 취약하므로 호출마다 끈다.
+  # `nvm unload`는 upstream이 아는 함수만 지우므로 _nvm_upstream이 셸에 남는다.
+  # 래퍼가 직접 정리한다.
   functions[_nvm_upstream]=$functions[nvm]
   nvm() {
     setopt local_options no_extended_glob
+    if [[ "$1" == unload ]]; then
+      _nvm_upstream "$@" && unfunction _nvm_upstream nvm 2>/dev/null
+      return
+    fi
     _nvm_upstream "$@"
   }
   nvm "$@"
