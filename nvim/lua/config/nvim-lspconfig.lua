@@ -19,8 +19,9 @@ local default_opts = {
   },
 }
 
--- servers 테이블에 없는 서버(mason-lspconfig automatic_enable로 시작되는 서버 포함)에도
+-- servers 테이블을 거치지 않고 붙는 서버(nvim-metals가 띄우는 metals 등)에도
 -- blink.cmp capabilities가 적용되도록 전역 기본값을 등록한다.
+-- (nvim-metals가 띄우는 metals, mason-lspconfig의 allowlist로 활성되는 서버 모두 포함)
 vim.lsp.config("*", {
   capabilities = lsp_capabilities.default_capabilities(),
 })
@@ -87,6 +88,16 @@ local servers = {
       end,
     },
   },
+  -- oxlint: JS/TS용 Rust 린터. eslint를 대체하지 않고 병행한다.
+  -- 추가 설정 없이 lspconfig 기본값(lsp/oxlint.lua)을 그대로 쓰므로 빈 테이블이다.
+  -- 여기 있으면 default_opts(capabilities/flags)가 적용되고, 이 파일이
+  -- "무엇이 뜨는가"의 단일 목록 역할을 한다.
+  -- 기본값의 workspace_required = true와 root marker(.oxlintrc.json 등) 덕에
+  -- oxlint를 설정하지 않은 프로젝트에서는 서버가 시작되지 않는다.
+  oxlint = {},
+  -- pyright: 타입 체크 전용. 린팅/포맷은 nvim-lint + conform의 ruff가 담당한다.
+  -- (mason의 ruff 패키지는 LSP로 띄우지 않는다 - config/mason-lspconfig.lua 참고)
+  pyright = {},
   marksman = {
     filetypes = { "markdown" },
   },
