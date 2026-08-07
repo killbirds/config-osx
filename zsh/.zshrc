@@ -19,9 +19,52 @@ alias view="nvim -R"
 alias vimdiff="nvim -d"
 
 # nvm
+#
+# EXTENDED_GLOB 아래에서 nvm이 깨진다. prezto completion 모듈이 이 옵션을 켜고
+# (~/.zprezto/modules/completion/init.zsh), nvm.sh의 ${NVM_ALIAS_LINE%%#*}가
+# 그 상태에서 "bad pattern: #*"로 실패한다. 그러면 ~/.nvm/alias/default가
+# 해석되지 않아 지정한 기본 버전이 활성화되지 않고 조용히 system node로 떨어진다.
+# 증상: nvm current -> system, node -> /opt/homebrew/bin/node
+# 확인: nvm_alias default  ->  nvm_alias:32: bad pattern: #*
+#       unsetopt extendedglob 후 같은 명령 -> 24
 export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+export NVM_SH="/opt/homebrew/opt/nvm/nvm.sh"
+
+# nvm.sh를 시작마다 source하면 기본 버전 활성화까지 수행하면서 셸 시작이
+# 0.43초 -> 1.54초가 된다(실측). herdr로 패인을 여럿 띄우면 감당이 안 된다.
+# 그래서 두 갈래로 나눈다.
+#   (1) 기본 버전의 bin만 PATH에 직접 넣어 node/npm/npx를 즉시 쓸 수 있게 한다.
+#   (2) nvm 명령 자체는 처음 호출될 때 로드한다.
+() {
+  [[ -r "$NVM_DIR/alias/default" ]] || return
+  local want="$(<"$NVM_DIR/alias/default")"
+  local -a cands
+  # alias가 "24"처럼 major만 가리킬 수 있으므로 설치된 매칭 버전 중 최신을 고른다.
+  # numeric_glob_sort가 없으면 v24.9.0이 v24.13.0보다 뒤로 정렬된다.
+  setopt local_options numeric_glob_sort
+  cands=("$NVM_DIR/versions/node/v${want#v}"*(/N))
+  (( $#cands )) || return
+  path=("${cands[-1]}/bin" $path)
+}
+
+# nvm / node 버전 전환이 필요할 때만 nvm.sh를 로드하는 지연 셸.
+# EXTENDED_GLOB 아래에서 nvm.sh의 ${NVM_ALIAS_LINE%%#*}가 "bad pattern: #*"로
+# 깨지므로(prezto completion 모듈이 이 옵션을 켠다) 로드 중에는 반드시 끈다.
+# 이 때문에 default alias가 해석되지 않아 조용히 system node로 떨어지고 있었다.
+nvm() {
+  unfunction nvm
+  setopt local_options no_extended_glob
+  source "$NVM_SH"
+  [[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ]] && \
+    source "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+  # 로드 후에도 nvm 내부가 EXTENDED_GLOB에 취약하므로 호출마다 끈다.
+  functions[_nvm_upstream]=$functions[nvm]
+  nvm() {
+    setopt local_options no_extended_glob
+    _nvm_upstream "$@"
+  }
+  nvm "$@"
+}
 
 # kubectl 자동완성
 # https://kubernetes.io/ko/docs/tasks/tools/included/optional-kubectl-configs-zsh/
