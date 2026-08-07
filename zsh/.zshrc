@@ -27,6 +27,16 @@ export NVM_DIR="$HOME/.nvm"
 # https://kubernetes.io/ko/docs/tasks/tools/included/optional-kubectl-configs-zsh/
 (( $+commands[kubectl] )) && source <(kubectl completion zsh)
 
+# zoxide — 디렉토리 점프 (fasd 대체)
+# fasd는 2018년 이후 유지보수가 끊겼다. prezto fasd 모듈이 제공한 사용자 명령은
+# 대화형 점프 `j` 하나뿐이었으므로 zoxide의 `zi`에 같은 이름을 붙여 습관을 유지한다.
+#   z <검색어>   빈도·최근성 기준으로 바로 이동
+#   zi <검색어>  fzf로 후보를 골라 이동 (기존 j와 같은 동작)
+if (( $+commands[zoxide] )); then
+  eval "$(zoxide init zsh)"
+  alias j='zi'
+fi
+
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
