@@ -456,15 +456,15 @@ nvim/
 # 성능 모니터링 활성화
 export NVIM_PERF_MONITOR=1
 
-# 캐시 디버그 정보 표시
+# 캐시 디버그 정보 표시 (cache_manager.lua)
 export NVIM_CACHE_DEBUG=1
 
-# Treesitter 디버그 정보
-export NVIM_TS_DEBUG=1
-
-# 프로파일링 활성화
+# 프로파일링 활성화 (plugin.lua — /tmp/nvim-profile.log)
 export NVIM_PROFILE=1
 ```
+
+이 세 개가 설정이 실제로 읽는 전부입니다.
+(예전 문서에 있던 `NVIM_TS_DEBUG`는 참조하는 코드가 없어 아무 효과가 없었으므로 지웠습니다.)
 
 ### 주요 키매핑
 
@@ -477,10 +477,14 @@ export NVIM_PROFILE=1
 - `<C-S>` (삽입 모드): 시그니처 도움말
 
 #### 추가 최적화 매핑
-- `<Leader>dl`: Virtual lines 진단 토글
-- `<Leader>lc`: LSP 자동완성 토글
-- `<Leader>df`: 진단 플로팅 창 표시
+- `<leader>e`: 진단 플로팅 창 표시 (`config/diagnostics.lua`)
+- `<leader>dt`: 진단 virtual text 토글
+- `<leader>dm`: 진단 모드 전환 (default / performance / development)
+- `<Leader>Lt`: LSP 자동완성 토글 (`vim.lsp.completion`)
 - `jj`: 삽입 모드 빠져나오기
+
+> Virtual lines 토글(`<leader>dl`)은 표시 중복 때문에 **비활성 상태**입니다.
+> `config/diagnostics.lua`에 주석으로 남아 있으니 필요하면 풀어서 쓰면 됩니다.
 
 ### 성능 특징
 

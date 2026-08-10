@@ -38,7 +38,11 @@
 
 #### 일반 모드
 
-- 저장 및 종료: `<leader>w`, `<leader>q`, `<leader>Q`, `<leader>wq`
+- 저장 및 종료: `<leader>w`(저장), `<leader>qq`(닫기), `<leader>Q`(전체 강제 종료),
+  `<leader>x` / `<leader>wq`(저장 후 닫기)
+  - 주의: `<leader>q`는 종료가 아니라 **진단 패널 열기**(`workbench.action.problems.view`)입니다.
+    `<leader>q`와 `<leader>qq`가 접두어를 공유하므로 `<leader>q`를 누른 뒤 `timeoutlen`(300ms)만큼
+    기다려야 진단 패널이 열립니다.
 - 검색 하이라이트 제거: `<leader><space>`
 - LSP 관련 기능: `gd`, `gD`, `gi`, `gr`, `gy`, `K` 등
 - 버퍼 관리: `<leader>bn`, `<leader>bp`, `<leader>bd`
