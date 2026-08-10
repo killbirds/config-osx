@@ -89,7 +89,20 @@ if [[ -z "$LESSOPEN" ]] && (( $#commands[(i)lesspipe(|.sh)] )); then
 fi
 
 # brew
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# 경로를 하드코딩하지 않는다. Apple Silicon은 /opt/homebrew, Intel은 /usr/local,
+# custom prefix도 있다. 하드코딩하면 그 밖의 장비에서 이 줄이 조용히 실패하고
+# HOMEBREW_PREFIX가 비어 .zshrc의 fzf 로딩까지 함께 죽는다.
+# (.zshrc는 같은 이유로 $HOMEBREW_PREFIX를 쓰고 그 근거를 주석으로 남겨 두었다)
+# shellenv가 실제로 출력을 낼 때만 break 한다. 파일이 실행 가능하다는 것만으로
+# 멈추면, 깨진 brew가 앞 후보에 있을 때 뒤 후보를 시도하지 않는다.
+for _brew_candidate in /opt/homebrew/bin/brew /usr/local/bin/brew "$HOME/.linuxbrew/bin/brew"; do
+  [[ -x "$_brew_candidate" ]] || continue
+  if _brew_env="$("$_brew_candidate" shellenv 2>/dev/null)" && [[ -n "$_brew_env" ]]; then
+    eval "$_brew_env"
+    break
+  fi
+done
+unset _brew_candidate _brew_env
 
 # chatGPT
 [[ -r "$HOME/.chatgpt" ]] && source "$HOME/.chatgpt"

@@ -66,6 +66,12 @@ OUT="$(mktemp -t iterm2-prefs)"
 export OUT
 trap 'rm -f "$OUT"' EXIT
 
+# import는 preference domain 전체를 교체하므로, 되돌릴 원본을 먼저 남긴다.
+# 예전에는 원본을 파이프로만 흘리고 변환본만 임시 파일에 썼으며 그 임시 파일도
+# trap이 지웠다. 즉 실행 후 롤백할 자료가 아무것도 남지 않았다.
+BACKUP_DIR="$HOME/.config/backup_iterm2"
+BACKUP="$BACKUP_DIR/com.googlecode.iterm2.$(date '+%Y%m%d%H%M%S').plist"
+
 PY_TRANSFORM='
 import os, plistlib, sys
 
@@ -125,6 +131,14 @@ case "$rc" in
   *)  echo "설정 변환 실패 (종료 코드 $rc)" >&2; exit "$rc" ;;
 esac
 
+# 실제로 바꾸기로 확정된 시점에만 원본을 보관한다(드라이런/변경 없음은 위에서 종료).
+mkdir -p "$BACKUP_DIR"
+if ! defaults export "$DOMAIN" "$BACKUP"; then
+  echo "오류: 원본 설정을 백업할 수 없어 중단합니다: $BACKUP" >&2
+  exit 1
+fi
+echo "원본 백업: $BACKUP"
+
 defaults import "$DOMAIN" "$OUT"
 killall cfprefsd 2>/dev/null || true
 
@@ -133,3 +147,6 @@ echo "적용 완료. iTerm2를 실행하면 반영됩니다."
 echo "확인:"
 echo "  Settings > Profiles > Keys > General  -> Left/Right Option Key = Esc+"
 echo "  Settings > Profiles > Terminal        -> Scrollback lines = ${SCROLLBACK_LINES}"
+echo
+echo "되돌리기 (iTerm2를 종료한 뒤):"
+echo "  defaults import $DOMAIN '$BACKUP' && killall cfprefsd"

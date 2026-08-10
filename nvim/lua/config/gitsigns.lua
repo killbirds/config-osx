@@ -68,12 +68,13 @@ require("gitsigns").setup({
 
     -- 키 매핑 추가
     -- 탐색
+    -- next_hunk/prev_hunk는 설치본에서 @deprecated다(gitsigns/actions.lua). nav_hunk로 쓴다.
     map("n", "]c", function()
       if vim.wo.diff then
         return "]c"
       end
       vim.schedule(function()
-        gs.next_hunk()
+        gs.nav_hunk("next")
       end)
       return "<Ignore>"
     end, { expr = true, desc = "다음 변경 부분으로 이동" })
@@ -83,7 +84,7 @@ require("gitsigns").setup({
         return "[c"
       end
       vim.schedule(function()
-        gs.prev_hunk()
+        gs.nav_hunk("prev")
       end)
       return "<Ignore>"
     end, { expr = true, desc = "이전 변경 부분으로 이동" })
@@ -98,6 +99,13 @@ require("gitsigns").setup({
       gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
     end, { desc = "선택 부분 리셋" })
     map("n", "<leader>hS", gs.stage_buffer, { desc = "버퍼 전체 스테이징" })
+    -- undo_stage_hunk는 @deprecated지만 의도적으로 유지한다.
+    -- 업스트림이 권하는 대체는 "staged sign 위에서 stage_hunk를 다시 호출"인데,
+    -- stage_hunk는 커서 위치의 unstaged hunk를 먼저 찾고 **없을 때만** invert=true로
+    -- staged hunk를 되돌린다(gitsigns/actions.lua의 stage_hunk 본문).
+    -- 즉 커서가 staged hunk 위가 아니면 "취소" 키가 오히려 스테이징을 해버린다.
+    -- 키 의미를 뒤집지 않기 위해 스택 기반 undo를 그대로 쓴다.
+    -- 업스트림이 실제로 제거하면 그때 "staged hunk로 이동 후 stage_hunk" 조합으로 옮길 것.
     map("n", "<leader>hu", gs.undo_stage_hunk, { desc = "스테이징 취소" })
     map("n", "<leader>hR", gs.reset_buffer, { desc = "버퍼 전체 리셋" })
     map("n", "<leader>hp", gs.preview_hunk, { desc = "Hunk 미리보기" })
@@ -111,14 +119,9 @@ require("gitsigns").setup({
     end, { desc = "HEAD와 diff 비교" })
     map("n", "<leader>td", gs.toggle_deleted, { desc = "삭제된 줄 토글" })
 
-    -- 버퍼가 닫힐 때 안전하게 정리
-    vim.api.nvim_buf_attach(bufnr, false, {
-      on_detach = function()
-        if vim.api.nvim_buf_is_valid(bufnr) then
-          gs.detach(bufnr)
-        end
-      end,
-    })
+    -- 참고: 예전에는 여기서 nvim_buf_attach(on_detach -> gs.detach)를 걸어 두었다.
+    -- gitsigns가 자체 attach(gitsigns/attach.lua)에서 이미 on_detach를 등록하고
+    -- 캐시까지 정리하므로 중복이었다. 제거했다.
   end,
   -- NOTE: _threaded_diff는 gitsigns의 private API (underscore prefix)이다.
   -- 업데이트 시 동작이 변경되거나 제거될 수 있으므로 버전 업그레이드 후 동작 확인 필요.
