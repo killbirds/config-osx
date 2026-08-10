@@ -2,7 +2,9 @@ local keys = require("config.nvim-lspconfig-keys")
 local lsp_capabilities = require("config.lsp-capabilities")
 
 -- 서버별 추가 설정 (LspAttach 시 적용)
-local function apply_server_specific_config(client, bufnr)
+-- 버퍼별로 갈리는 설정이 생기면 bufnr을 인자로 받게 되돌릴 것. 지금은 클라이언트
+-- 단위 설정뿐이라 받지 않는다(받아두고 안 쓰면 selene이 unused_variable로 잡는다).
+local function apply_server_specific_config(client)
   if client.name == "ts_ls" then
     -- tsserver는 prettier에 포매팅 위임
     client.server_capabilities.documentFormattingProvider = false
@@ -36,7 +38,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
       return
     end
     keys.on_attach(client, args.buf)
-    apply_server_specific_config(client, args.buf)
+    apply_server_specific_config(client)
   end,
 })
 
@@ -263,22 +265,41 @@ end
 setup_lsp_servers()
 
 -- LSP 클라이언트 관리 유틸리티 함수들
+--
+-- 중복 판정 기준: 이름 **과** 작업 영역(root)이 모두 같을 때만 중복으로 본다.
+-- 이름만 보면 안 된다. Neovim은 같은 서버라도 프로젝트 root마다 별도 클라이언트를
+-- 띄우는 것이 정상이므로(vim.lsp.enable의 root_dir 기반 재사용), 한 인스턴스에서
+-- 여러 프로젝트를 열어 두면 lua_ls가 root마다 하나씩 붙는다. 이전 구현은 그중
+-- 첫 번째만 남기고 나머지를 전부 stop해서, 다른 프로젝트의 정상 LSP를 끊었다.
+local function client_identity(client)
+  local root = client.config and client.config.root_dir
+
+  -- root_dir이 없는 서버(단일 파일 모드, workspace_required = false 등)는
+  -- workspace_folders로 보완하고, 그것도 없으면 이름만으로 판정한다.
+  if not root and client.workspace_folders and client.workspace_folders[1] then
+    root = client.workspace_folders[1].name
+  end
+
+  return client.name .. "\0" .. (root or "")
+end
+
 local function cleanup_duplicate_clients()
-  local clients_by_name = {}
+  local clients_by_identity = {}
   local clients_to_stop = {}
 
-  -- 클라이언트를 이름별로 그룹화
+  -- 클라이언트를 (이름, root)별로 그룹화
   for _, client in ipairs(vim.lsp.get_clients()) do
     if client.name ~= "metals" then
-      if not clients_by_name[client.name] then
-        clients_by_name[client.name] = {}
+      local key = client_identity(client)
+      if not clients_by_identity[key] then
+        clients_by_identity[key] = {}
       end
-      table.insert(clients_by_name[client.name], client)
+      table.insert(clients_by_identity[key], client)
     end
   end
 
-  -- 중복 클라이언트 찾기
-  for _, clients in pairs(clients_by_name) do
+  -- 진짜 중복(같은 이름 + 같은 root)만 찾기
+  for _, clients in pairs(clients_by_identity) do
     if #clients > 1 then
       -- 첫 번째 클라이언트만 유지하고 나머지는 중지
       for i = 2, #clients do
@@ -289,8 +310,9 @@ local function cleanup_duplicate_clients()
 
   -- 중복 클라이언트 중지
   for _, client in ipairs(clients_to_stop) do
+    local root = client.config and client.config.root_dir or "(root 없음)"
     vim.notify(
-      string.format("중복된 LSP 클라이언트 '%s' (id: %d)를 중지합니다.", client.name, client.id),
+      string.format("중복된 LSP 클라이언트 '%s' (id: %d, root: %s)를 중지합니다.", client.name, client.id, root),
       vim.log.levels.INFO,
       { title = "LSP 정리" }
     )

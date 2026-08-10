@@ -1,5 +1,4 @@
 local metals = require("metals")
-local keys = require("config.nvim-lspconfig-keys")
 local lsp_capabilities = require("config.lsp-capabilities")
 
 -- ========== 설정 변수 ========== --
@@ -210,9 +209,13 @@ local function setup_auto_start()
 end
 
 -- 공통 LSP 설정 적용
-metals_config.on_attach = function(client, bufnr)
-  -- 공통 LSP 키맵 설정 적용
-  keys.on_attach(client, bufnr)
+-- 주의: 공통 키맵/버퍼 옵션은 여기서 부르지 않는다.
+-- config/nvim-lspconfig.lua의 전역 LspAttach autocmd가 metals를 포함한 **모든**
+-- 클라이언트에 keys.on_attach를 적용하고, Neovim은 LspAttach를 on_attach보다 먼저
+-- 발행한다(runtime/lua/vim/lsp/client.lua의 nvim_exec_autocmds('LspAttach') 뒤에
+-- on_attach 콜백 실행). 예전에는 양쪽에서 불러 metals 버퍼에서만 두 번 실행됐고,
+-- 그 파일의 "on_attach 대신 LspAttach 하나로 통일" 주석과도 어긋났다.
+metals_config.on_attach = function(_client, bufnr)
   setup_format_on_save(bufnr)
 
   -- Metals 특화 명령어 추가

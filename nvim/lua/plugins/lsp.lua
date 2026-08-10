@@ -181,7 +181,12 @@ return {
       {
         "<leader>fmt",
         function()
-          require("conform").format({ async = true, lsp_fallback = true })
+          -- lsp_fallback을 무조건 true로 넘기지 않는다.
+          -- :Format과 visual 포맷은 config/conform.lua의 should_lsp_fallback을 쓰며
+          -- java는 fallback을 끈다(google-java-format이 없으면 조용히 metals 포맷으로
+          -- 넘어가지 않고 실패해야 한다는 정책). 여기만 true였으면 같은 버퍼에서
+          -- 키와 명령의 동작이 갈린다.
+          require("config.conform").format_buffer()
         end,
         mode = "n",
         desc = "Format buffer",

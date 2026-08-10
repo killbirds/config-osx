@@ -88,6 +88,17 @@ end
 
 local M = {}
 
+-- 버퍼 전체 포맷. plugins/lsp.lua의 <leader>fmt(normal)가 쓴다.
+-- :Format / format_visual과 같은 fallback 정책(should_lsp_fallback)을 공유하기 위해
+-- 여기에 둔다.
+function M.format_buffer()
+  local bufnr = vim.api.nvim_get_current_buf()
+  require("conform").format({
+    async = true,
+    lsp_fallback = should_lsp_fallback(bufnr),
+  })
+end
+
 -- visual 선택 영역 포맷.
 -- conform에 range를 넘기지 않으면 스스로 선택 영역을 계산하지만
 -- (conform/init.lua:440-442의 range_from_selection), V 모드에서 start_col = 1을

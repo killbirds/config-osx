@@ -85,8 +85,27 @@ function M.find_ignore_dirs(force_refresh)
   return ignore_dirs
 end
 
+-- 이 모듈이 wildignore에 넣은 패턴. cwd가 바뀔 때 되돌리기 위해 기억한다.
+-- 예전에는 시작 시 cwd 기준으로 한 번만 append하고, DirChanged는 디렉토리 스캔 캐시만
+-- 비웠다. 그래서 새 cwd의 패턴은 추가되지 않고 이전 cwd의 패턴은 회수되지도 않아,
+-- 세션이 길어지면 무관한 프로젝트의 패턴이 wildignore에 쌓였다.
+local added_patterns = {}
+
+local function remove_added_patterns()
+  for _, pattern in ipairs(added_patterns) do
+    -- 사용자가 같은 패턴을 직접 넣었을 수도 있으므로 remove 실패는 무시한다
+    pcall(function()
+      vim.opt.wildignore:remove(pattern)
+    end)
+  end
+  added_patterns = {}
+end
+
 -- 0.11 최적화된 파일 시스템 설정
 function M.setup_fs_optimizations()
+  -- 이전 cwd에서 넣은 패턴을 먼저 걷어낸다
+  remove_added_patterns()
+
   local ignore_dirs = M.find_ignore_dirs()
 
   -- 기존 wildignore 패턴에 추가 (중복 방지)
@@ -100,19 +119,21 @@ function M.setup_fs_optimizations()
       local pattern1 = "**/" .. dir .. "/**"
       local pattern2 = dir .. "/**"
 
-      -- 중복되지 않은 패턴만 추가
+      -- 중복되지 않은 패턴만 추가 (우리가 넣은 것만 기억해 나중에 회수한다)
       if not existing_patterns[pattern1] then
         vim.opt.wildignore:append(pattern1)
         existing_patterns[pattern1] = true
+        table.insert(added_patterns, pattern1)
       end
       if not existing_patterns[pattern2] then
         vim.opt.wildignore:append(pattern2)
         existing_patterns[pattern2] = true
+        table.insert(added_patterns, pattern2)
       end
     end
-
-    vim.g.cache_dirs_found = ignore_dirs
   end
+
+  vim.g.cache_dirs_found = ignore_dirs
 
   return ignore_dirs
 end
@@ -162,9 +183,11 @@ function M.setup_buffer_cache()
       end
 
       -- 5MB 이상 파일은 추가 최적화 적용 (init.lua와 동일한 임계값 사용)
+      -- 주의: swapfile은 여기서 끄지 않는다. lua/init.lua가 이미 전역으로
+      -- swapfile/backup/writebackup을 껐으므로 버퍼별로 다시 끄는 것은 죽은 코드다.
+      -- 전역 설정을 되살리게 되면 이 자리에 swapfile = false를 다시 넣을 것.
       if file_size > size_5mb then
         vim.b[bufnr]._large_file = true
-        vim.bo[bufnr].swapfile = false
         vim.bo[bufnr].undofile = false
         -- Window-local options must be set per-window for this buffer
         vim.schedule(function()
@@ -267,10 +290,12 @@ function M.setup()
   M.setup_buffer_cache()
   M.setup_performance_monitoring()
 
-  -- 디렉토리 변경 감지하여 캐시 무효화
+  -- 디렉토리 변경 시 캐시를 비우고 wildignore를 새 cwd 기준으로 다시 계산한다.
+  -- (캐시만 비우면 새 cwd의 패턴이 반영되지 않고 이전 패턴도 남는다)
   vim.api.nvim_create_autocmd("DirChanged", {
     callback = function()
       M.clear_cache()
+      M.setup_fs_optimizations()
     end,
   })
 
