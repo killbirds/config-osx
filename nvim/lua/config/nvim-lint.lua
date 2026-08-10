@@ -46,31 +46,125 @@ local function resolve_command(candidates)
   return nil
 end
 
-local scalafix_cmd = resolve_command({
-  "scalafix",
-  "/opt/homebrew/bin/scalafix",
-  "/usr/local/bin/scalafix",
-})
+-- 명령 해석은 **린터 정의가 호출되는 시점**(= 린트 시점)에 한다.
+-- 모듈 로드 시점(BufReadPre)에 해석하면 mason이 vim.env.PATH를 prepend하기 전일 수 있어
+-- mason에만 설치된 도구를 못 찾는다. 그때 결과를 굳혀 버리면 이후로 영원히 못 찾는다.
+local function scalafix_command()
+  return resolve_command({
+    "scalafix",
+    "/opt/homebrew/bin/scalafix",
+    "/usr/local/bin/scalafix",
+  })
+end
 
-local coursier_cmd = resolve_command({
-  "coursier",
-  "/opt/homebrew/bin/coursier",
-  "/usr/local/bin/coursier",
-})
+local function coursier_command()
+  return resolve_command({
+    "coursier",
+    "/opt/homebrew/bin/coursier",
+    "/usr/local/bin/coursier",
+  })
+end
 
-local checkstyle_cmd = resolve_command({
-  "checkstyle",
-  "/opt/homebrew/bin/checkstyle",
-  "/usr/local/bin/checkstyle",
-})
+local function checkstyle_command()
+  return resolve_command({
+    "checkstyle",
+    "/opt/homebrew/bin/checkstyle",
+    "/usr/local/bin/checkstyle",
+  })
+end
 
-local luacheck_cmd = resolve_command({
-  "/opt/homebrew/bin/luacheck",
-  "/usr/local/bin/luacheck",
-  "luacheck",
-})
+-- Lua는 selene을 쓴다(luacheck 아님).
+-- luacheck는 mason이 luarocks로 설치하면서 시스템 Lua 인터프리터 경로를 셸 래퍼에
+-- 하드코딩하므로 Homebrew lua가 올라갈 때마다 조용히 깨졌다(실측 2회: lua5.4 소멸로
+-- exit 126, luacheck 1.1.0을 Lua 5.5로 실행해 exit 1). mason 레지스트리 최신도
+-- 1.1.0이라 버전을 올려 해결할 수 없다. selene은 단일 Rust 바이너리다.
+-- 기준은 nvim/selene.toml + nvim/neovim.yml이 갖고 있다.
 
 local java_checkstyle_config = vim.fn.expand("~/.custom_java_checks.xml")
+
+-- vim.fn.executable()로는 "파일은 실행 가능한데 실행하면 바로 죽는" 래퍼를 잡을 수 없다.
+-- 실측한 두 가지 실패가 모두 그랬고, 둘 다 진단 0건과 구분되지 않았다:
+--   1) mason luacheck 래퍼가 사라진 lua5.4를 exec  -> exit 126, stdout 없음
+--   2) luacheck 1.1.0을 Lua 5.5로 실행            -> exit 1,   stdout 없음
+--      ("attempt to assign to const variable" — 업스트림 비호환)
+-- 그래서 종료 코드 목록(126/127)으로 판정하면 2번을 놓친다.
+-- 대신 "정상 도구는 --version에 exit 0과 stdout을 낸다"를 기준으로 삼는다.
+-- 실측 확인: checkstyle / scalafix / coursier / cargo / ruff / stylua 전부 그렇다.
+-- 명령별로 한 번만 판정하고 결과를 캐시한다(:LintRecheck로 초기화).
+--
+-- 프로브는 **비동기**로 돌린다. `:wait()`로 동기 대기하면 린트 시점에 UI가 멈춘다
+-- (실측 단독 소요: selene/scalafix/cargo 0.03초, checkstyle 0.22초 — JVM 기동).
+-- 결과가 나오기 전에는 "실행 가능"으로 보아 이전과 같이 린트를 시도하고,
+-- 프로브가 실패로 판정하면 그때 경고를 띄우고 이후 호출부터 건너뛴다.
+-- 조용히 죽는 것만 막으면 되므로 첫 회 한 번이 늦게 판정되는 것은 문제가 아니다.
+local probe_cache = {}
+local probe_running = {}
+
+local function start_probe(cmd)
+  if probe_running[cmd] then
+    return
+  end
+  probe_running[cmd] = true
+
+  local ok = pcall(function()
+    vim.system({ cmd, "--version" }, { text = true }, function(result)
+      probe_running[cmd] = nil
+
+      local runnable = true
+      local reason
+      if result.code ~= 0 or (result.stdout or "") == "" then
+        runnable = false
+        reason = string.format("`%s --version`이 실패했습니다 (exit %s)", cmd, tostring(result.code))
+        local stderr = (result.stderr or ""):gsub("%s+$", "")
+        if stderr ~= "" then
+          reason = reason .. ": " .. vim.split(stderr, "\n")[1]
+        end
+      end
+
+      probe_cache[cmd] = runnable
+
+      if not runnable then
+        vim.schedule(function()
+          vim.notify(
+            string.format("린터 '%s'를 건너뜁니다 — %s", cmd, reason),
+            vim.log.levels.WARN,
+            { title = "nvim-lint" }
+          )
+        end)
+      end
+    end)
+  end)
+
+  -- spawn 자체가 실패하면(실행 파일이 없거나 실행 불가) 즉시 판정한다
+  if not ok then
+    probe_running[cmd] = nil
+    probe_cache[cmd] = false
+    vim.schedule(function()
+      vim.notify(
+        string.format("린터 '%s'를 건너뜁니다 — 실행할 수 없습니다", cmd),
+        vim.log.levels.WARN,
+        { title = "nvim-lint" }
+      )
+    end)
+  end
+end
+
+local function can_actually_run(cmd)
+  local cached = probe_cache[cmd]
+  if cached ~= nil then
+    return cached
+  end
+
+  -- 아직 판정 전이면 프로브만 걸어 두고 이번에는 통과시킨다
+  start_probe(cmd)
+  return true
+end
+
+-- 프로브 캐시를 비워 재판정하게 한다 (도구를 다시 설치한 뒤 쓰면 된다)
+local function reset_probe_cache()
+  probe_cache = {}
+  probe_running = {}
+end
 
 local function is_linter_runnable(linter)
   if type(linter.condition) == "function" then
@@ -89,7 +183,11 @@ local function is_linter_runnable(linter)
     cmd = resolved_cmd
   end
 
-  return type(cmd) == "string" and vim.fn.executable(cmd) == 1
+  if type(cmd) ~= "string" or vim.fn.executable(cmd) ~= 1 then
+    return false
+  end
+
+  return can_actually_run(cmd)
 end
 
 -- upstream try_lint()은 대상 버퍼와 filetype을 **호출 시점의**
@@ -181,11 +279,18 @@ function timers.stop(timer_type, id)
 end
 
 -- 파일 타입별 린터 설정
+-- 주의: 이 목록을 **로드 시점의** executable() 결과로 가리지 마라.
+-- 이 모듈은 BufReadPre에 로드되는데 mason이 vim.env.PATH를 prepend하는 시점보다
+-- 앞설 수 있다. 그러면 mason에만 설치된 도구(selene, ruff 등)가 그 순간 안 보여서
+-- 목록이 조용히 빈 테이블이 되고, 나중에 PATH가 갖춰져도 영원히 린트되지 않는다.
+-- (실측: `lua = selene_cmd and {"selene"} or {}` -> linters_by_ft.lua = {} 인데
+--  같은 세션에서 executable("selene") = 1)
+-- 실행 가능 여부는 try_lint_safe의 filter(is_linter_runnable)가 **린트 시점에** 본다.
 lint.linters_by_ft = {
   python = { "ruff" }, -- Python 린팅 (ruff)
-  lua = { "luacheck" }, -- Lua 린팅
+  lua = { "selene" }, -- Lua 린팅 (selene)
   rust = { "clippy" }, -- Rust 린팅 (cargo clippy)
-  scala = (scalafix_cmd or coursier_cmd) and { "scalafix" } or {}, -- Scala 린팅 (scalafix)
+  scala = { "scalafix" }, -- Scala 린팅 (scalafix, 없으면 coursier launch)
   java = { "java_checkstyle" },
 }
 
@@ -214,27 +319,35 @@ end
 -- stdin=false + append_fname(기본값 true)으로 자동으로 덧붙이게 한다.
 -- (JS/TS 린팅은 LSP의 eslint 서버가 담당하므로 여기에는 없음)
 
--- luacheck: 내장 정의를 쓰되 homebrew 경로 해석과 --filename 만 보강
-lint.linters.luacheck.cmd = luacheck_cmd or "luacheck"
-lint.linters.luacheck.args = {
-  "--formatter",
-  "plain",
-  "--codes",
-  "--ranges",
-  "--filename",
-  function()
-    return vim.api.nvim_buf_get_name(0)
-  end,
-  "-",
-}
+-- selene: 내장 정의(stdin + --display-style json)를 그대로 쓰되 실행 위치만 잡아준다.
+-- selene은 selene.toml을 찾지 못하면 실행을 거부하고, 설정 탐색은 **cwd 기준**이다.
+-- nvim의 cwd가 다른 곳일 때 ~/.config/nvim/lua/*.lua를 열면 설정을 못 찾아 실패하므로,
+-- 버퍼 기준으로 selene.toml을 찾아 cwd로 넘긴다. 못 찾으면 건너뛴다
+-- (clippy가 Cargo.toml 루트를 다루는 방식과 같다. 설정이 없는 프로젝트에서
+--  선택되지 않은 규칙으로 잡음을 내지 않는 쪽이 낫다).
+local base_selene = lint.linters.selene
+lint.linters.selene = function()
+  local selene_root = vim.fs.root(0, { "selene.toml" })
+  ---@diagnostic disable-next-line: param-type-mismatch
+  return vim.tbl_extend("force", base_selene, {
+    cmd = "selene",
+    cwd = selene_root,
+    condition = function()
+      return selene_root ~= nil
+    end,
+  })
+end
 
 lint.linters.scalafix = function()
-  local cmd = scalafix_cmd
+  local cmd = scalafix_command()
   local args = { "--check" } -- 파일명은 append_fname(stdin=false 기본값)으로 자동 추가됨
 
-  if not cmd and coursier_cmd then
-    cmd = coursier_cmd
-    args = { "launch", "scalafix", "--", "--check" }
+  if not cmd then
+    local coursier = coursier_command()
+    if coursier then
+      cmd = coursier
+      args = { "launch", "scalafix", "--", "--check" }
+    end
   end
 
   cmd = cmd or "scalafix"
@@ -254,16 +367,23 @@ lint.linters.scalafix = function()
 end
 
 lint.linters.java_checkstyle = function()
+  local checkstyle = checkstyle_command()
   return {
     name = "java_checkstyle",
-    cmd = checkstyle_cmd or "checkstyle",
+    cmd = checkstyle or "checkstyle",
     args = { "-f", "sarif", "-c", java_checkstyle_config },
     stream = "stdout",
-    ignore_exitcode = true,
+    -- ignore_exitcode를 켜지 않는다.
+    -- ~/.custom_java_checks.xml은 severity=warning이므로 **위반을 찾아도 exit 0**이고
+    -- (실측: 진단 4건에 exit 0), nonzero는 설정 로드 실패·크래시일 때만 나온다.
+    -- 즉 종료 코드가 곧 "checkstyle이 제대로 돌았는가" 신호다. 예전에는 이걸 무시해서
+    -- 설정이 checkstyle 13과 맞지 않아 로드부터 실패하는 동안에도(LineLength가
+    -- TreeWalker 하위, JavadocMethod의 scope 속성) 진단 0건처럼 보였다.
+    ignore_exitcode = false,
     stdin = false,
     append_fname = true,
     condition = function()
-      return checkstyle_cmd ~= nil and vim.uv.fs_stat(java_checkstyle_config) ~= nil
+      return checkstyle ~= nil and vim.uv.fs_stat(java_checkstyle_config) ~= nil
     end,
     parser = require("lint.parser").for_sarif({
       source = "checkstyle",
@@ -300,12 +420,25 @@ local function update_quickfix(opts)
   opts = opts or {}
 
   local qf_id = find_qflist_id()
-  if not qf_id and not opts.create and vim.fn.getqflist({ nr = "$" }).nr ~= 0 then
+  -- 전용 목록이 없고 수동 실행(:Lint)도 아니면 아무것도 하지 않는다.
+  -- 예전에는 `and vim.fn.getqflist({ nr = "$" }).nr ~= 0` 조건이 붙어 있어서
+  -- quickfix 스택이 **비어 있을 때만** 백그라운드 갱신이 새 목록을 만들었다.
+  -- 바로 위 주석("백그라운드 갱신은 기존 전용 목록의 제자리 갱신만")과 어긋났고,
+  -- lua 파일 하나만 열어도 묻지 않고 quickfix 목록이 생겼다.
+  if not qf_id and not opts.create then
     return
   end
 
-  -- 현재 작업 디렉토리(프로젝트 루트) 가져오기
+  -- 현재 작업 디렉토리(프로젝트 루트) 가져오기.
+  -- 경계까지 포함한 접두어로 비교한다. `find(cwd, 1, true)`는 부분 문자열 검사여서
+  -- 경로 중간에 cwd 문자열이 들어간 무관한 파일도 통과했고, "/foo" 아래에서
+  -- "/other/foo/x.lua" 같은 경로가 프로젝트 내부로 취급될 수 있었다.
   local cwd = vim.fn.getcwd()
+  local cwd_prefix = cwd:gsub("/$", "") .. "/"
+
+  local function in_project(path)
+    return path == cwd or vim.startswith(path, cwd_prefix)
+  end
 
   -- 모든 열린 버퍼에서 진단 수집
   local all_diagnostics = {}
@@ -319,7 +452,7 @@ local function update_quickfix(opts)
       local buf_name = vim.api.nvim_buf_get_name(buf)
 
       -- 파일이 현재 프로젝트 내에 있는지 확인
-      if buf_name and buf_name:find(cwd, 1, true) then
+      if buf_name and buf_name ~= "" and in_project(buf_name) then
         -- 진단이 변경되지 않았으면 캐시된 결과 사용
         if not diagnostic_cache[buf] then
           diagnostic_cache[buf] = vim.diagnostic.get(buf, {
@@ -509,6 +642,14 @@ vim.api.nvim_create_user_command("Lint", function()
   -- 수동 실행은 전용 quickfix 목록이 없으면 새로 만든다
   update_quickfix({ create = true })
 end, { desc = "수동으로 린팅 실행" })
+
+-- 실행 불가로 판정해 건너뛴 린터를 다시 판정하게 한다.
+-- (:MasonInstall 등으로 도구를 고친 뒤 Neovim을 재시작하지 않고 반영할 때)
+vim.api.nvim_create_user_command("LintRecheck", function()
+  reset_probe_cache()
+  vim.notify("린터 실행 가능 여부를 다시 판정합니다.", vim.log.levels.INFO, { title = "nvim-lint" })
+  try_lint_safe()
+end, { desc = "린터 실행 가능 여부 재판정 후 린팅" })
 
 -- 참고: 상태줄 진단 표시는 lualine의 diagnostics 컴포넌트가 담당한다.
 -- (이전의 _G.lint_status는 같은 vim.diagnostic 정보를 중복 표시했음)

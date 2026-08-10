@@ -8,7 +8,10 @@
 require("mason-tool-installer").setup({
   ensure_installed = {
     -- 필수 린터만 포함
-    "luacheck", -- Lua
+    -- selene: Lua. luacheck에서 옮겼다 — luacheck는 luarocks 설치본이 시스템 Lua
+    -- 인터프리터 경로를 래퍼에 하드코딩해서 Homebrew lua가 올라가면 조용히 깨진다
+    -- (실측 2회). selene은 단일 Rust 바이너리다. 기준은 nvim/selene.toml 참고.
+    "selene", -- Lua
     "ruff", -- Python
 
     -- 필수 포매터만 포함

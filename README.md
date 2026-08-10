@@ -441,7 +441,7 @@ nvim/
    :MasonToolsInstall
    ```
    LSP 서버(`lua_ls`, `ts_ls`, `eslint`, `oxlint`, `pyright`, `marksman`)는 mason-lspconfig가
-   파일을 열 때 자동으로 설치합니다. 반면 린터·포매터(`luacheck`, `ruff`, `stylua`, `prettier`)는
+   파일을 열 때 자동으로 설치합니다. 반면 린터·포매터(`selene`, `ruff`, `stylua`, `prettier`)는
    **이 명령을 직접 실행해야 설치됩니다.** mason-tool-installer를 의도적으로 수동 전용으로
    두었기 때문입니다(`nvim/lua/config/mason-tool-installer.lua` 주석 참고).
    실행하지 않으면 포맷과 린트가 아무 오류 없이 조용히 동작하지 않습니다.

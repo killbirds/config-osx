@@ -1,0 +1,10 @@
+---
+# selene용 Neovim 전역 정의 (nvim/selene.toml의 std = "lua51+neovim"이 이 파일을 읽는다).
+#
+# vim은 필드가 방대하고 버전마다 바뀌므로 전체를 열거하지 않고 any로 둔다.
+# 목적은 "vim이 정의되지 않은 전역"이라는 잡음을 없애는 것이고, selene의 실질 가치인
+# 미사용 변수 / 섀도잉 / 빈 블록 / 실수로 만든 전역 같은 검사는 그대로 유지된다.
+# vim.* 필드 수준 검증은 lua_ls가 담당한다(nvim/.luarc.json, script/nvim-luals-check.sh).
+globals:
+  vim:
+    any: true

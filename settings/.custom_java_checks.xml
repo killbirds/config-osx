@@ -27,6 +27,17 @@
         <property name="eachLine" value="true"/>
     </module>
 
+    <!-- LineLength는 Checker 직속이어야 한다.
+         checkstyle 8.24에서 TreeWalker 하위에서 제거되었고, TreeWalker 안에 두면
+         "TreeWalker is not allowed as a parent of LineLength"로 **설정 로드 자체가
+         실패**한다. 그러면 checkstyle이 진단을 하나도 내지 않고 종료하는데,
+         nvim-lint 쪽은 stdout SARIF만 읽고 exit code를 무시하므로(config/nvim-lint.lua)
+         "진단 0건"과 구분되지 않는다. 즉 Java 린트가 조용히 죽는다. -->
+    <module name="LineLength">
+        <property name="max" value="100"/>
+        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+    </module>
+
     <module name="TreeWalker">
         <module name="OuterTypeFilename"/>
         <module name="IllegalTokenText">
@@ -40,10 +51,6 @@
             <property name="allowEscapesForControlCharacters" value="true"/>
             <property name="allowByTailComment" value="true"/>
             <property name="allowNonPrintableEscapes" value="true"/>
-        </module>
-        <module name="LineLength">
-            <property name="max" value="100"/>
-            <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
         </module>
         <module name="AvoidStarImport"/>
         <module name="OneTopLevelClass"/>
@@ -230,14 +237,26 @@
             <property name="target"
              value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
         </module>
+        <!-- checkstyle 8.24에서 JavadocMethod가 둘로 쪼개졌다.
+             "있는 Javadoc이 올바른가"는 JavadocMethod, "Javadoc이 있어야 하는가"는
+             MissingJavadocMethod가 담당한다. 아래 속성 이름 변경도 그때 일어났다:
+               scope                      -> accessModifiers (JavadocMethod)
+               minLineCount               -> MissingJavadocMethod로 이동
+               allowMissingThrowsTags     -> 제거. throws 검사는 validateThrows(기본 false)가
+                                             켜질 때만 하므로 지정하지 않는 것이 곧 기존 동작이다
+               allowThrowsTagsForSubclasses -> 제거 (같은 이유)
+             원래 의도(public 메서드에서 2줄 이상일 때만 Javadoc 요구, Override/Test 제외)를
+             두 모듈로 나눠 그대로 유지한다. -->
         <module name="JavadocMethod">
-            <property name="scope" value="public"/>
+            <property name="accessModifiers" value="public"/>
             <property name="allowMissingParamTags" value="true"/>
-            <property name="allowMissingThrowsTags" value="true"/>
             <property name="allowMissingReturnTag" value="true"/>
+            <property name="allowedAnnotations" value="Override, Test"/>
+        </module>
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="public"/>
             <property name="minLineCount" value="2"/>
             <property name="allowedAnnotations" value="Override, Test"/>
-            <property name="allowThrowsTagsForSubclasses" value="true"/>
         </module>
         <module name="MethodName">
             <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9_]*$"/>
