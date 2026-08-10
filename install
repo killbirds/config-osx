@@ -42,13 +42,28 @@ check_dependencies() {
 }
 
 # 백업 생성
+#
+# 이 함수가 실패하면 호출자는 설치를 진행하지 않는다. 백업은 아래 설치 단계가
+# 홈의 파일을 지우기 전의 유일한 보호막이므로, 백업이 불완전한 상태로 파괴적
+# 단계에 들어가면 되돌릴 방법이 없다.
 create_backup() {
   echo "기존 설정 백업 중..."
   BACKUP_DIR="$HOME/.config/backup_$(date +%Y%m%d%H%M%S)"
-  mkdir -p "$BACKUP_DIR"
+  if ! mkdir -p "$BACKUP_DIR"; then
+    echo "오류: 백업 디렉토리를 만들 수 없습니다: $BACKUP_DIR" >&2
+    return 1
+  fi
 
+  # -r(대문자 -R 아님)은 의도적이다. macOS cp에서 -r은 심링크를 **역참조**하므로
+  # (실측: -r -> 일반 파일, -R -> 심링크 유지) 두 번째 설치 이후에도 백업이
+  # 링크 묶음이 아니라 그 시점 내용의 독립 사본이 된다. -R로 바꾸지 말 것.
   if [ -d "$HOME/.config/nvim" ]; then
-    cp -r "$HOME/.config/nvim" "$BACKUP_DIR/"
+    if ! cp -r "$HOME/.config/nvim" "$BACKUP_DIR/"; then
+      echo "오류: Neovim 설정 백업에 실패했습니다: $HOME/.config/nvim" >&2
+      echo "      (끊긴 심링크가 있으면 cp -r이 실패합니다. 확인 후 다시 실행하세요:" >&2
+      echo "       find -L \"$HOME/.config/nvim\" -type l)" >&2
+      return 1
+    fi
   fi
 
   # zsh 설치 단계는 홈의 runcom 6개를 지우고 다시 링크한다. 심링크가 아니라
@@ -64,6 +79,25 @@ create_backup() {
   if [ -f "$HOME/.config/herdr/config.toml" ]; then
     mkdir -p "$BACKUP_DIR/herdr"
     cp "$HOME/.config/herdr/config.toml" "$BACKUP_DIR/herdr/"
+  fi
+
+  # main_install이 덮어쓰는 git 전역 설정의 이전 값을 남긴다.
+  # 파일이 아니라 설정 값이라 백업 디렉토리에 저절로 담기지 않는다. 기록이 없으면
+  # 다른 전역 ignore 파일을 쓰던 장비에서 이전 값을 되돌릴 방법이 없다.
+  local prev_excludes
+  prev_excludes="$(git config --global --get core.excludesfile 2>/dev/null)"
+  if ! {
+    echo "# ./install 실행 전 git 전역 설정 ($(date '+%Y-%m-%d %H:%M:%S'))"
+    if [ -n "$prev_excludes" ]; then
+      echo "core.excludesfile = $prev_excludes"
+      echo "# 되돌리기: git config --global core.excludesfile '$prev_excludes'"
+    else
+      echo "core.excludesfile = (미설정)"
+      echo "# 되돌리기: git config --global --unset core.excludesfile"
+    fi
+  } > "$BACKUP_DIR/git-config-before.txt"; then
+    echo "오류: git 설정 백업을 쓸 수 없습니다: $BACKUP_DIR/git-config-before.txt" >&2
+    return 1
   fi
 
   echo "백업 완료: $BACKUP_DIR"
@@ -98,11 +132,14 @@ main_install() {
   echo "herdr 설정 설치 중..."
   # ~/.config/herdr에는 herdr이 만드는 런타임 파일(session.json, *.log, *.sock)이 함께 있으므로
   # 디렉토리 전체가 아니라 herdr/ 안의 파일만 개별 심링크한다.
-  mkdir -p ~/.config/herdr
+  mkdir -p ~/.config/herdr || return 1
   # 디렉토리 순회(=$install)를 쓰면 나중에 herdr/에 파일이 추가될 때 그것까지
   # ~/.config/herdr로 링크되어 동명 런타임 파일을 지운다. 대상을 고정한다.
   rm -rf ~/.config/herdr/config.toml
-  ln -s "$cur/herdr/config.toml" ~/.config/herdr/config.toml
+  if ! ln -s "$cur/herdr/config.toml" ~/.config/herdr/config.toml; then
+    echo "오류: herdr 설정 링크를 만들 수 없습니다." >&2
+    return 1
+  fi
   if command -v herdr &> /dev/null; then
     herdr config check || echo "경고: herdr 설정 검증에 실패했습니다. herdr/config.toml을 확인하세요."
     # 서버가 떠 있으면 재시작 없이 반영 (떠 있지 않으면 실패해도 무방)
@@ -110,7 +147,7 @@ main_install() {
   fi
 
   echo "SBT 설정 설치 중..."
-  mkdir -p ~/.sbt/1.0
+  mkdir -p ~/.sbt/1.0 || return 1
   for sbt_item in "$cur/sbt/1.0"/*; do
     [ -e "$sbt_item" ] || continue
 
@@ -126,21 +163,51 @@ main_install() {
       rm -rf "$sbt_target"
     fi
 
-    cp -R "$sbt_item" "$sbt_target"
+    if ! cp -R "$sbt_item" "$sbt_target"; then
+      echo "오류: SBT 설정 복사 실패: $sbt_item -> $sbt_target" >&2
+      return 1
+    fi
   done
 
   echo "Git 설정 적용 중..."
-  git config --global core.excludesfile ~/.gitignore_global
+  # 이전 값은 create_backup이 $BACKUP_DIR/git-config-before.txt에 기록해 두었다.
+  if ! git config --global core.excludesfile ~/.gitignore_global; then
+    echo "오류: git 전역 설정을 적용할 수 없습니다." >&2
+    return 1
+  fi
 
   echo "Neovim 플러그인 설치 중..."
-  nvim --headless -c "Lazy sync" -c "qa"
+  # bang이 필수다. lazy.nvim은 `:Lazy`의 bang 여부만 wait로 넘기고
+  # (view/commands.lua의 `wait = cmd.bang == true`) manage/init.lua는 opts.wait일 때만
+  # 완료를 기다린다. bang 없이 부르면 곧바로 이어지는 qa가 동기화를 끊을 수 있다.
+  if ! nvim --headless "+Lazy! sync" +qa; then
+    echo "오류: Neovim 플러그인 동기화 실패. nvim을 열어 :Lazy로 상태를 확인하세요." >&2
+    return 1
+  fi
 }
 
 # 메인 함수
 main() {
   check_dependencies
-  create_backup
-  main_install
+
+  # 백업이 실패하면 파괴적 설치로 넘어가지 않는다.
+  if ! create_backup; then
+    echo >&2
+    echo "백업에 실패해 설치를 중단했습니다. 홈의 설정은 그대로입니다." >&2
+    exit 1
+  fi
+
+  # main_install의 상태를 반드시 검사한다.
+  # 예전에는 검사하지 않고 곧바로 완료 메시지를 출력했고, 함수의 마지막 명령 뒤에
+  # echo 두 개가 성공하므로 스크립트도 0으로 끝났다. 즉 herdr/SBT/Git/Lazy 단계가
+  # 실패해도 "설치가 완료되었습니다!"가 나왔다.
+  if ! main_install; then
+    echo >&2
+    echo "설치가 중간에 실패했습니다. 위 오류를 확인하세요." >&2
+    echo "백업: $BACKUP_DIR" >&2
+    exit 1
+  fi
+
   echo "설치가 완료되었습니다!"
   echo "새 터미널을 열어 설정을 적용하세요."
 }
