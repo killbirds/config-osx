@@ -919,5 +919,9 @@ Scala 빌드 도구 설정
 - `nvim-luals-check.sh`: `nvim/.luarc.json` 기준으로 Neovim 설정 Lua를 lua_ls로 정적 검사
 - `iterm2-herdr-setup.sh`: herdr용 iTerm2 프로파일 설정 일괄 적용 (Option Key = Esc+, 스크롤백 제한)
 - `zoxide-import-fasd.sh`: fasd 디렉토리 히스토리를 zoxide로 이관 (`./install`이 자동 호출, 마커로 한 번만)
-- `pull`: 현재 디렉토리 아래의 모든 git 저장소를 순회하며 `git pull`
+- `pull`: 현재 디렉토리가 git 저장소면 그 저장소를, 아니면 하위 디렉토리(기본 2단계)를 훑어 발견한 저장소를 순회하며 `git pull`
+  - 깊이는 인자나 `PULL_DEPTH`로 조절 (`pull 1`은 바로 아래만, `pull 3`은 3단계까지)
+  - 저장소를 만나면 그 아래로는 내려가지 않음. `--recurse-submodules`가 따라가는 것은
+    **상위 저장소에 등록된 submodule뿐**이므로, 등록되지 않은 독립 중첩 저장소
+    (`vendor/inner/.git` 같은 것)는 갱신되지 않는다. 그런 저장소는 직접 들어가서 `pull`할 것
 - `p4merge.sh`: p4merge를 git mergetool로 쓰기 위한 래퍼

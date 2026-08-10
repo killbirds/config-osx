@@ -1,6 +1,14 @@
 #!/bin/bash
 #
-# 현재 디렉토리 바로 아래의 git 저장소를 모두 순회하며 git pull 한다.
+# 현재 디렉토리가 git 저장소이면 그 저장소를 pull 하고,
+# 아니면 하위 디렉토리를 훑어 발견한 git 저장소를 모두 pull 한다.
+#
+# 사용법:
+#   pull        # 하위 2단계까지 탐색 (team/repo 까지)
+#   pull 1      # 바로 아래만 (예전 동작)
+#   pull 3      # 3단계까지
+#
+#   PULL_DEPTH=3 pull   # 기본 깊이를 환경변수로 고정 (인자가 우선)
 
 set -u
 
@@ -10,28 +18,67 @@ set -u
 # 글로브를 쓰면 디렉토리만, 숨김 항목과 '.' / '..' 없이 얻는다.
 shopt -s nullglob
 
+DEPTH="${1:-${PULL_DEPTH:-2}}"
+if [[ ! "$DEPTH" =~ ^[1-9][0-9]*$ ]]; then
+  echo "깊이는 1 이상의 정수여야 합니다: $DEPTH" >&2
+  exit 2
+fi
+
 # 하나가 실패해도 나머지는 계속 받되, 종료 코드에는 반영한다.
 # 예전에는 pull 실패가 무시되고 마지막 sleep이 성공하면 전체가 0으로 끝나,
 # 자동화에서 이 스크립트로 갱신 성공 여부를 판단할 수 없었다.
 status=0
 failed=()
+found=0
 
-for PROJECT in */; do
-  PROJECT="${PROJECT%/}"
+pull_one() {
+  local project="$1"
 
-  # 워크트리와 서브모듈에서 .git은 디렉토리가 아니라 파일이므로 -e로 검사한다.
-  [ -e "$PROJECT/.git" ] || continue
+  # sleep은 저장소 사이에서만 쉬면 된다. 마지막 저장소 뒤에 붙는 5초는
+  # 결과를 보기까지 기다리는 시간만 늘린다.
+  (( found )) && sleep 5
+  found=1
 
-  echo "current dir: $(cd "$PROJECT" && pwd)"
-  if ! (cd "$PROJECT" && git pull --all --recurse-submodules --log); then
+  echo "current dir: $(cd "$project" && pwd)"
+  if ! (cd "$project" && git pull --all --recurse-submodules --log); then
     status=1
-    failed+=("$PROJECT")
-    echo "  !! pull 실패: $PROJECT"
+    failed+=("$project")
+    echo "  !! pull 실패: $project"
   fi
   echo "--------------------------------------"
+}
 
-  sleep 5
-done
+# 저장소를 만나면 그 아래로는 내려가지 않는다. 저장소 하위 디렉토리는 대개
+# 별도 저장소가 아니고, **등록된 서브모듈**은 --recurse-submodules가 이미 따라간다.
+# 등록되지 않은 독립 중첩 저장소는 이 스크립트도 git도 갱신하지 않으므로
+# 필요하면 그 디렉토리에서 직접 실행해야 한다.
+# prefix는 "" 또는 "team/" 형태여서 라벨이 그대로 상대 경로가 된다.
+scan() {
+  local prefix="$1" remaining="$2"
+  local entry project
+
+  for entry in "$prefix"*/; do
+    project="${entry%/}"
+
+    # 워크트리와 서브모듈에서 .git은 디렉토리가 아니라 파일이므로 -e로 검사한다.
+    if [ -e "$project/.git" ]; then
+      pull_one "$project"
+    elif (( remaining > 1 )); then
+      scan "$project/" $(( remaining - 1 ))
+    fi
+  done
+}
+
+if [ -e .git ]; then
+  # '.' 대신 절대 경로를 넘겨 실패 목록에도 어느 저장소인지 남게 한다.
+  pull_one "$PWD"
+else
+  scan "" "$DEPTH"
+
+  if (( ! found )); then
+    echo "git 저장소를 찾지 못했습니다(깊이 $DEPTH): $(pwd)"
+  fi
+fi
 
 if (( ${#failed[@]} )); then
   echo
