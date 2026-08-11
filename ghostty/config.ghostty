@@ -3,8 +3,9 @@
 
 # ── Font ────────────────────────────────────────────────────────────────
 # iTerm: Normal Font = MesloLGMNFM-Regular 14
+# Size deliberately bumped to 16 — the iTerm value was 14.
 font-family = MesloLGM Nerd Font Mono
-font-size = 14
+font-size = 15
 
 # Hangul fallback. Meslo has no Hangul glyphs, and Ghostty's automatic fallback
 # picks PCMyungjo (a serif 명조 face) — iTerm falls back to the macOS system
@@ -22,11 +23,15 @@ font-feature = -dlig
 bold-color = bright
 
 # ── Colors ──────────────────────────────────────────────────────────────
-# Solarized Dark. Identical to the iTerm profile's colors except palette 8
-# (bright black), which the iTerm profile set to #002b36 — the same as the
-# background, making bright/bold black text invisible. This theme uses
-# #335e69 instead.
-theme = iTerm2 Solarized Dark
+# Deliberately NOT the iTerm profile's colors. Despite the name, "Solarized
+# Osaka Night" is a Tokyo Night palette (background #1a1b26, foreground
+# #c0caf5) and shares nothing with Solarized.
+#
+# The faithful port is `theme = iTerm2 Solarized Dark`, which matches the
+# iTerm profile's 22 colors except palette 8 (bright black): iTerm set it to
+# #002b36, the same as the background, making bright/bold black text
+# invisible. That theme uses #335e69 instead.
+theme = Solarized Osaka Night
 
 # ── Cursor ──────────────────────────────────────────────────────────────
 # iTerm: box cursor, Blinking Cursor = off

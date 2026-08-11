@@ -654,10 +654,10 @@ herdr과 같은 이유로 대상을 `config.ghostty` 하나로 고정합니다.
 
 | iTerm2 설정 | Ghostty |
 | --- | --- |
-| Normal Font = `MesloLGMNFM-Regular 14` | `font-family = MesloLGM Nerd Font Mono`, `font-size = 14` |
+| Normal Font = `MesloLGMNFM-Regular 14` | `font-family = MesloLGM Nerd Font Mono`, `font-size = 16` (일부러 키움, 아래 참고) |
 | ASCII/Non-ASCII Ligatures 끔 | `font-feature = -calt` / `-liga` / `-dlig` |
 | Use Bright Bold | `bold-color = bright` |
-| Solarized Dark 색상 22개 | `theme = iTerm2 Solarized Dark` (내장 테마) |
+| Solarized Dark 색상 22개 | `theme = Solarized Osaka Night` (내장 테마, 일부러 다른 팔레트 — 아래 참고) |
 | Box 커서, Blinking Cursor 끔 | `cursor-style = block`, `cursor-style-blink = false` |
 | Columns 80 × Rows 25 | `window-width = 80`, `window-height = 25` |
 | Transparency 0, Blur 끔 | `background-opacity = 1`, `background-blur = false` |
@@ -674,8 +674,10 @@ herdr과 같은 이유로 대상을 `config.ghostty` 하나로 고정합니다.
 - **한글 폰트**: Meslo에는 한글 글리프가 없어 폴백이 일어나는데, Ghostty의 자동 폴백은 `PCMyungjo`(명조체)를 고릅니다. iTerm2는 시스템 한글 폰트로 떨어지므로 `font-family = Apple SD Gothic Neo`를 폴백으로 명시했습니다(`font-family`를 여러 번 쓰면 뒤쪽이 폴백).
 - **탭 이동**: Ghostty 기본 탭 이동은 `cmd+shift+[`/`]`와 `ctrl+tab`뿐이라 `keybind = cmd+arrow_left=previous_tab` / `cmd+arrow_right=next_tab`을 추가했습니다. **`cmd+방향키`는 비어 있던 자리가 아닙니다** — Ghostty 기본값은 `super+arrow_left=text:\x01`(Ctrl-A, 줄 처음) / `super+arrow_right=text:\x05`(Ctrl-E, 줄 끝)이고, 이 두 줄이 그것을 덮습니다. 줄 이동이 더 필요하면 주석 처리하세요.
 
-iTerm2와 **일부러 다르게** 둔 항목 두 개:
+iTerm2와 **일부러 다르게** 둔 항목 네 개:
 
+- **`theme = Solarized Osaka Night`** — 이름과 달리 Solarized가 아니라 Tokyo Night 팔레트입니다(배경 `#1a1b26`, 전경 `#c0caf5`). iTerm2 프로파일 색을 그대로 옮긴 테마는 `iTerm2 Solarized Dark`이고, 그쪽은 팔레트 8(bright black)만 다릅니다 — iTerm2가 배경과 같은 `#002b36`으로 둬서 bold/bright 검정 글자가 보이지 않던 것을 `#335e69`로 바꾼 것. 이식 그대로 쓰려면 그 줄로 되돌리면 됩니다.
+- **`font-size = 16`** (iTerm2는 14)
 - **`confirm-close-surface = true`** (iTerm2는 Prompt Before Closing / PromptOnQuit 둘 다 끔) — herdr 서버가 터미널의 자식 프로세스라(`Ghostty → login → zsh → herdr → herdr server`) `false`면 `cmd+w`/`cmd+q` 한 번에 안에서 돌던 에이전트가 확인 없이 전부 죽습니다.
 - **`shell-integration-features = ssh-env`** — iTerm2는 `TERM=xterm-256color`를 보냈지만 Ghostty 기본값은 `xterm-ghostty`이고, terminfo가 없는 원격 서버에서는 셸이 깨집니다. `ssh-env`는 ssh 연결에서만 `TERM`을 `xterm-256color`로 되돌립니다. 대안인 `ssh-terminfo`는 접속하는 원격 호스트의 `~/.terminfo`에 Ghostty terminfo를 설치하므로 기본으로 켜지 않았습니다.
 
