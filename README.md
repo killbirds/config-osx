@@ -405,7 +405,6 @@ nvim/
 ├── init.lua                # 메인 설정
 ├── .luarc.json             # lua_ls 설정 (에디터와 script/nvim-luals-check.sh가 공유)
 ├── stylua.toml             # Lua 포매터 설정
-├── lazy-lock.json          # 플러그인 버전 고정
 └── lua/
     ├── init.lua            # 핵심 설정 (옵션, autocmd)
     ├── keys.lua            # 키매핑 (기본 매핑과 충돌하지 않게 구성)

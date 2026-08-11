@@ -6,3 +6,6 @@
 !nvim/.luarc.json
 .bsp/
 .scala-build/
+# lazy.nvim이 :Lazy update마다 새로 쓰는 파일이다. 한때 시점 복구를 위해 추적했지만
+# (a3b69f3) 업데이트가 잦아 working tree가 상시 더러워져 추적을 그만뒀다.
+nvim/lazy-lock.json
