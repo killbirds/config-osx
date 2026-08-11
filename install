@@ -81,6 +81,12 @@ create_backup() {
     cp "$HOME/.config/herdr/config.toml" "$BACKUP_DIR/herdr/"
   fi
 
+  # Ghostty도 같은 이유로 설치가 덮어쓰는 파일 하나만 백업한다.
+  if [ -f "$HOME/.config/ghostty/config.ghostty" ]; then
+    mkdir -p "$BACKUP_DIR/ghostty"
+    cp "$HOME/.config/ghostty/config.ghostty" "$BACKUP_DIR/ghostty/"
+  fi
+
   # main_install이 덮어쓰는 git 전역 설정의 이전 값을 남긴다.
   # 파일이 아니라 설정 값이라 백업 디렉토리에 저절로 담기지 않는다. 기록이 없으면
   # 다른 전역 ignore 파일을 쓰던 장비에서 이전 값을 되돌릴 방법이 없다.
@@ -144,6 +150,23 @@ main_install() {
     herdr config check || echo "경고: herdr 설정 검증에 실패했습니다. herdr/config.toml을 확인하세요."
     # 서버가 떠 있으면 재시작 없이 반영 (떠 있지 않으면 실패해도 무방)
     herdr server reload-config &> /dev/null || true
+  fi
+
+  echo "Ghostty 설정 설치 중..."
+  mkdir -p ~/.config/ghostty || return 1
+  # herdr과 같은 이유로 디렉토리 순회($install)를 쓰지 않고 대상을 고정한다.
+  # Ghostty 자체는 이 디렉토리에 아무것도 쓰지 않지만, 코딩 에이전트를
+  # ~/.config/ghostty에서 실행하면 .claude 같은 상태 디렉토리가 생긴다.
+  # 순회 설치는 저장소 쪽 ghostty/에 같은 이름이 생기는 순간 그것을 rm -rf 하고
+  # 링크로 덮어쓴다. isIgnored는 .omo/.sisyphus만 걸러 .claude는 통과한다.
+  rm -rf ~/.config/ghostty/config.ghostty
+  if ! ln -s "$cur/ghostty/config.ghostty" ~/.config/ghostty/config.ghostty; then
+    echo "오류: Ghostty 설정 링크를 만들 수 없습니다." >&2
+    return 1
+  fi
+  # PATH에 없을 수 있다(Ghostty.app 안의 바이너리라 앱 셸 통합이 넣어 준다).
+  if command -v ghostty &> /dev/null; then
+    ghostty +validate-config || echo "경고: Ghostty 설정 검증에 실패했습니다. ghostty/config.ghostty를 확인하세요."
   fi
 
   echo "SBT 설정 설치 중..."

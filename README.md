@@ -11,6 +11,7 @@
 - [주요 플러그인 사용법](#주요-플러그인-사용법)
 - [설정 커스터마이징](#설정-커스터마이징)
 - [iTerm2 설정](#iterm2-설정)
+- [Ghostty 설정](#ghostty-설정)
 - [herdr 설정](#herdr-설정)
 - [문제 해결](#문제-해결)
 - [디렉토리 구조](#디렉토리-구조)
@@ -20,6 +21,7 @@
 
 - zsh 설정 (prezto runcoms — 저장소가 원본을 보유)
 - Neovim 설정 (플러그인, 테마, 한글 입력 지원 등)
+- Ghostty 설정 (iTerm2 프로파일에서 이식한 터미널 설정)
 - herdr 설정 (터미널 워크스페이스 키바인딩)
 - 개발 도구 설정 (SBT, Scala, Java 등)
 - 유용한 유틸리티 스크립트
@@ -161,6 +163,7 @@ Scala/sbt 포매팅은 conform이 아니라 nvim-metals의 저장 시 포맷이 
 - zsh 설정(prezto runcoms)을 홈 디렉토리에 설치
 - Neovim 설정을 ~/.config/nvim에 설치
 - herdr 설정(`config.toml`)을 ~/.config/herdr에 설치
+- Ghostty 설정(`config.ghostty`)을 ~/.config/ghostty에 설치
 - SBT 설정을 ~/.sbt/1.0에 설치
 - fasd 히스토리를 zoxide로 이관 (한 번만)
 - Git 글로벌 설정 적용
@@ -170,7 +173,7 @@ Scala/sbt 포매팅은 conform이 아니라 nvim-metals의 저장 시 포맷이 
 
 > **덮어쓰기 범위에 주의하세요.** `install`은 대상 파일을 **지운 뒤** 다시 링크합니다.
 > 백업(`~/.config/backup_<타임스탬프>/`)에 담기는 것은 Neovim 설정, herdr `config.toml`,
-> zsh runcom 6개뿐입니다. `settings/`가 홈에 놓는 파일, `~/bin`의 동명 스크립트,
+> Ghostty `config.ghostty`, zsh runcom 6개뿐입니다. `settings/`가 홈에 놓는 파일, `~/bin`의 동명 스크립트,
 > `~/.sbt/1.0`의 동명 항목은 **백업 없이** 교체됩니다.
 > 이 저장소가 관리하지 않는 동명 파일이 홈에 있다면 먼저 옮겨두세요.
 
@@ -623,6 +626,74 @@ iTerm2에서는 키보드만으로 텍스트를 선택하고 복사할 수 있�
 
 복사 모드 중에는 터미널 내용이 업데이트되지 않으며, 키보드만으로 효율적으로 텍스트를 선택하고 복사할 수 있습니다.
 
+## Ghostty 설정
+
+[Ghostty](https://ghostty.org)는 GPU 렌더링 터미널 에뮬레이터입니다.
+이 저장소는 `ghostty/config.ghostty` 하나만 관리하며, `./install`이 이를 `~/.config/ghostty/config.ghostty`로 심링크합니다.
+
+```bash
+brew install --cask ghostty
+```
+
+설정 내용은 iTerm2 기본 프로파일(`No Tmux`)에서 이식했습니다. 폰트는 [필수 폰트 설치](#필수-폰트-설치)의 Meslo LG Nerd Font를 그대로 씁니다.
+
+### 파일 이름이 `config`가 아닌 이유
+
+Ghostty는 `~/.config/ghostty/config`와 `~/.config/ghostty/config.ghostty`를 **둘 다** 읽습니다(1.3.1 실측).
+확장자가 있는 쪽은 편집기가 문법 강조를 걸어 주므로 이쪽을 씁니다. 두 파일을 함께 두면 양쪽이 모두 로드되므로 하나만 둘 것.
+
+### 디렉토리 전체가 아니라 파일 하나만 링크하는 이유
+
+Ghostty 자체는 `~/.config/ghostty`에 아무것도 쓰지 않지만, 코딩 에이전트를 이 디렉토리에서 실행하면 `.claude` 같은 상태 디렉토리가 생깁니다.
+`install.sh`의 디렉토리 순회를 쓰면 저장소 쪽 `ghostty/`에 같은 이름이 생기는 순간 홈의 그 디렉토리를 `rm -rf`하고 링크로 덮어씁니다(`isIgnored`는 `.omo`/`.sisyphus`만 걸러 `.claude`는 통과).
+herdr과 같은 이유로 대상을 `config.ghostty` 하나로 고정합니다.
+
+### iTerm2 → Ghostty 이식 내역
+
+| iTerm2 설정 | Ghostty |
+| --- | --- |
+| Normal Font = `MesloLGMNFM-Regular 14` | `font-family = MesloLGM Nerd Font Mono`, `font-size = 14` |
+| ASCII/Non-ASCII Ligatures 끔 | `font-feature = -calt` / `-liga` / `-dlig` |
+| Use Bright Bold | `bold-color = bright` |
+| Solarized Dark 색상 22개 | `theme = iTerm2 Solarized Dark` (내장 테마) |
+| Box 커서, Blinking Cursor 끔 | `cursor-style = block`, `cursor-style-blink = false` |
+| Columns 80 × Rows 25 | `window-width = 80`, `window-height = 25` |
+| Transparency 0, Blur 끔 | `background-opacity = 1`, `background-blur = false` |
+| Dim inactive split panes (0.049) | `unfocused-split-opacity = 0.95` |
+| Prompt Before Closing 끔 | `confirm-close-surface = false` |
+| Custom Directory = No | `working-directory = home` |
+| Option Key Sends = Esc+ (좌/우) | `macos-option-as-alt = true` |
+| 소리·시각 벨 + 알림 | `bell-features = system,attention,title,border` |
+| AllowClipboardAccess | `clipboard-read = allow` |
+
+기본값과 달라서 **직접 채워 넣은** 항목 두 개:
+
+- **한글 폰트**: Meslo에는 한글 글리프가 없어 폴백이 일어나는데, Ghostty의 자동 폴백은 `PCMyungjo`(명조체)를 고릅니다. iTerm2는 시스템 한글 폰트로 떨어지므로 `font-family = Apple SD Gothic Neo`를 폴백으로 명시했습니다(`font-family`를 여러 번 쓰면 뒤쪽이 폴백).
+- **탭 이동**: Ghostty 기본값에는 `cmd+방향키`가 없습니다(`cmd+shift+[`/`]`와 `ctrl+tab`만 있음). `keybind = cmd+arrow_left=previous_tab` / `cmd+arrow_right=next_tab`을 추가했습니다.
+
+옮기지 않은 것:
+
+- **Scrollback 10000줄** — Ghostty의 `scrollback-limit`은 줄이 아니라 바이트(기본 10MB)라 기본값이 더 넉넉합니다
+- **`TERM`** — iTerm2는 `xterm-256color`, Ghostty 기본은 `xterm-ghostty`. terminfo가 없는 원격 서버가 많으면 `term = xterm-256color`를 추가하세요
+- **세 손가락 스와이프 제스처, 마우스 버튼 매핑, Badge/Link 색** — Ghostty에 해당 설정이 없습니다
+- **`tmux` / `Default` 프로파일의 Initial Text** — Ghostty에는 프로파일 개념이 없습니다. 필요하면 `ghostty -e "tmux attach -t base"`로 실행하세요
+- **`Non Ascii Font = NanumGothic`** — 이 폰트가 설치돼 있지 않고 `Use Non-ASCII Font`도 꺼져 있어 iTerm2에서도 쓰이지 않던 값입니다
+
+### 설정 변경 방법
+
+심링크이므로 어느 쪽을 고쳐도 같은 파일입니다. 저장소에서 고치는 쪽을 권장합니다.
+
+```bash
+$EDITOR ghostty/config.ghostty
+ghostty +validate-config            # 문법 검증 (./install도 마지막에 실행)
+ghostty +show-config                # 실제 적용될 값 (테마가 색으로 풀린 결과까지)
+ghostty +show-face --string="한글A"  # 코드포인트별로 어떤 폰트가 쓰이는지
+git diff ghostty/config.ghostty
+```
+
+실행 중인 Ghostty에는 **`cmd+shift+,`**(Reload Config)로 재시작 없이 반영됩니다.
+기본값 전체는 `ghostty +show-config --default --docs`(634줄, 주석 포함)로 확인하세요. 저장소에는 기본값과 다른 항목만 둡니다.
+
 ## herdr 설정
 
 [herdr](https://herdr.dev)는 코딩 에이전트용 터미널 워크스페이스 매니저입니다.
@@ -900,6 +971,7 @@ macism com.apple.keylayout.ABC  # 영문 입력으로 전환
 - `nvim/`: Neovim 설정 파일
 - `zsh/`: prezto runcoms (`.zshrc`, `.zshenv`, `.zprofile`, `.zpreztorc`, `.zlogin`, `.zlogout`)
 - `herdr/`: herdr 설정 파일 (`config.toml`)
+- `ghostty/`: Ghostty 설정 파일 (`config.ghostty`)
 - `sbt/`: SBT(Scala Build Tool) 설정
 - `vscode/`: Cursor의 Vim 플러그인 설정 (`./install`이 다루지 않음 — 수동 복사)
 

@@ -1,0 +1,84 @@
+# Ghostty config — ported from iTerm2 profile "No Tmux"
+# (iTerm2 3.6.11, default bookmark 1747A7A7-EBAC-4929-B665-FD3722B7EC15)
+
+# ── Font ────────────────────────────────────────────────────────────────
+# iTerm: Normal Font = MesloLGMNFM-Regular 14
+font-family = MesloLGM Nerd Font Mono
+font-size = 14
+
+# Hangul fallback. Meslo has no Hangul glyphs, and Ghostty's automatic fallback
+# picks PCMyungjo (a serif 명조 face) — iTerm falls back to the macOS system
+# Korean font instead, so name it explicitly to match.
+# (The iTerm profile named NanumGothic as its non-ASCII font, but that font
+# isn't installed and "Use Non-ASCII Font" was off, so it was never used.)
+font-family = Apple SD Gothic Neo
+
+# iTerm: ASCII/Non-ASCII Ligatures = off
+font-feature = -calt
+font-feature = -liga
+font-feature = -dlig
+
+# iTerm: Use Bright Bold = on (bold text uses the bright palette)
+bold-color = bright
+
+# ── Colors ──────────────────────────────────────────────────────────────
+# Solarized Dark. Identical to the iTerm profile's colors except palette 8
+# (bright black), which the iTerm profile set to #002b36 — the same as the
+# background, making bright/bold black text invisible. This theme uses
+# #335e69 instead.
+theme = iTerm2 Solarized Dark
+
+# ── Cursor ──────────────────────────────────────────────────────────────
+# iTerm: box cursor, Blinking Cursor = off
+cursor-style = block
+cursor-style-blink = false
+
+# ── Window ──────────────────────────────────────────────────────────────
+# iTerm: Columns = 80, Rows = 25
+window-width = 80
+window-height = 25
+
+# iTerm: Transparency = 0, Blur = off
+background-opacity = 1
+background-blur = false
+
+# iTerm: Dim inactive split panes = on, dimming amount ~0.05
+unfocused-split-opacity = 0.95
+
+# iTerm: Prompt Before Closing = off, PromptOnQuit = off
+confirm-close-surface = false
+
+# iTerm: Custom Directory = No (start in home)
+working-directory = home
+
+# iTerm tab style was "Minimal"; closest Ghostty equivalent is the integrated
+# tab bar. Uncomment if you want it instead of the default transparent titlebar.
+# macos-titlebar-style = tabs
+
+# ── Keyboard ────────────────────────────────────────────────────────────
+# iTerm: Left/Right Option Key Sends = Esc+
+macos-option-as-alt = true
+
+# iTerm's default tab navigation. Ghostty only ships cmd+shift+[ / cmd+shift+]
+# (and ctrl+tab), so add the arrow bindings.
+keybind = cmd+arrow_left=previous_tab
+keybind = cmd+arrow_right=next_tab
+
+# iTerm remapped ctrl+opt+arrows to CSI 1;7{A,B,C,D}. Ghostty already emits
+# these sequences natively, so no keybind is needed. Uncomment only if some
+# app disagrees (note: this forces the legacy encoding even under the Kitty
+# keyboard protocol).
+# keybind = ctrl+alt+up=csi:1;7A
+# keybind = ctrl+alt+down=csi:1;7B
+# keybind = ctrl+alt+left=csi:1;7D
+# keybind = ctrl+alt+right=csi:1;7C
+
+# ── Bell ────────────────────────────────────────────────────────────────
+# iTerm: audible bell on, visual bell on, notification on bell
+bell-features = system,attention,title,border
+
+# ── Clipboard ───────────────────────────────────────────────────────────
+# iTerm: AllowClipboardAccess = on. This lets programs (including ones over
+# ssh) READ your clipboard via OSC 52 without a prompt. Set to `ask` to be
+# prompted instead.
+clipboard-read = allow
