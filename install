@@ -76,15 +76,25 @@ create_backup() {
 
   # herdr은 설정과 런타임 상태(session.json, 로그, 소켓)가 한 디렉토리에 섞여 있으므로
   # 설치가 덮어쓰는 config.toml만 백업한다.
+  #
+  # cp의 종료 상태를 반드시 검사한다. 검사하지 않으면 권한/디스크 문제로 사본을
+  # 만들지 못해도 create_backup이 성공으로 끝나고, main_install이 같은 경로를
+  # rm -rf 한다. 즉 유일한 복구 수단 없이 파괴적 단계로 들어간다.
   if [ -f "$HOME/.config/herdr/config.toml" ]; then
-    mkdir -p "$BACKUP_DIR/herdr"
-    cp "$HOME/.config/herdr/config.toml" "$BACKUP_DIR/herdr/"
+    if ! mkdir -p "$BACKUP_DIR/herdr" ||
+       ! cp "$HOME/.config/herdr/config.toml" "$BACKUP_DIR/herdr/"; then
+      echo "오류: herdr 설정 백업에 실패했습니다: $HOME/.config/herdr/config.toml" >&2
+      return 1
+    fi
   fi
 
   # Ghostty도 같은 이유로 설치가 덮어쓰는 파일 하나만 백업한다.
   if [ -f "$HOME/.config/ghostty/config.ghostty" ]; then
-    mkdir -p "$BACKUP_DIR/ghostty"
-    cp "$HOME/.config/ghostty/config.ghostty" "$BACKUP_DIR/ghostty/"
+    if ! mkdir -p "$BACKUP_DIR/ghostty" ||
+       ! cp "$HOME/.config/ghostty/config.ghostty" "$BACKUP_DIR/ghostty/"; then
+      echo "오류: Ghostty 설정 백업에 실패했습니다: $HOME/.config/ghostty/config.ghostty" >&2
+      return 1
+    fi
   fi
 
   # main_install이 덮어쓰는 git 전역 설정의 이전 값을 남긴다.
@@ -164,7 +174,17 @@ main_install() {
     echo "오류: Ghostty 설정 링크를 만들 수 없습니다." >&2
     return 1
   fi
+  # Ghostty는 같은 디렉토리의 config와 config.ghostty를 **둘 다** 읽는다(1.3.1 실측).
+  # 확장자 없는 config가 남아 있으면 두 파일이 함께 로드되어(config -> config.ghostty
+  # 순서라 겹치는 항목은 저장소 쪽이 이긴다) 저장소가 설정하지 않는 항목이 조용히
+  # 남는다. 지우지는 않고 알려만 준다 — 저장소가 만든 파일이 아니다.
+  if [ -e "$HOME/.config/ghostty/config" ]; then
+    echo "경고: ~/.config/ghostty/config 가 함께 로드됩니다. 저장소가 관리하는 파일은"
+    echo "      config.ghostty 하나입니다. 옮기거나 지우세요."
+  fi
+
   # PATH에 없을 수 있다(Ghostty.app 안의 바이너리라 앱 셸 통합이 넣어 준다).
+  # 없으면 검증 없이 넘어간다 — 설치를 막지는 않는다.
   if command -v ghostty &> /dev/null; then
     ghostty +validate-config || echo "경고: Ghostty 설정 검증에 실패했습니다. ghostty/config.ghostty를 확인하세요."
   fi

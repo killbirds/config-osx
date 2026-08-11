@@ -639,8 +639,11 @@ brew install --cask ghostty
 
 ### 파일 이름이 `config`가 아닌 이유
 
-Ghostty는 `~/.config/ghostty/config`와 `~/.config/ghostty/config.ghostty`를 **둘 다** 읽습니다(1.3.1 실측).
-확장자가 있는 쪽은 편집기가 문법 강조를 걸어 주므로 이쪽을 씁니다. 두 파일을 함께 두면 양쪽이 모두 로드되므로 하나만 둘 것.
+Ghostty는 `~/.config/ghostty/config`와 `~/.config/ghostty/config.ghostty`를 **둘 다** 읽습니다(1.3.1 실측: 확장자 없는 `config`만 두고 `window-width`를 바꿔도 적용됩니다).
+확장자가 있는 쪽은 편집기가 문법 강조를 걸어 주므로 이쪽을 씁니다. 두 파일을 함께 두면 양쪽이 모두 로드되고(`config` → `config.ghostty` 순서라 겹치는 항목은 뒤쪽이 이김) 저장소가 설정하지 않는 항목이 조용히 남으므로 하나만 둘 것 — `./install`이 `config`가 있으면 경고합니다.
+
+macOS에는 `~/Library/Application Support/com.mitchellh.ghostty/config.ghostty`라는 경로가 하나 더 있고 이쪽도 로드됩니다(Ghostty가 빈 파일로 만들어 둡니다).
+저장소는 XDG 경로만 관리하므로, 이 파일에 내용을 넣으면 저장소 설정과 함께 로드됩니다. 비어 있는지 확인하세요.
 
 ### 디렉토리 전체가 아니라 파일 하나만 링크하는 이유
 
@@ -660,24 +663,38 @@ herdr과 같은 이유로 대상을 `config.ghostty` 하나로 고정합니다.
 | Columns 80 × Rows 25 | `window-width = 80`, `window-height = 25` |
 | Transparency 0, Blur 끔 | `background-opacity = 1`, `background-blur = false` |
 | Dim inactive split panes (0.049) | `unfocused-split-opacity = 0.95` |
-| Prompt Before Closing 끔 | `confirm-close-surface = false` |
 | Custom Directory = No | `working-directory = home` |
 | Option Key Sends = Esc+ (좌/우) | `macos-option-as-alt = true` |
 | 소리·시각 벨 + 알림 | `bell-features = system,attention,title,border` |
-| AllowClipboardAccess | `clipboard-read = allow` |
+| AllowClipboardAccess (프로그램의 클립보드 **쓰기** 허용) | Ghostty 기본값 `clipboard-write = allow`가 이미 같은 권한이라 **설정 없음** |
+
+`cursor-style` / `background-opacity` / `background-blur`는 1.3.1 기본값과 같은 값이지만, 이식 대조표로 쓰라고 파일에 남겨 두었습니다(동작 변화는 없음).
 
 기본값과 달라서 **직접 채워 넣은** 항목 두 개:
 
 - **한글 폰트**: Meslo에는 한글 글리프가 없어 폴백이 일어나는데, Ghostty의 자동 폴백은 `PCMyungjo`(명조체)를 고릅니다. iTerm2는 시스템 한글 폰트로 떨어지므로 `font-family = Apple SD Gothic Neo`를 폴백으로 명시했습니다(`font-family`를 여러 번 쓰면 뒤쪽이 폴백).
-- **탭 이동**: Ghostty 기본값에는 `cmd+방향키`가 없습니다(`cmd+shift+[`/`]`와 `ctrl+tab`만 있음). `keybind = cmd+arrow_left=previous_tab` / `cmd+arrow_right=next_tab`을 추가했습니다.
+- **탭 이동**: Ghostty 기본 탭 이동은 `cmd+shift+[`/`]`와 `ctrl+tab`뿐이라 `keybind = cmd+arrow_left=previous_tab` / `cmd+arrow_right=next_tab`을 추가했습니다. **`cmd+방향키`는 비어 있던 자리가 아닙니다** — Ghostty 기본값은 `super+arrow_left=text:\x01`(Ctrl-A, 줄 처음) / `super+arrow_right=text:\x05`(Ctrl-E, 줄 끝)이고, 이 두 줄이 그것을 덮습니다. 줄 이동이 더 필요하면 주석 처리하세요.
+
+iTerm2와 **일부러 다르게** 둔 항목 두 개:
+
+- **`confirm-close-surface = true`** (iTerm2는 Prompt Before Closing / PromptOnQuit 둘 다 끔) — herdr 서버가 터미널의 자식 프로세스라(`Ghostty → login → zsh → herdr → herdr server`) `false`면 `cmd+w`/`cmd+q` 한 번에 안에서 돌던 에이전트가 확인 없이 전부 죽습니다.
+- **`shell-integration-features = ssh-env`** — iTerm2는 `TERM=xterm-256color`를 보냈지만 Ghostty 기본값은 `xterm-ghostty`이고, terminfo가 없는 원격 서버에서는 셸이 깨집니다. `ssh-env`는 ssh 연결에서만 `TERM`을 `xterm-256color`로 되돌립니다. 대안인 `ssh-terminfo`는 접속하는 원격 호스트의 `~/.terminfo`에 Ghostty terminfo를 설치하므로 기본으로 켜지 않았습니다.
 
 옮기지 않은 것:
 
-- **Scrollback 10000줄** — Ghostty의 `scrollback-limit`은 줄이 아니라 바이트(기본 10MB)라 기본값이 더 넉넉합니다
-- **`TERM`** — iTerm2는 `xterm-256color`, Ghostty 기본은 `xterm-ghostty`. terminfo가 없는 원격 서버가 많으면 `term = xterm-256color`를 추가하세요
+- **Scrollback 10000줄** — Ghostty의 `scrollback-limit`은 줄이 아니라 바이트(기본 10MB)입니다. 단위가 달라 환산이 불가능하니 "더 넉넉하다"고 단정할 수는 없지만, 한 줄이 평균 1KB를 넘지 않는 일반적인 출력에서는 10,000줄보다 많이 담습니다
+- **vim 스타일 복사 모드** — Ghostty 1.3.1에는 copy mode 자체가 없어 `cmd+shift+c`가 동작하지 않습니다. 대안은 [복사 모드 대신 무엇을 쓰나](#복사-모드-대신-무엇을-쓰나) 참고
+- **탭 스타일 Minimal** — 가장 가까운 값은 `macos-titlebar-style = tabs`지만 기본 transparent titlebar를 그대로 씁니다(설정 파일에 주석으로 남겨 둠)
 - **세 손가락 스와이프 제스처, 마우스 버튼 매핑, Badge/Link 색** — Ghostty에 해당 설정이 없습니다
 - **`tmux` / `Default` 프로파일의 Initial Text** — Ghostty에는 프로파일 개념이 없습니다. 필요하면 `ghostty -e "tmux attach -t base"`로 실행하세요
 - **`Non Ascii Font = NanumGothic`** — 이 폰트가 설치돼 있지 않고 `Use Non-ASCII Font`도 꺼져 있어 iTerm2에서도 쓰이지 않던 값입니다
+
+### 복사 모드 대신 무엇을 쓰나
+
+iTerm2에서 `Cmd+Shift+C`로 쓰던 [vim 스타일 복사 모드](#vim-스타일-복사-모드-활성화)는 Ghostty에 없습니다. 위치에 따라 대체재가 다릅니다.
+
+- **herdr 안** — herdr 자체 기능을 씁니다. `copy_mode`는 herdr 0.8.0에 있지만 기본 바인딩이 없어 [herdr 키바인딩](#herdr-설정)에서 직접 걸어 줍니다(이 저장소는 `prefix+[`와 `ctrl+alt+y`에 걸어 두었습니다). 스크롤백을 에디터로 열려면 `prefix+e`(`edit_scrollback`)입니다. herdr은 대체 화면에 그리므로 터미널 쪽 복사 기능은 패인 내용에 애초에 닿지 않습니다
+- **herdr 밖** — 마우스로 선택하면 자동 복사됩니다(`copy-on-select` 기본 켜짐). 선택 후 `shift+방향키`로 범위 조정, `cmd+f` 검색, `cmd+a` 전체 선택. 화면을 파일로 떠서 nvim으로 보려면 `cmd+shift+j`(임시 파일 경로가 프롬프트에 붙여넣어짐) 후 `nvim <경로>`
 
 ### 설정 변경 방법
 
@@ -685,14 +702,18 @@ herdr과 같은 이유로 대상을 `config.ghostty` 하나로 고정합니다.
 
 ```bash
 $EDITOR ghostty/config.ghostty
-ghostty +validate-config            # 문법 검증 (./install도 마지막에 실행)
+ghostty +validate-config            # 문법 검증 (./install도 Ghostty 단계 끝에서 실행)
 ghostty +show-config                # 실제 적용될 값 (테마가 색으로 풀린 결과까지)
 ghostty +show-face --string="한글A"  # 코드포인트별로 어떤 폰트가 쓰이는지
 git diff ghostty/config.ghostty
 ```
 
 실행 중인 Ghostty에는 **`cmd+shift+,`**(Reload Config)로 재시작 없이 반영됩니다.
-기본값 전체는 `ghostty +show-config --default --docs`(634줄, 주석 포함)로 확인하세요. 저장소에는 기본값과 다른 항목만 둡니다.
+기본값 전체는 `ghostty +show-config --default --docs`(634줄, 주석 포함)로 확인하세요.
+저장소에는 기본값과 다른 항목을 둡니다 — 위에서 밝힌 이식 대조용 세 줄만 예외입니다.
+`ghostty +show-config`는 **기본값과 다른 항목만** 출력하므로, 어떤 줄이 실제로 효과가 있는지 확인하는 데 그대로 쓸 수 있습니다.
+
+`./install`의 Ghostty 검증은 보장이 아니라 경고입니다. `ghostty`가 PATH에 있을 때만 실행되고(Ghostty.app 안의 바이너리라 앱 셸 통합이 넣어 줍니다), 검증이 실패해도 설치는 계속됩니다.
 
 ## herdr 설정
 
@@ -738,9 +759,10 @@ git diff herdr/config.toml
 - **tab(가로축)**: `ctrl+alt+;` / `ctrl+alt+'` 로 이전/다음 — HHKB의 `Fn+[;'/` 방향키 위치를 Fn 없이 그대로 사용
 - **workspace(세로축)**: `ctrl+alt+[` / `ctrl+alt+/` 로 이전/다음
 - **pane**: `ctrl+alt+o` 로 직전 패인 토글 (o = other)
+- **복사 모드**: `prefix+[` / `ctrl+alt+y` (`copy_mode`) — herdr에 액션은 있으나 기본 바인딩이 없어 직접 등록. iTerm2의 `Cmd+Shift+C` 대체이며, 패인 내용은 대체 화면에 그려지므로 터미널 쪽 복사 기능으로는 닿지 않습니다. 스크롤백을 에디터로 여는 `edit_scrollback`은 기본값 `prefix+e` 그대로
 - `switch_ascii_input_source_in_prefix = true`: prefix 진입 시 영문 입력으로 자동 전환 (한글 입력 중 단축키 오작동 방지)
 - `reveal_hidden_cursor_for_cjk_ime = true`: 한글 후보창이 커서를 따라오게 함 (아래 참고)
-- `[ui.toast] delivery = "terminal"`: 백그라운드 에이전트 알림을 iTerm2 데스크톱 알림으로
+- `[ui.toast] delivery = "terminal"`: 백그라운드 에이전트 알림을 바깥 터미널의 데스크톱 알림으로
 - 사운드 비활성화, 패인 테두리의 에이전트 라벨 숨김, 탭이 하나면 탭 바 숨김
 
 ### 한글 입력 (CJK IME)
@@ -773,7 +795,7 @@ cjk_ime_agents = ["claude", "codex", "opencode", "gemini"]
 
 | 값 | 동작 |
 | --- | --- |
-| `"terminal"` | 바깥 터미널(iTerm2)에 데스크톱 알림 요청 — iTerm2 알림 권한을 그대로 사용 |
+| `"terminal"` | 바깥 터미널에 데스크톱 알림 요청(OSC 9/777) — 그 터미널의 알림 권한을 그대로 사용. Ghostty는 `desktop-notifications`가 기본 켜짐이지만 macOS 알림 권한은 앱별이라 Ghostty.app에 따로 허용해야 합니다 |
 | `"herdr"` | 인앱 토스트 — herdr 화면을 보고 있을 때만 보이지만 확실히 동작 |
 | `"system"` | OS 알림 서비스 직접 호출 |
 | `"off"` | 비활성 (기본값) |
@@ -787,6 +809,10 @@ cjk_ime_agents = ["claude", "codex", "opencode", "gemini"]
 `ctrl+alt+minus`는 터미널에 따라 전달이 불안정해서 가로 분할만 `ctrl+alt+shift+v`로 두었습니다.
 
 ### iTerm2 키 설정 (필수)
+
+> **Ghostty에서는 이 절이 필요 없습니다.** kitty keyboard protocol을 기본 지원하므로 아래 문제가 발생하지
+> 않고, 필요한 설정은 [Ghostty 설정](#ghostty-설정)이 이미 갖고 있는 `macos-option-as-alt = true` 하나뿐입니다.
+> 화살표 키 리맵(아래 Key Bindings 표)도 Ghostty에서는 불필요합니다.
 
 **iTerm2 설정을 맞추지 않으면 이 저장소의 prefix-free 단축키 상당수가 조용히 동작하지 않습니다.**
 바인딩이 잘못된 게 아니라 iTerm2가 키를 herdr에 전달하지 못하는 것이므로, 오류 메시지도 나오지 않습니다.

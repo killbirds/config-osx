@@ -45,8 +45,11 @@ background-blur = false
 # iTerm: Dim inactive split panes = on, dimming amount ~0.05
 unfocused-split-opacity = 0.95
 
-# iTerm: Prompt Before Closing = off, PromptOnQuit = off
-confirm-close-surface = false
+# iTerm had this off (Prompt Before Closing = off, PromptOnQuit = off), but the
+# default is kept on purpose. herdr's server is a child of the terminal
+# (Ghostty -> login -> zsh -> herdr -> herdr server), so one stray cmd+w or
+# cmd+q takes down every agent running in it, silently, with `false`.
+confirm-close-surface = true
 
 # iTerm: Custom Directory = No (start in home)
 working-directory = home
@@ -59,8 +62,11 @@ working-directory = home
 # iTerm: Left/Right Option Key Sends = Esc+
 macos-option-as-alt = true
 
-# iTerm's default tab navigation. Ghostty only ships cmd+shift+[ / cmd+shift+]
-# (and ctrl+tab), so add the arrow bindings.
+# iTerm's default tab navigation. Ghostty ships tab navigation on cmd+shift+[ /
+# cmd+shift+] (and ctrl+tab) but nothing on cmd+arrows, so add the arrow
+# bindings. Note what this costs: cmd+arrow_left/right are not free in Ghostty,
+# they default to `text:\x01` / `text:\x05` (Ctrl-A / Ctrl-E, start/end of
+# line). Comment these two out if you want that back.
 keybind = cmd+arrow_left=previous_tab
 keybind = cmd+arrow_right=next_tab
 
@@ -73,12 +79,27 @@ keybind = cmd+arrow_right=next_tab
 # keybind = ctrl+alt+left=csi:1;7D
 # keybind = ctrl+alt+right=csi:1;7C
 
+# ── ssh ─────────────────────────────────────────────────────────────────
+# iTerm reported TERM=xterm-256color; Ghostty's default is xterm-ghostty, which
+# no remote host has terminfo for, so `ssh somewhere` lands in a session with a
+# broken terminal. `ssh-env` converts TERM back to xterm-256color for ssh and
+# propagates COLORTERM/TERM_PROGRAM instead.
+#
+# The alternative, `ssh-terminfo`, keeps xterm-ghostty by installing Ghostty's
+# terminfo into the remote's ~/.terminfo on first connect. That writes to every
+# host you ssh into, so it stays off here; add it if you want the full feature
+# set on hosts you own. Unlisted features keep their defaults.
+shell-integration-features = ssh-env
+
 # ── Bell ────────────────────────────────────────────────────────────────
 # iTerm: audible bell on, visual bell on, notification on bell
 bell-features = system,attention,title,border
 
 # ── Clipboard ───────────────────────────────────────────────────────────
-# iTerm: AllowClipboardAccess = on. This lets programs (including ones over
-# ssh) READ your clipboard via OSC 52 without a prompt. Set to `ask` to be
-# prompted instead.
-clipboard-read = allow
+# Nothing to set. iTerm's AllowClipboardAccess = on lets programs WRITE the
+# clipboard (OSC 52 copy), which Ghostty already allows by default
+# (clipboard-write = allow). Reading is a separate permission Ghostty gates
+# behind a prompt (clipboard-read = ask) and iTerm never granted at all, so
+# setting it to `allow` would hand every program -- including one on the far
+# end of an ssh session -- silent access to whatever is on the clipboard.
+# herdr only ever writes (OSC 52 `]52;c;<base64>`), so the default is enough.
