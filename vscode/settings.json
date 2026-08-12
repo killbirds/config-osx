@@ -39,6 +39,19 @@
   "vim.cursorStylePerMode.visualblock": "block-outline",
   "vim.cursorStylePerMode.replace": "underline",
 
+  // 폰트 — 터미널(ghostty/config.ghostty)과 같은 조합
+  //
+  // 에디터 기본값 Menlo에는 한글이 없어 시스템 폰트로 폴백하는데, 그 폰트들은
+  // 한글 폭이 라틴의 2배가 아니라(Apple SD Gothic Neo는 1.43배) 등폭 격자에서
+  // 한글만 크기가 어긋난다. D2Coding은 정확히 2:1이라 그대로 떨어진다.
+  // Apple SD Gothic Neo를 뒤에 두는 것은 D2Coding에 없는 조합형 자모
+  // (U+1100-11FF, macOS가 파일명을 저장하는 형태) 몫이다.
+  // 근거와 실측값은 저장소 README의 "한글 폰트를 두 벌 지정하는 이유" 참고.
+  //
+  // 설치: brew install --cask font-meslo-lg-nerd-font font-d2coding
+  "editor.fontFamily": "'MesloLGM Nerd Font Mono', 'D2Coding', 'Apple SD Gothic Neo', monospace",
+  "terminal.integrated.fontFamily": "'MesloLGM Nerd Font Mono', 'D2Coding', 'Apple SD Gothic Neo', monospace",
+
   // 에디터 설정
   "editor.lineNumbers": "on",
   "editor.wordWrap": "off",

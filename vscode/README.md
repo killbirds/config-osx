@@ -8,7 +8,7 @@
 
 | 파일 | 붙여넣을 곳 | 내용 |
 | --- | --- | --- |
-| `settings.json` | `Preferences: Open Settings (JSON)` | Vim 플러그인 설정 (리더 키, 모드별 키 바인딩, 커서 스타일 등) |
+| `settings.json` | `Preferences: Open Settings (JSON)` | Vim 플러그인 설정 (리더 키, 모드별 키 바인딩, 커서 스타일 등) + 폰트 |
 | `keybindings.json` | `Preferences: Open Keyboard Shortcuts (JSON)` | Vim 플러그인이 다루지 못하는 에디터 자체 단축키 |
 
 `keybindings.json`이 필요한 이유는 Vim 플러그인의 키 바인딩이 에디터 버퍼 안에서만 동작하기 때문입니다.
@@ -33,6 +33,27 @@
 - 검색 하이라이트 및 증분 검색 활성화
 - EasyMotion, Sneak, Surround 플러그인 지원
 - 모드별 커서 스타일 커스터마이징
+
+### 폰트
+
+에디터와 내장 터미널을 저장소 터미널 설정(`ghostty/config.ghostty`)과 같은 조합으로 맞춥니다.
+
+```jsonc
+"editor.fontFamily": "'MesloLGM Nerd Font Mono', 'D2Coding', 'Apple SD Gothic Neo', monospace",
+"terminal.integrated.fontFamily": "'MesloLGM Nerd Font Mono', 'D2Coding', 'Apple SD Gothic Neo', monospace",
+```
+
+먼저 폰트를 설치해야 합니다. 없으면 조용히 다른 폰트로 폴백합니다.
+
+```bash
+brew install --cask font-meslo-lg-nerd-font font-d2coding
+```
+
+기본값 Menlo에는 한글이 없어 시스템 폰트로 폴백하는데, 그 폰트들은 한글 폭이 라틴의 2배가 아니라(Apple SD Gothic Neo는 1.43배) 등폭 격자에서 한글만 크기가 어긋납니다.
+D2Coding은 정확히 2:1입니다. 뒤의 Apple SD Gothic Neo는 D2Coding에 없는 조합형 자모(U+1100–11FF, macOS가 파일명을 저장하는 형태) 몫입니다.
+실측값과 근거는 저장소 README의 "한글 폰트를 두 벌 지정하는 이유"에 있습니다.
+
+크기는 건드리지 않았습니다 — 에디터 기본값을 그대로 씁니다.
 
 ### 모드별 키 바인딩
 

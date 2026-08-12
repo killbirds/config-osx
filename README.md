@@ -40,6 +40,7 @@ brew install --cask font-d2coding
 
 `brew tap homebrew/cask-fonts`는 필요 없습니다 — `font-*` cask는 `homebrew/cask` 본체에 통합됐습니다.
 
+Ghostty와 [Cursor](#vscode) 양쪽이 같은 조합을 씁니다.
 두 폰트 모두 `./install`이 시작할 때 확인하고, 없으면 위 명령을 안내합니다(설치를 대신 해 주지는 않습니다).
 없어도 Ghostty는 오류 없이 뜨고 조용히 다른 폰트로 폴백하므로 — 아이콘은 두부(□), 한글은 `PCMyungjo` 명조체 — 증상만 보고는 원인을 알기 어렵습니다.
 한글이 왜 두 벌인지는 [한글 폰트를 두 벌 지정하는 이유](#한글-폰트를-두-벌-지정하는-이유)를 보세요.
@@ -1073,6 +1074,7 @@ Scala 빌드 도구 설정
 ### vscode/
 디렉토리 이름과 달리 **Cursor의 Vim 플러그인 설정**입니다(`vscode/README.md` 참고).
 `./install`이 다루지 않으므로 `settings.json` / `keybindings.json`을 Cursor 설정에 직접 붙여넣어야 합니다.
+`settings.json`은 에디터·내장 터미널 폰트도 Ghostty와 같은 조합(`Meslo → D2Coding → Apple SD Gothic Neo`)으로 지정합니다.
 
 ### 설치 스크립트
 `script/`의 스크립트는 `./install`이 `~/bin`에 심링크합니다.
