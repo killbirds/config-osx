@@ -2,7 +2,7 @@ onboarding = false
 
 [ui]
 agent_panel_sort = "spaces"
-show_agent_labels_on_pane_borders = false
+show_agent_labels_on_pane_borders = true
 hide_tab_bar_when_single_tab = true   # 탭이 하나뿐이면 탭 바를 숨겨 한 줄 확보
 
 [ui.sound]
