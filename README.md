@@ -31,10 +31,18 @@
 ### 필수 폰트 설치
 
 ```bash
-# Nerd Font 설치 (https://www.nerdfonts.com)
-brew tap homebrew/cask-fonts
+# 기본 폰트 · Nerd Font 아이콘 (https://www.nerdfonts.com)
 brew install --cask font-meslo-lg-nerd-font
+
+# 한글 폴백 (https://github.com/naver/d2codingfont)
+brew install --cask font-d2coding
 ```
+
+`brew tap homebrew/cask-fonts`는 필요 없습니다 — `font-*` cask는 `homebrew/cask` 본체에 통합됐습니다.
+
+두 폰트 모두 `./install`이 시작할 때 확인하고, 없으면 위 명령을 안내합니다(설치를 대신 해 주지는 않습니다).
+없어도 Ghostty는 오류 없이 뜨고 조용히 다른 폰트로 폴백하므로 — 아이콘은 두부(□), 한글은 `PCMyungjo` 명조체 — 증상만 보고는 원인을 알기 어렵습니다.
+한글이 왜 두 벌인지는 [한글 폰트를 두 벌 지정하는 이유](#한글-폰트를-두-벌-지정하는-이유)를 보세요.
 
 ### 한글 입력 지원 도구 설치
 
@@ -634,7 +642,7 @@ iTerm2에서는 키보드만으로 텍스트를 선택하고 복사할 수 있�
 brew install --cask ghostty
 ```
 
-설정 내용은 iTerm2 기본 프로파일(`No Tmux`)에서 이식했습니다. 폰트는 [필수 폰트 설치](#필수-폰트-설치)의 Meslo LG Nerd Font를 그대로 씁니다.
+설정 내용은 iTerm2 기본 프로파일(`No Tmux`)에서 이식했습니다. 폰트는 [필수 폰트 설치](#필수-폰트-설치)의 Meslo LG Nerd Font를 그대로 쓰고, 한글은 D2Coding으로 폴백합니다.
 
 ### 파일 이름이 `config`가 아닌 이유
 
@@ -654,7 +662,7 @@ herdr과 같은 이유로 대상을 `config.ghostty` 하나로 고정합니다.
 
 | iTerm2 설정 | Ghostty |
 | --- | --- |
-| Normal Font = `MesloLGMNFM-Regular 14` | `font-family = MesloLGM Nerd Font Mono`, `font-size = 16` (일부러 키움, 아래 참고) |
+| Normal Font = `MesloLGMNFM-Regular 14` | `font-family = MesloLGM Nerd Font Mono`, `font-size = 15` (일부러 키움, 아래 참고) |
 | ASCII/Non-ASCII Ligatures 끔 | `font-feature = -calt` / `-liga` / `-dlig` |
 | Use Bright Bold | `bold-color = bright` |
 | Solarized Dark 색상 22개 | `theme = Solarized Osaka Night` (내장 테마, 일부러 다른 팔레트 — 아래 참고) |
@@ -671,7 +679,7 @@ herdr과 같은 이유로 대상을 `config.ghostty` 하나로 고정합니다.
 
 기본값과 달라서 **직접 채워 넣은** 항목 두 개:
 
-- **한글 폰트**: Meslo에는 한글 글리프가 없어 폴백이 일어나는데, Ghostty의 자동 폴백은 `PCMyungjo`(명조체)를 고릅니다. iTerm2는 시스템 한글 폰트로 떨어지므로 `font-family = Apple SD Gothic Neo`를 폴백으로 명시했습니다(`font-family`를 여러 번 쓰면 뒤쪽이 폴백).
+- **한글 폰트**: Meslo에는 한글 글리프가 없어 폴백이 일어나는데, Ghostty의 자동 폴백은 `PCMyungjo`(명조체)를 고릅니다. `font-family = D2Coding`과 `font-family = Apple SD Gothic Neo`를 순서대로 명시했습니다(`font-family`를 여러 번 쓰면 뒤쪽이 폴백). 두 벌인 이유는 [바로 아래](#한글-폰트를-두-벌-지정하는-이유).
 - **탭 이동**: Ghostty 기본 탭 이동은 `cmd+shift+[`/`]`와 `ctrl+tab`뿐이라 `keybind = cmd+arrow_left=previous_tab` / `cmd+arrow_right=next_tab`을 추가했습니다. **`cmd+방향키`는 비어 있던 자리가 아닙니다** — Ghostty 기본값은 `super+arrow_left=text:\x01`(Ctrl-A, 줄 처음) / `super+arrow_right=text:\x05`(Ctrl-E, 줄 끝)이고, 이 두 줄이 그것을 덮습니다. 줄 이동이 더 필요하면 주석 처리하세요.
 
 iTerm2와 **일부러 다르게** 둔 항목 네 개:
@@ -689,6 +697,39 @@ iTerm2와 **일부러 다르게** 둔 항목 네 개:
 - **세 손가락 스와이프 제스처, 마우스 버튼 매핑, Badge/Link 색** — Ghostty에 해당 설정이 없습니다
 - **`tmux` / `Default` 프로파일의 Initial Text** — Ghostty에는 프로파일 개념이 없습니다. 필요하면 `ghostty -e "tmux attach -t base"`로 실행하세요
 - **`Non Ascii Font = NanumGothic`** — 이 폰트가 설치돼 있지 않고 `Use Non-ASCII Font`도 꺼져 있어 iTerm2에서도 쓰이지 않던 값입니다
+
+### 한글 폰트를 두 벌 지정하는 이유
+
+한글 폴백이 `D2Coding` → `Apple SD Gothic Neo` 두 단계입니다. 한 벌로는 안 됩니다.
+
+**1. D2Coding — 격자에 맞는 폭**
+
+터미널은 한글을 East Asian Wide로 보고 정확히 2셀에 그립니다.
+Meslo 기준 2셀은 `2 × 0.6021em = 1.2042em`이고, 그 폭에 글리프가 왜곡 없이 얹히는지는 폰트 자신의 **한글 : 라틴 advance 비율**이 결정합니다.
+CoreText로 100pt에서 실측한 값:
+
+| 폰트 | `A` | `한` | 비율 |
+| --- | --- | --- | --- |
+| D2Coding | 50.00 | 100.00 | **2.00** |
+| Apple SD Gothic Neo | 60.50 | 86.50 | 1.43 |
+
+`Apple SD Gothic Neo`는 비등폭 UI 폰트라 한글이 제 라틴 폭의 1.43배뿐입니다.
+2셀 격자에 올리려면 40% 가까이 늘려야 하고, 그래서 한글만 영문과 크기·획 굵기가 어긋나 보입니다.
+D2Coding은 애초에 2:1로 그려져 있어 균일하게 확대하면 격자에 그대로 떨어집니다. 한자·가나도 D2Coding이 같은 격자로 그립니다.
+
+**2. Apple SD Gothic Neo — 조합형 자모**
+
+D2Coding에는 조합형 자모(U+1100–11FF)가 **없습니다**(실측: 이 영역은 `PCMyungjo`로 떨어집니다).
+macOS는 파일명을 NFD(조합형)로 저장하므로, 이 줄을 빼면 `ls`에 찍히는 한글 파일명이 명조체 낱자로 흩어집니다.
+
+```bash
+# 완성형 (U+D55C U+AE00) → D2Coding
+ghostty +show-face --string="한글"
+
+# 조합형 (U+1112 U+1161 U+11AB …) → Apple SD Gothic Neo
+# macOS가 한글 파일명을 저장하는 형태
+ghostty +show-face --string="$(python3 -c 'import unicodedata; print(unicodedata.normalize("NFD", "한글"))')"
+```
 
 ### 복사 모드 대신 무엇을 쓰나
 
@@ -990,6 +1031,24 @@ macism com.apple.keylayout.ABC  # 영문 입력으로 전환
 ### 폰트 문제
 
 아이콘이 제대로 표시되지 않는 경우 Nerd Font가 올바르게 설치되었는지 확인하고 터미널 에뮬레이터에서 해당 폰트를 선택했는지 확인하세요.
+
+Ghostty에서는 어떤 코드포인트가 어느 폰트로 그려지는지 직접 확인할 수 있습니다.
+
+```bash
+ghostty +show-face --string="A한글"   # 코드포인트별 실제 폰트
+ghostty +list-fonts | grep -i d2      # 설치 여부 (등폭 폰트만 나열됩니다)
+```
+
+증상별 원인:
+
+| 증상 | 원인 |
+| --- | --- |
+| 한글이 명조체로 나온다 | D2Coding 미설치 → `brew install --cask font-d2coding` |
+| 한글만 크기·굵기가 영문과 어긋난다 | 폴백이 비등폭 폰트로 잡힘 → [한글 폰트를 두 벌 지정하는 이유](#한글-폰트를-두-벌-지정하는-이유) |
+| `ls`에서 한글 **파일명만** 낱자로 흩어진다 | NFD 조합형 자모 문제 — `font-family = Apple SD Gothic Neo` 줄이 빠졌는지 확인 |
+| 아이콘이 두부(□)로 나온다 | Nerd Font 미설치 → `brew install --cask font-meslo-lg-nerd-font` |
+
+폰트를 새로 설치했다면 Ghostty에서 `cmd+shift+,`(Reload Config)로 반영합니다.
 
 ## 디렉토리 구조
 

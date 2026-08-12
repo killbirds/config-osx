@@ -3,15 +3,37 @@
 
 # ── Font ────────────────────────────────────────────────────────────────
 # iTerm: Normal Font = MesloLGMNFM-Regular 14
-# Size deliberately bumped to 16 — the iTerm value was 14.
+# Size deliberately bumped — the iTerm value was 14.
 font-family = MesloLGM Nerd Font Mono
 font-size = 15
 
-# Hangul fallback. Meslo has no Hangul glyphs, and Ghostty's automatic fallback
-# picks PCMyungjo (a serif 명조 face) — iTerm falls back to the macOS system
-# Korean font instead, so name it explicitly to match.
+# Hangul fallback, two faces deep. Meslo has no Hangul glyphs at all, and
+# Ghostty's automatic fallback picks PCMyungjo (a serif 명조 face).
+#
+# 1) D2Coding takes precomposed syllables (U+AC00-D7A3), compatibility jamo
+#    (U+3130-318F), and — as a side effect of being first — hanja and kana.
+#    A terminal treats all of these as East Asian Wide and gives them exactly
+#    two cells, i.e. 2 x 0.6021em = 1.2042em of Meslo, so what decides whether
+#    a face lands on the grid is its own Hangul-to-Latin advance ratio.
+#    Measured with CoreText at 100pt:
+#      D2Coding             A=50.00  한=100.00  -> exactly 2.00
+#      Apple SD Gothic Neo  A=60.50  한= 86.50  -> 1.43
+#    Apple SD Gothic Neo is a proportional UI face; its Hangul is only 1.43x its
+#    own Latin, so putting it on a two-cell grid means stretching it ~40%.
+#    D2Coding is drawn 2:1 to begin with, so a uniform scale lands it exactly.
+#
+# 2) Apple SD Gothic Neo stays behind it for conjoining jamo (U+1100-11FF),
+#    which D2Coding does not cover (measured: those codepoints fall through to
+#    PCMyungjo). macOS stores filenames decomposed, so without this line every
+#    Korean filename in `ls` scatters into serif standalone jamo.
+#
+# Repeated font-family entries are tried front to back, so this order is the
+# priority order. Apple SD Gothic Neo ships with macOS; D2Coding does not --
+# `brew install --cask font-d2coding` (./install checks for it and says so).
+#
 # (The iTerm profile named NanumGothic as its non-ASCII font, but that font
 # isn't installed and "Use Non-ASCII Font" was off, so it was never used.)
+font-family = D2Coding
 font-family = Apple SD Gothic Neo
 
 # iTerm: ASCII/Non-ASCII Ligatures = off

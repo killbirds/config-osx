@@ -41,6 +41,65 @@ check_dependencies() {
   fi
 }
 
+# 폰트 파일 존재 확인. 첫 인자는 폰트 디렉토리 안에서 찾을 파일명 글롭이다.
+font_installed() {
+  local pattern="$1" dir
+  # 사용자 설치(brew --cask font-*)가 홈으로 가고, 나머지 둘은 수동 설치 경로다.
+  for dir in "$HOME/Library/Fonts" "/Library/Fonts" "/System/Library/Fonts"; do
+    [ -d "$dir" ] || continue
+    if compgen -G "$dir/$pattern" > /dev/null 2>&1; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+# 폰트 확인
+#
+# ghostty/config.ghostty가 이름으로 지정하는 폰트들이다. 없어도 Ghostty는 오류
+# 없이 뜨고 조용히 다른 폰트로 폴백하므로(아이콘은 두부, 한글은 PCMyungjo 명조체)
+# 증상만 보고는 원인을 알기 어렵다. 그래서 여기서 미리 알려 준다.
+#
+# 설치를 대신 해 주지는 않는다. brew가 없을 수 있고, 설치 스크립트가 임의로
+# 네트워크에서 폰트를 받아 홈에 쓰는 것은 이 스크립트의 역할 밖이다.
+check_fonts() {
+  echo "폰트 확인 중..."
+  local -a missing=()
+  local entry pattern name rest
+
+  # 글롭 : 폰트 이름 : cask 이름 : 설명
+  for entry in \
+    "MesloLGMNerdFontMono-*:Meslo LG Nerd Font:font-meslo-lg-nerd-font:기본 폰트, Nerd Font 아이콘" \
+    "D2Coding*:D2Coding:font-d2coding:한글 폴백 (완성형 음절·호환 자모)"
+  do
+    pattern="${entry%%:*}"
+    rest="${entry#*:}"
+    if ! font_installed "$pattern"; then
+      missing+=("$rest")
+    fi
+  done
+
+  # 조합형 자모(U+1100-11FF) 폴백. macOS 기본 탑재라 없을 일이 사실상 없지만,
+  # 이게 빠지면 NFD로 저장된 한글 파일명이 명조체 낱자로 흩어진다.
+  if ! font_installed "AppleSDGothicNeo.ttc"; then
+    echo "경고: Apple SD Gothic Neo가 없습니다. 한글 파일명(NFD 조합형 자모)이 깨져 보입니다."
+  fi
+
+  if [ ${#missing[@]} -eq 0 ]; then
+    echo "필요한 폰트가 설치되어 있습니다."
+    return 0
+  fi
+
+  echo
+  echo "참고: 아래 폰트가 없어 Ghostty 표시가 깨질 수 있습니다."
+  for entry in "${missing[@]}"; do
+    name="${entry%%:*}"
+    rest="${entry#*:}"
+    printf "  %-18s (brew install --cask %-23s) %s\n" "$name" "${rest%%:*}" "${rest#*:}"
+  done
+  echo
+}
+
 # 백업 생성
 #
 # 이 함수가 실패하면 호출자는 설치를 진행하지 않는다. 백업은 아래 설치 단계가
@@ -232,6 +291,7 @@ main_install() {
 # 메인 함수
 main() {
   check_dependencies
+  check_fonts
 
   # 백업이 실패하면 파괴적 설치로 넘어가지 않는다.
   if ! create_backup; then
