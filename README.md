@@ -1053,7 +1053,7 @@ ghostty +list-fonts | grep -i d2      # 설치 여부 (등폭 폰트만 나열�
 
 ## 디렉토리 구조
 
-- `script/`: 유틸리티 스크립트
+- `script/`: 유틸리티 스크립트 (`script/bin/`만 `~/bin`에 링크되어 전역 명령이 됩니다)
 - `settings/`: 다양한 도구의 설정 파일
 - `nvim/`: Neovim 설정 파일
 - `zsh/`: prezto runcoms (`.zshrc`, `.zshenv`, `.zprofile`, `.zpreztorc`, `.zlogin`, `.zlogout`)
@@ -1077,12 +1077,30 @@ Scala 빌드 도구 설정
 `settings.json`은 에디터·내장 터미널 폰트도 Ghostty와 같은 조합(`Meslo → D2Coding → Apple SD Gothic Neo`)으로 지정합니다.
 
 ### 설치 스크립트
-`script/`의 스크립트는 `./install`이 `~/bin`에 심링크합니다.
+`script/`는 성격이 다른 두 종류를 나눠 담습니다.
+
+- **`script/bin/`**: 어디서나 이름으로 부르는 명령. `./install`이 `~/bin`에 심링크합니다
+  (`~/bin`은 `zsh/.zprofile`이 PATH 맨 앞에 넣습니다).
+- **`script/` 최상위**: 이 저장소를 정비하는 1회성 스크립트. 전역 명령이 될 이유가 없어
+  링크하지 않고 `./script/X` 로 직접 부릅니다.
+
+새 스크립트를 추가할 때 전역 명령으로 쓸 것만 `script/bin/`에 두세요. 예전에는 `script/`
+전체를 링크해서 `~/bin/install.sh` 같은 흔한 이름이 전역 명령이 되었고, `install.sh`의
+`rm -f`가 덮어쓸 수 있는 `~/bin`의 이름 범위도 그만큼 넓었습니다.
+
+**`script/` — 저장소 정비용 (`./script/X`)**
 
 - `install.sh`: 디렉토리 트리를 대상 경로에 심링크하는 공용 설치기 (`_recursive_` 마커가 있으면 하위 디렉토리까지 재귀)
 - `nvim-luals-check.sh`: `nvim/.luarc.json` 기준으로 Neovim 설정 Lua를 lua_ls로 정적 검사
 - `iterm2-herdr-setup.sh`: herdr용 iTerm2 프로파일 설정 일괄 적용 (Option Key = Esc+, 스크롤백 제한)
 - `zoxide-import-fasd.sh`: fasd 디렉토리 히스토리를 zoxide로 이관 (`./install`이 자동 호출, 마커로 한 번만)
+
+**`script/bin` — 전역 명령 (`~/bin` 링크)**
+
+- `p4merge.sh`: p4merge를 git mergetool로 쓰기 위한 래퍼.
+  전역 gitconfig의 `mergetool.p4merge.cmd`가 **이름으로** 호출하므로 PATH에 있어야 합니다.
+  설정 쪽도 각 변수를 인용해야 공백 든 경로가 쪼개지지 않습니다:
+  `p4merge.sh "$BASE" "$LOCAL" "$REMOTE" "$MERGED"`
 - `pull`: 현재 디렉토리가 git 저장소면 그 저장소를, 아니면 하위 디렉토리(기본 2단계)를 훑어 발견한 저장소를 순회하며 `git pull`
   - 깊이는 인자나 `PULL_DEPTH`로 조절 (`pull 1`은 바로 아래만, `pull 3`은 3단계까지)
   - 저장소를 만나면 그 아래로는 내려가지 않음. `--recurse-submodules`가 따라가는 것은
@@ -1103,4 +1121,3 @@ Scala 빌드 도구 설정
   ```
 
   `cargo upgrade`는 cargo-edit이 있어야 합니다: `cargo install cargo-edit`
-- `p4merge.sh`: p4merge를 git mergetool로 쓰기 위한 래퍼
