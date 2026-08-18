@@ -1088,4 +1088,19 @@ Scala 빌드 도구 설정
   - 저장소를 만나면 그 아래로는 내려가지 않음. `--recurse-submodules`가 따라가는 것은
     **상위 저장소에 등록된 submodule뿐**이므로, 등록되지 않은 독립 중첩 저장소
     (`vendor/inner/.git` 같은 것)는 갱신되지 않는다. 그런 저장소는 직접 들어가서 `pull`할 것
+- `run-in-subdirs`: 하위 디렉토리마다 같은 명령을 한 번씩 실행 (여러 Rust 프로젝트 일괄 정리용)
+  - `--only <경로>`로 그 파일이 있는 디렉토리만 고름 (`--only Cargo.toml`), `--depth N`으로 몇 단계까지 찾을지 조절
+  - 마커가 있는 디렉토리를 만나면 그 아래로는 내려가지 않음 — cargo 워크스페이스는 루트에서 한 번만 돌면 됨
+  - 하나가 실패해도 나머지는 계속 돌고, 끝에 실패한 디렉토리 목록과 종료 코드를 모아 보여 줌
+  - 셸 문법(`&&`, `|`)은 해석하지 않음. 이으려면 `run-in-subdirs bash -c 'cargo clean && cargo update'`
+
+  ```bash
+  run-in-subdirs --dry-run --only Cargo.toml cargo clean   # 어디서 돌지 먼저 확인
+  run-in-subdirs --only Cargo.toml cargo clean
+  run-in-subdirs --only Cargo.toml cargo update            # Cargo.lock만 갱신
+  run-in-subdirs --only Cargo.toml cargo upgrade           # Cargo.toml의 호환 버전 상향
+  run-in-subdirs --only Cargo.toml cargo upgrade --incompatible   # semver 비호환까지
+  ```
+
+  `cargo upgrade`는 cargo-edit이 있어야 합니다: `cargo install cargo-edit`
 - `p4merge.sh`: p4merge를 git mergetool로 쓰기 위한 래퍼

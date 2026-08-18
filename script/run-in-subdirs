@@ -1,0 +1,219 @@
+#!/bin/bash
+#
+# 하위 디렉토리마다 같은 명령을 한 번씩 실행한다.
+# 여러 프로젝트를 한 폴더에 모아 두고 일괄 정리(cargo clean/update/upgrade)할 때 쓴다.
+#
+# 사용법:
+#   run-in-subdirs cargo clean                                    # 바로 아래 디렉토리마다
+#   run-in-subdirs --only Cargo.toml cargo clean                  # Cargo.toml이 있는 곳에서만
+#   run-in-subdirs --only Cargo.toml cargo update
+#   run-in-subdirs --only Cargo.toml cargo upgrade
+#   run-in-subdirs --only Cargo.toml cargo upgrade --incompatible
+#   run-in-subdirs --only Cargo.toml --depth 3 cargo clean        # team/repo 처럼 묻혀 있을 때
+#   run-in-subdirs --dry-run --only Cargo.toml cargo clean        # 어디서 돌지만 확인
+#
+#   cargo upgrade는 cargo-edit이 있어야 한다: cargo install cargo-edit
+#
+# 왜 명령을 문자열이 아니라 인자 배열로 받는가:
+#   sh -c "$*" 로 실행하면 공백이 든 경로나 인용부호가 셸에서 한 번 더 쪼개진다.
+#   여기서는 "${CMD[@]}"를 그대로 실행하므로 인자가 온전하다. 대신 셸 문법
+#   (&&, |, 리다이렉션)은 해석하지 않는다. 여러 명령을 이어야 하면 셸을 명시한다:
+#     run-in-subdirs --only Cargo.toml bash -c 'cargo clean && cargo update'
+#
+# 옵션 파싱은 첫 번째 비옵션 인자에서 멈춘다. 그래서 `cargo upgrade --incompatible`의
+# --incompatible을 이 스크립트가 자기 옵션으로 가로채지 않는다.
+
+set -u
+
+# 글로브로 디렉토리만, 숨김 항목과 '.' / '..' 없이 얻는다.
+# nullglob은 마커 검사(has_marker)에서도 필요하다 — 매치가 없을 때 패턴 문자열이
+# 그대로 남으면 존재하지 않는 파일을 "있다"고 볼 뻔한다.
+shopt -s nullglob
+
+usage() {
+  cat <<'USAGE'
+사용법: run-in-subdirs [옵션] <명령> [인자...]
+
+하위 디렉토리마다 같은 명령을 한 번씩 실행한다.
+하나가 실패해도 나머지는 계속 돌리고, 끝에 실패한 디렉토리를 모아 보여 준다.
+
+옵션 (첫 번째 비옵션 인자에서 파싱을 멈춘다):
+  -o, --only <경로>   그 경로가 있는 디렉토리에서만 실행 (글로브 가능: '*.csproj')
+  -d, --depth <N>     --only를 찾아 내려갈 최대 깊이 (기본 1)
+  -n, --dry-run       실행하지 않고 어디서 무엇을 돌릴지만 출력
+  -h, --help          이 도움말
+
+예시:
+  run-in-subdirs cargo clean
+  run-in-subdirs --only Cargo.toml cargo update
+  run-in-subdirs --only Cargo.toml cargo upgrade
+  run-in-subdirs --only Cargo.toml cargo upgrade --incompatible
+  run-in-subdirs -- ls -la          # 실행할 명령 자체가 옵션처럼 생겼을 때
+
+셸 문법은 해석하지 않는다. 여러 명령을 이으려면 셸을 직접 부른다:
+  run-in-subdirs --only Cargo.toml bash -c 'cargo clean && cargo update'
+USAGE
+}
+
+ONLY=""
+DEPTH=1
+DRY_RUN=false
+
+while (( $# )); do
+  case "$1" in
+    -o | --only)
+      [ $# -ge 2 ] || { echo "--only 에 값이 없습니다." >&2; exit 2; }
+      ONLY="$2"; shift 2 ;;
+    --only=*) ONLY="${1#*=}"; shift ;;
+    -d | --depth)
+      [ $# -ge 2 ] || { echo "--depth 에 값이 없습니다." >&2; exit 2; }
+      DEPTH="$2"; shift 2 ;;
+    --depth=*) DEPTH="${1#*=}"; shift ;;
+    -n | --dry-run) DRY_RUN=true; shift ;;
+    -h | --help) usage; exit 0 ;;
+    --) shift; break ;;
+    -*)
+      echo "알 수 없는 옵션: $1" >&2
+      echo "실행할 명령이 옵션으로 시작하면 -- 로 끊으세요: run-in-subdirs -- ls -la" >&2
+      exit 2 ;;
+    *) break ;;
+  esac
+done
+
+if (( ! $# )); then
+  usage >&2
+  exit 2
+fi
+
+if [[ ! "$DEPTH" =~ ^[1-9][0-9]*$ ]]; then
+  echo "깊이는 1 이상의 정수여야 합니다: $DEPTH" >&2
+  exit 2
+fi
+
+CMD=("$@")
+
+# 없는 명령이면 디렉토리 수만큼 같은 실패를 반복하고 끝난다. 미리 한 번만 확인한다.
+# command -v 는 빌트인과 함수도 찾으므로 PATH에 없는 셸 빌트인을 오탐하지 않는다.
+if ! command -v "${CMD[0]}" > /dev/null 2>&1; then
+  echo "명령을 찾을 수 없습니다: ${CMD[0]}" >&2
+  exit 127
+fi
+
+# --only 없이는 모든 디렉토리가 1단계에서 일치하므로 더 내려갈 일이 없다.
+if [ -z "$ONLY" ] && (( DEPTH > 1 )); then
+  echo "참고: --only 없이는 모든 디렉토리가 1단계에서 일치하므로 --depth가 효과가 없습니다." >&2
+fi
+
+# 표시용 문자열. 공백이나 인용부호가 든 인자를 그냥 이어 붙이면 실제 실행되는 것과
+# 달라 보이므로 %q로 인용해서 보여 준다.
+CMD_DISPLAY="$(printf '%q ' "${CMD[@]}")"
+CMD_DISPLAY="${CMD_DISPLAY% }"
+
+# 긴 작업(cargo build 같은) 중 Ctrl-C를 누르면 포그라운드 프로세스 그룹 전체가
+# SIGINT를 받는다. 트랩이 없으면 이 루프가 다음 디렉토리로 넘어가, 한 번 눌러서는
+# 멈출 수 없다. 여기서 전체를 끝낸다.
+trap 'echo; echo "중단됨 (Ctrl-C)"; exit 130' INT
+
+status=0
+found=0
+failed=()
+skipped=()
+
+# --only 가 없으면 모든 디렉토리가 대상이다.
+# 마커는 글로브일 수 있으므로($ONLY 를 인용하지 않는 이유) 확장 결과를 하나씩 본다.
+has_marker() {
+  [ -n "$ONLY" ] || return 0
+
+  local hit
+  for hit in "$1"/$ONLY; do
+    [ -e "$hit" ] && return 0
+  done
+  return 1
+}
+
+run_one() {
+  local dir="$1" rc
+
+  found=$(( found + 1 ))
+  echo "==> $dir"
+  echo "    \$ $CMD_DISPLAY"
+
+  if $DRY_RUN; then
+    echo "    (dry-run: 실행하지 않음)"
+    echo "--------------------------------------"
+    return
+  fi
+
+  # 서브셸에서 cd 하므로 호출자의 현재 디렉토리가 바뀌지 않는다.
+  # rc는 여기서 바로 받는다 — `if ! (...)` 로 감싸면 $? 가 부정된 값(0)이 되어
+  # 실제 종료 코드를 보고할 수 없다.
+  (cd "$dir" && "${CMD[@]}")
+  rc=$?
+
+  if (( rc != 0 )); then
+    status=1
+    failed+=("$dir (exit $rc)")
+    echo "  !! 실패 (exit $rc): $dir"
+  fi
+  echo "--------------------------------------"
+}
+
+# 마커가 있는 디렉토리를 만나면 그 아래로는 내려가지 않는다.
+# cargo 워크스페이스가 대표적인 이유다 — 루트에서 한 번 돌리면 멤버 크레이트까지
+# 처리되는데, 멤버마다 또 들어가면 같은 일을 중복해서 한다.
+# prefix는 "" 또는 "team/" 형태여서 라벨이 그대로 상대 경로가 된다.
+scan() {
+  local prefix="$1" remaining="$2"
+  local entry dir before
+
+  for entry in "$prefix"*/; do
+    dir="${entry%/}"
+
+    if has_marker "$dir"; then
+      run_one "$dir"
+      continue
+    fi
+
+    before=$found
+    if (( remaining > 1 )); then
+      scan "$dir/" $(( remaining - 1 ))
+    fi
+
+    # 이 디렉토리 아래에서 아무것도 실행하지 못했다.
+    # 최상위(prefix가 빈 문자열)에서만 센다 — 안쪽까지 세면 notrust/docs 와
+    # notrust 를 두 번 세어 "건너뜀" 개수가 실제보다 부풀려진다.
+    if (( found == before )) && [ -z "$prefix" ]; then
+      skipped+=("$dir")
+    fi
+  done
+}
+
+scan "" "$DEPTH"
+
+if (( ! found )); then
+  if [ -n "$ONLY" ]; then
+    echo "'$ONLY' 이(가) 있는 디렉토리를 찾지 못했습니다(깊이 $DEPTH): $(pwd)"
+  else
+    echo "하위 디렉토리가 없습니다: $(pwd)"
+  fi
+  exit 0
+fi
+
+echo
+echo "실행 ${found}개 · 실패 ${#failed[@]}개 · 건너뜀 ${#skipped[@]}개"
+
+# 건너뛴 목록은 dry-run에서만 펼친다. 실제 실행 때는 그 사이에 명령 출력이
+# 잔뜩 끼어 있어 목록까지 늘어놓으면 정작 실패 목록이 묻힌다.
+if $DRY_RUN && (( ${#skipped[@]} )); then
+  echo
+  echo "건너뛴 디렉토리 ${#skipped[@]}개:"
+  printf '  %s\n' "${skipped[@]}"
+fi
+
+if (( ${#failed[@]} )); then
+  echo
+  echo "실패한 디렉토리 ${#failed[@]}개:"
+  printf '  %s\n' "${failed[@]}"
+fi
+
+exit "$status"
