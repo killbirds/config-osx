@@ -24,3 +24,4 @@ CLAUDE.md
 .bloop/
 .omo/
 .cbmignore
+.codebase-memory/
