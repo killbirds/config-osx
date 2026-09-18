@@ -34,6 +34,11 @@ vim.g.maplocalleader = " "
 
 vim.g.python3_host_prog = vim.fn.expand("~/.local/pipx/venvs/pynvim/bin/python")
 
+-- Node/Perl/Ruby 원격 플러그인 호스트는 쓰는 플러그인이 없어 끈다 (checkhealth 경고 제거)
+vim.g.loaded_node_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0
+
 -- leader 키 응답 시간 설정
 vim.opt.timeout = true
 vim.opt.timeoutlen = 300 -- 기본값 1000ms보다 짧게 설정하여 더 빠른 응답
