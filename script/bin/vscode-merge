@@ -1,0 +1,15 @@
+#!/bin/sh
+# 공통 원본, 현재 파일, 상대 파일, 결과 파일을 받아 3-way 병합을 연다.
+usage='Usage: vscode-merge BASE LOCAL REMOTE MERGED'
+if [ "$#" -eq 1 ] && { [ "$1" = '--help' ] || [ "$1" = '-h' ]; }; then
+  printf '%s\n' "$usage"
+  exit 0
+fi
+if [ "$#" -ne 4 ]; then
+  printf '%s\n' "$usage" >&2
+  exit 2
+fi
+
+# VS Code는 REMOTE LOCAL BASE MERGED 순서로 받는다.
+exec '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' \
+  --wait --merge "$3" "$2" "$1" "$4"

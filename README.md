@@ -1095,12 +1095,42 @@ Scala 빌드 도구 설정
 - `iterm2-herdr-setup.sh`: herdr용 iTerm2 프로파일 설정 일괄 적용 (Option Key = Esc+, 스크롤백 제한)
 - `zoxide-import-fasd.sh`: fasd 디렉토리 히스토리를 zoxide로 이관 (`./install`이 자동 호출, 마커로 한 번만)
 
+**Git 비교·병합 — VS Code**
+
+`vscode-diff`와 `vscode-merge` 스크립트로 VS Code의 비교·병합 기능을 실행합니다.
+`./install`이 두 명령을 `~/bin`에 링크하며, 직접 사용할 수도 있습니다:
+
+```sh
+vscode-diff "before.txt" "after.txt"
+vscode-merge "base.txt" "local.txt" "remote.txt" "merged.txt"
+```
+
+병합 인수는 **공통 원본 → 현재 파일 → 상대 파일 → 결과 파일** 순서입니다.
+각 명령의 `--help`로 사용법을 확인할 수 있습니다.
+스크립트가 VS Code 앱 경로와 `--wait` 옵션을 처리하므로 `code`가 PATH에 없어도 동작합니다.
+Git과 SourceTree도 같은 스크립트를 사용하도록 설정합니다.
+`~/bin`이 PATH에 없는 GUI 앱에서도 실행되도록 `$HOME/bin` 경로를 지정합니다.
+
+```sh
+git config --global diff.tool vscode
+git config --global merge.tool vscode
+git config --global difftool.vscode.cmd '"$HOME/bin/vscode-diff" "$LOCAL" "$REMOTE"'
+git config --global mergetool.vscode.cmd '"$HOME/bin/vscode-merge" "$BASE" "$LOCAL" "$REMOTE" "$MERGED"'
+git config --global mergetool.vscode.trustExitCode false
+
+# SourceTree가 이름으로 호출하는 도구도 동일하게 설정합니다.
+git config --global difftool.sourcetree.cmd "$(git config --global difftool.vscode.cmd)"
+git config --global mergetool.sourcetree.cmd "$(git config --global mergetool.vscode.cmd)"
+git config --global mergetool.sourcetree.trustExitCode false
+```
+
+`git difftool` / `git mergetool`로 실행합니다. 저장 후 비교·병합 탭을 닫으면 Git으로 돌아옵니다.
+`trustExitCode=false`이므로 결과가 바뀌지 않았다면 Git이 병합 성공 여부를 확인합니다.
+
 **`script/bin` — 전역 명령 (`~/bin` 링크)**
 
-- `p4merge.sh`: p4merge를 git mergetool로 쓰기 위한 래퍼.
-  전역 gitconfig의 `mergetool.p4merge.cmd`가 **이름으로** 호출하므로 PATH에 있어야 합니다.
-  설정 쪽도 각 변수를 인용해야 공백 든 경로가 쪼개지지 않습니다:
-  `p4merge.sh "$BASE" "$LOCAL" "$REMOTE" "$MERGED"`
+- `vscode-diff`: 두 파일을 VS Code에서 비교 (`vscode-diff LOCAL REMOTE`)
+- `vscode-merge`: VS Code에서 3-way 병합 (`vscode-merge BASE LOCAL REMOTE MERGED`)
 - `pull`: 현재 디렉토리가 git 저장소면 그 저장소를, 아니면 하위 디렉토리(기본 2단계)를 훑어 발견한 저장소를 순회하며 `git pull`
   - 깊이는 인자나 `PULL_DEPTH`로 조절 (`pull 1`은 바로 아래만, `pull 3`은 3단계까지)
   - 저장소를 만나면 그 아래로는 내려가지 않음. `--recurse-submodules`가 따라가는 것은

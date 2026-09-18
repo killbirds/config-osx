@@ -1,0 +1,14 @@
+#!/bin/sh
+# 두 파일을 VS Code에서 비교하고, 탭을 닫을 때까지 기다린다.
+usage='Usage: vscode-diff LOCAL REMOTE'
+if [ "$#" -eq 1 ] && { [ "$1" = '--help' ] || [ "$1" = '-h' ]; }; then
+  printf '%s\n' "$usage"
+  exit 0
+fi
+if [ "$#" -ne 2 ]; then
+  printf '%s\n' "$usage" >&2
+  exit 2
+fi
+
+exec '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' \
+  --wait --diff "$1" "$2"
