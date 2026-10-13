@@ -120,27 +120,18 @@ end, { desc = "Toggle diagnostic mode (default/performance/development)" })
 vim.keymap.set("n", "<Leader>l", "gcc", { remap = true, desc = "Toggle comment line" })
 vim.keymap.set("x", "<Leader>l", "gc", { remap = true, desc = "Toggle comment selection" })
 
--- LSP completion 토글 (0.11 새 기능)
+-- 이 버퍼의 자동완성 토글.
+-- 완성 엔진은 blink.cmp 하나다. 예전 토글은 blink를 둔 채 내장 vim.lsp.completion을 켜서
+-- 메뉴 두 개가 함께 떴다. blink는 vim.b.completion == false인 버퍼에서 동작하지 않는다
+-- (blink/cmp/config/init.lua의 enabled 판정). cmdline 완성은 영향받지 않는다.
 -- <Leader>l은 주석 토글이므로 지연을 피해 <Leader>L 네임스페이스 사용
 vim.keymap.set("n", "<Leader>Lt", function()
-  local clients = vim.lsp.get_clients({ bufnr = 0 })
-  for _, client in ipairs(clients) do
-    if client:supports_method("textDocument/completion") then
-      if vim.b.lsp_completion_enabled then
-        -- bufnr는 필수 인자다(nil이면 _resolve_bufnr가 현재 버퍼로 해석하지만
-        --  아래 enable 분기와 형태를 맞춘다)
-        vim.lsp.completion.enable(false, client.id, 0)
-        vim.b.lsp_completion_enabled = false
-        vim.notify("LSP completion disabled", vim.log.levels.INFO)
-      else
-        vim.lsp.completion.enable(true, client.id, 0, { autotrigger = true })
-        vim.b.lsp_completion_enabled = true
-        vim.notify("LSP completion enabled", vim.log.levels.INFO)
-      end
-      break
-    end
+  vim.b.completion = vim.b.completion == false
+  if not vim.b.completion and package.loaded["blink.cmp"] then
+    require("blink.cmp").hide()
   end
-end, { desc = "Toggle LSP completion" })
+  vim.notify("Completion " .. (vim.b.completion and "enabled" or "disabled"), vim.log.levels.INFO)
+end, { desc = "Toggle completion (buffer)" })
 
 -- 추가 유용한 매핑
 vim.keymap.set("n", "<Leader>w", ":w<CR>", { noremap = true, silent = true, desc = "Save file" })

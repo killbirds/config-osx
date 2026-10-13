@@ -72,18 +72,11 @@ require("lazy").setup({
         -- matchparen은 괄호 짝 하이라이트이므로 비활성화하지 않는다
         "netrwPlugin",
         "tarPlugin",
-        "tohtml",
         "tutor",
         "zipPlugin",
-        -- 0.11 추가 권장 비활성화 플러그인
-        "2html_plugin",
-        "getscript",
-        "getscriptPlugin",
-        "logipat",
-        "rrhelper",
-        "spellfile_plugin",
-        "vimball",
-        "vimballPlugin",
+        -- 0.12의 $VIMRUNTIME/plugin에 실제로 있는 이름만 둔다. 예전 목록의
+        -- 2html_plugin, tohtml, getscript, logipat, rrhelper, spellfile_plugin, vimball은
+        -- 더 이상 존재하지 않아 아무것도 끄지 않았다.
       },
     },
   },

@@ -2,7 +2,7 @@ require("bufferline").setup({
   options = {
     mode = "buffers", -- 버퍼 모드 (기본값, 탭 대신 버퍼 표시)
     numbers = "none", -- 버퍼 번호 표시 안 함
-    -- bufdelete.nvim의 :Bdelete 사용 (창 레이아웃 유지).
+    -- :Bdelete(config/bufdelete.lua, mini.bufremove) 사용 (창 레이아웃 유지).
     -- bang 없이 실행해 수정된 버퍼는 경고 없이 날아가지 않도록 한다.
     close_command = "Bdelete %d",
     right_mouse_command = "Bdelete %d", -- 우클릭으로 버퍼 삭제

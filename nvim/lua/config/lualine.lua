@@ -42,11 +42,7 @@ require("lualine").setup({
           return { added = gs.added, modified = gs.changed, removed = gs.removed }
         end,
         symbols = { added = "+", modified = "~", removed = "-" }, -- 심플한 diff 심볼
-        diff_color = {
-          added = { fg = "#98c379" }, -- 색상 커스터마이징 (catppuccin과 조화)
-          modified = { fg = "#e5c07b" },
-          removed = { fg = "#e06c75" },
-        },
+        -- 색은 테마(catppuccin lualine 테마의 diff 색)를 따른다
       },
     },
     lualine_c = {
@@ -62,13 +58,15 @@ require("lualine").setup({
       },
       {
         "diagnostics",
-        sources = { "nvim_lsp" },
+        -- nvim_lsp는 vim.lsp 네임스페이스만 센다. nvim-lint(selene, ruff, clippy 등)도
+        -- 세도록 vim.diagnostic.count를 쓰는 nvim_diagnostic을 쓴다.
+        sources = { "nvim_diagnostic" },
         sections = { "error", "warn", "info", "hint" },
         symbols = { error = "✘ ", warn = "▲ ", info = "● ", hint = "◆ " },
         colored = true,
         update_in_insert = false,
         always_visible = false,
-      }, -- LSP 진단 (중복 방지를 위해 통합)
+      }, -- 진단 개수 (LSP + 린터)
     },
     lualine_x = {
       -- 진단 개수는 lualine_c의 diagnostics 컴포넌트가 표시하므로 여기서 중복 표시하지 않는다

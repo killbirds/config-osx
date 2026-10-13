@@ -21,7 +21,9 @@ return {
     end,
   },
   {
-    "famiu/bufdelete.nvim",
+    -- bufdelete.nvim(archive됨, 마지막 커밋 2024-02)을 대체한다. 창 배치를 유지한 채 버퍼를 지운다.
+    "nvim-mini/mini.bufremove",
+    version = "*",
     cmd = { "Bdelete", "Bwipeout" },
     keys = {
       {
@@ -34,7 +36,7 @@ return {
       },
     },
     config = function()
-      require("config.bufdelete")
+      require("config.bufdelete").setup()
     end,
   },
 

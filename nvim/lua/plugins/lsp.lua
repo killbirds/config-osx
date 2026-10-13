@@ -73,9 +73,8 @@ return {
   -- Mason (저장소가 williamboman → mason-org 조직으로 이관됨)
   {
     "mason-org/mason.nvim",
-    -- 트리거가 없으면 startup에 로드된다. 아래 mason-lspconfig가 BufReadPre에
-    -- dependency로 끌어올리므로 파일을 열 때는 어차피 로드되고,
-    -- 파일 인자 없이 nvim만 띄우는 경우에만 로드를 건너뛴다.
+    -- 아래 mason-lspconfig가 첫 파일을 연 뒤 dependency로 끌어올린다.
+    -- 바이너리 PATH는 lua/init.lua가 미리 넣으므로 그 전에도 서버/도구는 실행된다.
     cmd = { "Mason", "MasonInstall", "MasonUninstall", "MasonUninstallAll", "MasonLog", "MasonUpdate" },
     config = function()
       require("config.mason")
@@ -84,7 +83,22 @@ return {
   {
     "mason-org/mason-lspconfig.nvim",
     dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
-    event = { "BufReadPre", "BufNewFile" },
+    -- 파일 열기 경로에서 뺀다(mason registry 로드 ~10ms). 서버 시작은 nvim-lspconfig가
+    -- 하고, 여기서는 ensure_installed와 설치 후 재시작 훅만 담당하므로 늦어도 된다.
+    -- VeryLazy를 쓰면 안 된다: 파일 없이 띄워도 발생해서 dependencies의 nvim-lspconfig와
+    -- 그것이 require하는 blink.cmp까지 매번 로드된다. 첫 파일을 연 뒤 조금 늦게 로드한다.
+    lazy = true,
+    cmd = { "LspInstall", "LspUninstall" },
+    init = function()
+      vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+        once = true,
+        callback = function()
+          vim.defer_fn(function()
+            require("lazy").load({ plugins = { "mason-lspconfig.nvim" } })
+          end, 100)
+        end,
+      })
+    end,
     config = function()
       require("config.mason-lspconfig")
     end,

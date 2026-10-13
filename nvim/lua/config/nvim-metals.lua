@@ -89,11 +89,6 @@ local function apply_metals_settings()
 end
 
 -- 에러 처리 핸들러 설정
-local function setup_error_handlers()
-  -- Metals 연결 및 초기화 실패 이벤트는 직접 핸들러로 등록하지 않고
-  -- handlers 필드를 통해 처리합니다
-end
-
 -- 시스템 환경 확인 함수 (초기화 전에 직접 실행)
 local function check_system_requirements()
   -- Java 버전 확인
@@ -137,9 +132,9 @@ local function setup_format_on_save(bufnr)
     return
   end
 
-  vim.api.nvim_clear_autocmds({ group = nvim_metals_group, buffer = bufnr })
+  vim.api.nvim_clear_autocmds({ group = nvim_metals_group, buf = bufnr })
   vim.api.nvim_create_autocmd("BufWritePre", {
-    buffer = bufnr,
+    buf = bufnr,
     group = nvim_metals_group,
     callback = function()
       vim.lsp.buf.format({
@@ -236,9 +231,6 @@ metals_config.flags = {
   allow_incremental_sync = true,
   debounce_text_changes = 150,
 }
-
--- 에러 핸들러 설정
-setup_error_handlers()
 
 -- ========== 설정 적용 ========== --
 apply_metals_settings()

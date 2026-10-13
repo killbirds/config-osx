@@ -1,23 +1,5 @@
--- 하이라이트 그룹 정의
-local function setup_gitsigns_highlights()
-  vim.api.nvim_set_hl(0, "GitSignsAdd", { fg = "#2ecc71" }) -- 추가된 부분 (녹색)
-  vim.api.nvim_set_hl(0, "GitSignsChange", { fg = "#f1c40f" }) -- 변경된 부분 (노란색)
-  vim.api.nvim_set_hl(0, "GitSignsDelete", { fg = "#e74c3c" }) -- 삭제된 부분 (빨간색)
-  vim.api.nvim_set_hl(0, "GitSignsChangedelete", { fg = "#f1c40f" }) -- 변경+삭제 (노란색)
-  vim.api.nvim_set_hl(0, "GitSignsTopdelete", { fg = "#e74c3c" }) -- 상단 삭제 (빨간색)
-  vim.api.nvim_set_hl(0, "GitSignsUntracked", { fg = "#95a5a6" }) -- 추적되지 않음 (회색)
-end
-
--- 하이라이트 설정 적용
-setup_gitsigns_highlights()
-
--- 컬러 스키마 변경 시 하이라이트 다시 적용
-vim.api.nvim_create_autocmd("ColorScheme", {
-  pattern = "*",
-  callback = function()
-    setup_gitsigns_highlights()
-  end,
-})
+-- 사인 색은 catppuccin의 gitsigns 통합(auto_integrations)이 정한다.
+-- 예전에는 Flat UI 색을 하드코딩하고 ColorScheme마다 다시 덮어써서 테마와 따로 놀았다.
 
 require("gitsigns").setup({
   signs = {
@@ -62,7 +44,7 @@ require("gitsigns").setup({
 
     local function map(mode, l, r, opts)
       opts = opts or {}
-      opts.buffer = bufnr
+      opts.buf = bufnr
       vim.keymap.set(mode, l, r, opts)
     end
 

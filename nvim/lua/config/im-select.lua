@@ -12,7 +12,7 @@ require("im_select").setup({
   default_command = "macism",
 
   -- 모드 전환 시 자동으로 영문 입력으로 전환하는 이벤트
-  -- 노멀 모드로 돌아갈 때, vim 시작 시, 포커스 획득 시, 명령 모드 종료 시, 비주얼 모드 진입 시(*:v, *:V, *:CTRL-V)
+  -- 노멀 모드로 돌아갈 때, vim 시작 시, 포커스 획득 시, 명령 모드 종료 시
   set_default_events = {
     "VimEnter",
     "FocusGained",

@@ -1,5 +1,8 @@
-local function should_lsp_fallback(bufnr)
-  return vim.bo[bufnr].filetype ~= "java"
+-- lsp_fallback은 conform의 호환용 옛 옵션이다. lsp_format으로 같은 정책을 준다.
+-- java는 google-java-format만 쓰고 jdtls 포맷으로 대체하지 않는다.
+---@return conform.LspFormatOpts
+local function lsp_format(bufnr)
+  return vim.bo[bufnr].filetype ~= "java" and "fallback" or "never"
 end
 
 require("conform").setup({
@@ -32,7 +35,7 @@ require("conform").setup({
 
     return {
       timeout_ms = 500,
-      lsp_fallback = should_lsp_fallback(bufnr),
+      lsp_format = lsp_format(bufnr),
       quiet = true, -- 포맷팅 메시지 숨김
     }
   end,
@@ -50,20 +53,13 @@ require("conform").setup({
       args = { "--assume-filename", "$FILENAME", "-" },
       stdin = true,
     },
-    stylua = {
-      command = "stylua",
-    },
-    ruff_format = {
-      command = "ruff",
-      args = { "format", "--quiet", "--stdin-filename", "$FILENAME", "-" },
-      stdin = true,
-    },
+    -- stylua/ruff_format/gofmt는 내장 정의를 쓴다. 내장 stylua는 --search-parent-directories와
+    -- --stdin-filepath로 프로젝트 설정을 찾고, 내장 ruff_format은 range 포맷도 지원한다.
+    -- rustfmt도 내장을 쓰되 기본 edition만 바꾼다. args를 덮어쓰면 내장이 Cargo.toml에서
+    -- 읽는 edition과 rustfmt.toml 기준 cwd가 사라져 2021 crate까지 2024로 포맷된다.
+    -- default_edition은 Cargo.toml이 없는 단독 .rs 파일에만 쓰인다.
     rustfmt = {
-      command = "rustfmt", -- Rust 기본 포매터
-      args = { "--edition", "2024", "--emit", "stdout" }, -- Rust 2024 에디션 사용
-    },
-    gofmt = {
-      command = "gofmt",
+      options = { default_edition = "2024" },
     },
   },
 
@@ -89,13 +85,13 @@ end
 local M = {}
 
 -- 버퍼 전체 포맷. plugins/lsp.lua의 <leader>fmt(normal)가 쓴다.
--- :Format / format_visual과 같은 fallback 정책(should_lsp_fallback)을 공유하기 위해
+-- :Format / format_visual과 같은 fallback 정책(lsp_format)을 공유하기 위해
 -- 여기에 둔다.
 function M.format_buffer()
   local bufnr = vim.api.nvim_get_current_buf()
   require("conform").format({
     async = true,
-    lsp_fallback = should_lsp_fallback(bufnr),
+    lsp_format = lsp_format(bufnr),
   })
 end
 
@@ -111,7 +107,7 @@ function M.format_visual()
   end
   require("conform").format({
     async = true,
-    lsp_fallback = should_lsp_fallback(vim.api.nvim_get_current_buf()),
+    lsp_format = lsp_format(vim.api.nvim_get_current_buf()),
     range = line_range(l1, l2),
   })
 end
@@ -121,7 +117,7 @@ vim.api.nvim_create_user_command("Format", function(args)
   local bufnr = vim.api.nvim_get_current_buf()
   require("conform").format({
     async = true,
-    lsp_fallback = should_lsp_fallback(bufnr),
+    lsp_format = lsp_format(bufnr),
     range = args.range ~= 0 and line_range(args.line1, args.line2) or nil,
   })
 end, { range = true, desc = "Format buffer or range" })

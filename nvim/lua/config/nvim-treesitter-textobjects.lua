@@ -36,6 +36,8 @@ function M.setup()
 
   -- 주의: 조건문 이동은 ]o/[o를 사용한다.
   -- ]d/[d는 진단 이동(config/diagnostics.lua)과 충돌하므로 쓰지 않는다.
+  -- 반복문 이동은 ]r/[r이다(loop의 "repeat"). ]l/[l은 0.12 기본 location list 이동,
+  -- ]p/[p는 내장 들여쓰기 put이라 덮어쓰지 않는다.
   local move_keymaps = {
     ["]m"] = function()
       move.goto_next_start("@function.outer", "textobjects")
@@ -46,7 +48,7 @@ function M.setup()
     ["]o"] = function()
       move.goto_next_start("@conditional.outer", "textobjects")
     end,
-    ["]l"] = function()
+    ["]r"] = function()
       move.goto_next_start("@loop.outer", "textobjects")
     end,
     ["]M"] = function()
@@ -64,7 +66,7 @@ function M.setup()
     ["[o"] = function()
       move.goto_previous_start("@conditional.outer", "textobjects")
     end,
-    ["[l"] = function()
+    ["[r"] = function()
       move.goto_previous_start("@loop.outer", "textobjects")
     end,
     ["[M"] = function()

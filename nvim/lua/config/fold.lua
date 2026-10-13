@@ -77,7 +77,7 @@ function M.setup()
           else
             vim.notify("LSP foldingRange를 지원하는 서버가 없습니다.", vim.log.levels.WARN)
           end
-        end, { buffer = buffer, noremap = true, desc = "Apply LSP-based folding" })
+        end, { buf = buffer, noremap = true, desc = "Apply LSP-based folding" })
       end
     end,
   })
@@ -106,7 +106,7 @@ function M.setup()
         else
           vim.notify("LSP foldingRange를 지원하는 서버가 준비되지 않았습니다.", vim.log.levels.WARN)
         end
-      end, { buffer = 0, noremap = true, desc = "Apply language-optimized folding" })
+      end, { buf = 0, noremap = true, desc = "Apply language-optimized folding" })
     end,
   })
 

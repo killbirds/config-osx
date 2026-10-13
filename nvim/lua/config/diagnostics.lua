@@ -136,9 +136,6 @@ function M.setup(config_type)
 
   -- Set up diagnostic keymaps
   M.setup_keymaps()
-
-  -- Set up autocommands
-  M.setup_autocommands()
 end
 
 -- Setup diagnostic-related keymaps
@@ -168,9 +165,13 @@ function M.setup_keymaps()
     -- 주석상 반환 타입이 table?이라 가드를 둔다.
     local current_config = vim.diagnostic.config() or {}
     local virtual_text_enabled = current_config.virtual_text ~= false
-    vim.diagnostic.config({
-      virtual_text = virtual_text_enabled and false or virtual_text_opts,
-    })
+    -- `cond and false or x`는 항상 x가 되므로 끄는 쪽이 동작하지 않는다. 분기로 고른다.
+    ---@type vim.diagnostic.Opts.VirtualText|false
+    local new_virtual_text = virtual_text_opts
+    if virtual_text_enabled then
+      new_virtual_text = false
+    end
+    vim.diagnostic.config({ virtual_text = new_virtual_text })
     vim.notify(string.format("Virtual text %s", virtual_text_enabled and "disabled" or "enabled"))
   end, vim.tbl_extend("force", opts, { desc = "Toggle diagnostic virtual text" }))
 
@@ -183,35 +184,6 @@ function M.setup_keymaps()
   -- 	})
   -- 	vim.notify(string.format("Virtual lines %s", virtual_lines_enabled and "disabled" or "enabled"))
   -- end, vim.tbl_extend("force", opts, { desc = "Toggle diagnostic virtual lines" }))
-end
-
--- Setup diagnostic-related autocommands
-function M.setup_autocommands()
-  -- 주의: 아래 autocmd를 되살릴 때 augroup을 다시 만들 것.
-  --   local augroup = vim.api.nvim_create_augroup("DiagnosticConfig", { clear = true })
-  -- 사용처가 전부 주석 처리돼 있어 미사용 그룹만 남아 있었으므로 제거했다.
-
-  -- Auto-open float on cursor hold (disabled by default to avoid duplication)
-  -- Uncomment below if you want automatic float display
-  -- vim.api.nvim_create_autocmd("CursorHold", {
-  -- 	group = augroup,
-  -- 	pattern = "*",
-  -- 	callback = function()
-  -- 		-- Only show if there are diagnostics on the current line
-  -- 		local line_diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line(".") - 1 })
-  -- 		if #line_diagnostics > 0 then
-  -- 			vim.diagnostic.open_float(nil, { focus = false })
-  -- 		end
-  -- 	end,
-  -- 	desc = "Show diagnostics on cursor hold",
-  -- })
-
-  -- 대용량 파일 진단 비활성화는 cache_manager.lua에서 통합 관리됨
-end
-
--- Get current diagnostic configuration
-function M.get_config()
-  return vim.diagnostic.config()
 end
 
 -- Toggle between different configuration modes
@@ -231,44 +203,6 @@ function M.toggle_mode()
   vim.g.diagnostic_mode = next_mode
   M.setup(next_mode)
   vim.notify(string.format("Diagnostic mode: %s", next_mode))
-end
-
--- Utility function to get diagnostic status for statusline
--- (참고: 현재 상태줄은 lualine의 diagnostics 컴포넌트를 사용하므로 이 함수는 옵션)
-function M.get_status()
-  local diagnostics = vim.diagnostic.get(0)
-  if #diagnostics == 0 then
-    return "✓"
-  end
-
-  local counts = { errors = 0, warnings = 0, info = 0, hints = 0 }
-  for _, diagnostic in ipairs(diagnostics) do
-    if diagnostic.severity == vim.diagnostic.severity.ERROR then
-      counts.errors = counts.errors + 1
-    elseif diagnostic.severity == vim.diagnostic.severity.WARN then
-      counts.warnings = counts.warnings + 1
-    elseif diagnostic.severity == vim.diagnostic.severity.INFO then
-      counts.info = counts.info + 1
-    elseif diagnostic.severity == vim.diagnostic.severity.HINT then
-      counts.hints = counts.hints + 1
-    end
-  end
-
-  local status = {}
-  if counts.errors > 0 then
-    table.insert(status, string.format("E:%d", counts.errors))
-  end
-  if counts.warnings > 0 then
-    table.insert(status, string.format("W:%d", counts.warnings))
-  end
-  if counts.info > 0 then
-    table.insert(status, string.format("I:%d", counts.info))
-  end
-  if counts.hints > 0 then
-    table.insert(status, string.format("H:%d", counts.hints))
-  end
-
-  return table.concat(status, " ")
 end
 
 return M

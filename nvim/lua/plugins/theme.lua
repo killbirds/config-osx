@@ -23,10 +23,6 @@ return {
       integrations = {
         notify = false,
         neotree = false,
-        mini = {
-          enabled = true,
-          indentscope_color = "",
-        },
         indent_blankline = {
           enabled = true,
           scope_color = "lavender",

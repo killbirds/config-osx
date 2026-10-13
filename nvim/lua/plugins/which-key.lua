@@ -2,9 +2,19 @@ return {
   "folke/which-key.nvim",
   event = "VeryLazy",
   opts = {
-    -- your configuration comes here
-    -- or leave it empty to use the default settings
-    -- refer to the configuration section below
+    -- 키가 둘 이상인 <leader> 접두어에 이름을 붙인다. 없으면 "+N keymaps"로만 보인다.
+    -- 새 접두어를 만들면 여기에도 추가할 것.
+    spec = {
+      { "<leader>b", group = "buffer" },
+      { "<leader>d", group = "diagnostics" },
+      { "<leader>f", group = "find / format" },
+      { "<leader>h", group = "git hunk" },
+      { "<leader>L", group = "LSP" },
+      { "<leader>m", group = "multicursor" },
+      { "<leader>t", group = "toggle / terminal / tree" },
+      { "<leader>x", group = "trouble" },
+      { "<leader>z", group = "fold" },
+    },
   },
   keys = {
     {

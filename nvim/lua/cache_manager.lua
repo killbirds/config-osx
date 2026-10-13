@@ -68,7 +68,9 @@ function M.find_ignore_dirs(force_refresh)
       -- 이미 추가된 디렉토리는 건너뛰기
       if not seen[name] then
         for _, pattern in ipairs(ignore_patterns) do
-          if name:match(pattern) then
+          -- 이름 전체가 일치해야 한다. 앵커가 없으면 routes/layout(out), .github(.git)처럼
+          -- 이름 일부만 겹치는 일반 디렉토리까지 wildignore에 들어가 어느 깊이에서든 숨겨진다.
+          if name:match("^" .. pattern .. "$") then
             table.insert(ignore_dirs, name)
             seen[name] = true
             break
@@ -133,17 +135,7 @@ function M.setup_fs_optimizations()
     end
   end
 
-  vim.g.cache_dirs_found = ignore_dirs
-
   return ignore_dirs
-end
-
--- 0.11 메모리 최적화
-function M.setup_memory_optimizations()
-  -- 0.11에서 개선된 메모리 관리
-
-  -- LSP 로그 레벨은 init.lua와 nvim-lspconfig.lua에서 중앙 관리됨
-  -- 진단 설정은 config/diagnostics.lua에서 중앙 관리됨
 end
 
 -- 0.11 버퍼 캐시 최적화
@@ -286,7 +278,6 @@ function M.setup()
   local ignore_dirs = M.setup_fs_optimizations()
 
   -- 0.11 최적화 설정
-  M.setup_memory_optimizations()
   M.setup_buffer_cache()
   M.setup_performance_monitoring()
 

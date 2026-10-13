@@ -3,21 +3,6 @@
 
 local M = {}
 
--- 성능 측정 함수
-function M.profile_function(func, name)
-  name = name or "Function"
-  local start_time = vim.uv.hrtime()
-  local result = func()
-  local end_time = vim.uv.hrtime()
-  local duration = (end_time - start_time) / 1e6 -- 밀리초로 변환
-
-  if duration > 100 then -- 100ms 이상일 때만 경고
-    vim.notify(string.format("%s took %.2fms", name, duration), vim.log.levels.WARN, { title = "Performance Warning" })
-  end
-
-  return result
-end
-
 -- 메모리 사용량 확인
 function M.check_memory_usage()
   local mem_usage = vim.fn.system("ps -o rss= -p " .. vim.fn.getpid())

@@ -6,13 +6,17 @@ local config = {
   filetypes = {
     "python",
     "lua",
-    "rust",
     "scala",
     "java",
   },
 
   -- 지원하는 파일 패턴
-  patterns = { "*.py", "*.lua", "*.rs", "*.scala", "*.java" },
+  patterns = { "*.py", "*.lua", "*.scala", "*.java" },
+
+  -- 진단 변경 시 전용 quickfix 목록(:Lint로 생성)을 갱신할 파일 타입.
+  -- 자동 린트 대상(filetypes)과 다르다: rust는 자동 린트에서 뺐지만(rust-analyzer가
+  -- clippy를 돌린다) 그 LSP 진단과 :Clippy 결과는 여전히 목록에 반영해야 한다.
+  quickfix_filetypes = { "python", "lua", "rust", "scala", "java" },
 
   -- 디바운스 설정 (ms)
   debounce = {
@@ -289,7 +293,9 @@ end
 lint.linters_by_ft = {
   python = { "ruff" }, -- Python 린팅 (ruff)
   lua = { "selene" }, -- Lua 린팅 (selene)
-  rust = { "clippy" }, -- Rust 린팅 (cargo clippy)
+  -- rust는 자동 린트하지 않는다. rust-analyzer가 저장 시 check.command = "clippy"로 이미
+  -- cargo clippy를 돌리므로, 여기서도 돌리면 저장마다 cargo가 두 번 실행된다.
+  -- 따로 돌려야 할 때는 :Clippy (아래).
   scala = { "scalafix" }, -- Scala 린팅 (scalafix, 없으면 coursier launch)
   java = { "java_checkstyle" },
 }
@@ -610,7 +616,7 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
 
     -- 현재 버퍼 파일 타입 확인
     local ft = vim.bo.filetype
-    if vim.tbl_contains(config.filetypes, ft) then
+    if vim.tbl_contains(config.quickfix_filetypes, ft) then
       -- 타이머 생성 및 시작
       timers.start("diagnostic", nil, function()
         -- pcall로 안전하게 실행
@@ -629,7 +635,7 @@ vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("QuickfixKeymap", { clear = true }),
   callback = function()
     vim.keymap.set("n", "o", "<CR>", {
-      buffer = true,
+      buf = 0,
       silent = true,
       desc = "Open Quickfix item",
     })
@@ -642,6 +648,16 @@ vim.api.nvim_create_user_command("Lint", function()
   -- 수동 실행은 전용 quickfix 목록이 없으면 새로 만든다
   update_quickfix({ create = true })
 end, { desc = "수동으로 린팅 실행" })
+
+-- nvim-lint의 clippy를 수동으로 실행한다. rust-analyzer는 cargo.allFeatures = true로
+-- 검사하지만 이쪽은 기본 feature 집합이므로 결과가 다를 수 있다.
+vim.api.nvim_create_user_command("Clippy", function()
+  lint.try_lint("clippy", {
+    filter = function(linter)
+      return is_linter_runnable(linter)
+    end,
+  })
+end, { desc = "cargo clippy를 nvim-lint로 실행" })
 
 -- 실행 불가로 판정해 건너뛴 린터를 다시 판정하게 한다.
 -- (:MasonInstall 등으로 도구를 고친 뒤 Neovim을 재시작하지 않고 반영할 때)

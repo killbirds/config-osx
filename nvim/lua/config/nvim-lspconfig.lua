@@ -142,13 +142,14 @@ local servers = {
         },
         inlayHints = {
           maxLength = 25, -- 힌트 최대 길이
-          closingBraceHints = true, -- 닫는 중괄호에 힌트 표시 여부
-          closureReturnTypeHints = "always", -- 클로저 반환 유형 힌트
-          lifetimeElisionHints = { enable = true, useParameterNames = true },
-          reborrowHints = "never", -- 재대여 힌트 비활성화
+          -- 각 힌트는 { enable = ... } 하위 키로 준다. 값을 바로 주면(closureReturnTypeHints = "always")
+          -- rust-analyzer가 .enable을 찾지 못해 기본값으로 떨어진다.
+          closingBraceHints = { enable = true }, -- 닫는 중괄호에 힌트 표시 여부
+          closureReturnTypeHints = { enable = "always" }, -- 클로저 반환 유형 힌트
+          lifetimeElisionHints = { enable = "always", useParameterNames = true },
           bindingModeHints = { enable = true },
           chainingHints = { enable = true }, -- 체인 메서드 타입 힌트 활성화
-          expressionAdjustmentHints = { enable = true },
+          expressionAdjustmentHints = { enable = "always" }, -- 재대여 힌트(reborrowHints)를 대체한 설정
           typeHints = { enable = true },
           parameterHints = { enable = true },
           implicitDrops = { enable = true },
@@ -312,7 +313,12 @@ local function cleanup_duplicate_clients()
   for _, client in ipairs(clients_to_stop) do
     local root = client.config and client.config.root_dir or "(root 없음)"
     vim.notify(
-      string.format("중복된 LSP 클라이언트 '%s' (id: %d, root: %s)를 중지합니다.", client.name, client.id, root),
+      string.format(
+        "중복된 LSP 클라이언트 '%s' (id: %d, root: %s)를 중지합니다.",
+        client.name,
+        client.id,
+        root
+      ),
       vim.log.levels.INFO,
       { title = "LSP 정리" }
     )
@@ -383,8 +389,8 @@ vim.api.nvim_create_user_command("LspRestart", function()
     return
   end
 
-  -- vim.lsp.enable(name)은 이미 enabled 상태면 no-op이므로 stop() 후 다시 호출해도
-  -- 재시작되지 않는다. enable(name, false)로 내렸다가 잠시 후 다시 올린다.
+  -- 0.12 내장 :lsp restart가 클라이언트 종료와 재시작을 처리한다. 인자 없이 부르면 metals까지
+  -- 재시작하므로 이름을 하나씩 넘긴다.
   local names = {}
   for _, client in ipairs(restartable_clients) do
     names[client.name] = true
@@ -395,21 +401,9 @@ vim.api.nvim_create_user_command("LspRestart", function()
       title = "LSP 재시작",
       timeout = 1000,
     })
-    vim.lsp.enable(name, false)
+    -- 실패(해당 이름의 클라이언트 없음 등)는 :lsp가 직접 에러 메시지로 알린다
+    vim.cmd.lsp({ "restart", name })
   end
-
-  vim.defer_fn(function()
-    for name in pairs(names) do
-      local ok, err = pcall(vim.lsp.enable, name)
-      if not ok then
-        vim.notify(
-          string.format("LSP 서버 '%s' 재시작 실패: %s", name, err),
-          vim.log.levels.WARN,
-          { title = "LSP 재시작" }
-        )
-      end
-    end
-  end, 500)
 end, { desc = "현재 버퍼의 LSP 서버 재시작" })
 
 -- LSP 관리 키맵 (전역이므로 on_attach가 아닌 여기서 한 번만 등록)

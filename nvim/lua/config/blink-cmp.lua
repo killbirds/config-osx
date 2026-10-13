@@ -72,7 +72,8 @@ return {
     menu = {
       border = "rounded",
       scrollbar = true,
-      winhighlight = "Normal:Normal,FloatBorder:BorderBG,CursorLine:PmenuSel,Search:None",
+      -- FloatBorder는 테마의 BlinkCmpMenuBorder로 둔다(예전 BorderBG는 정의된 적 없는 그룹이라 테두리 색이 빠졌다)
+      winhighlight = "Normal:Normal,FloatBorder:BlinkCmpMenuBorder,CursorLine:PmenuSel,Search:None",
 
       draw = {
         -- 기존 cmp의 fields = { "kind", "abbr", "menu" } 순서를 그대로 재현.
@@ -109,7 +110,7 @@ return {
         border = "rounded",
         max_width = 60, -- 기존 cmp documentation max_width
         max_height = 15, -- 기존 cmp documentation max_height
-        winhighlight = "Normal:Normal,FloatBorder:BorderBG,EndOfBuffer:Normal",
+        winhighlight = "Normal:Normal,FloatBorder:BlinkCmpDocBorder,EndOfBuffer:Normal",
       },
     },
 

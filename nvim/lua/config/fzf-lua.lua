@@ -104,7 +104,7 @@ fzf.setup({
     -- toggle-help를 걸어 주므로 이미 해결된다.
     on_create = function(e)
       for _, key in ipairs({ "<C-j>", "<C-k>" }) do
-        vim.keymap.set("t", key, key, { buffer = e.bufnr, nowait = true })
+        vim.keymap.set("t", key, key, { buf = e.bufnr, nowait = true })
       end
     end,
   },

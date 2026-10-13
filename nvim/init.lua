@@ -30,12 +30,12 @@ require("config.diagnostics").setup()
 -- statuscolumn 개선 - 0.11에서 개선된 기능 활용
 vim.opt.statuscolumn = "%l %s"
 
--- 새로운 윈도우 테두리 기본값 설정
--- vim.o.winborder = "rounded"
+-- 플로팅 창 테두리 기본값. LSP hover/signature, 진단 float 등 border를 따로 주지 않는 창에 적용된다.
+vim.o.winborder = "rounded"
 
 -- completeopt는 lua/init.lua가 소유한다.
 -- blink.cmp는 자체 메뉴를 그리므로 completeopt를 읽지 않는다. 따라서 이 옵션은
--- 내장 완성(<C-x><C-o>, <leader>Lt로 켜는 vim.lsp.completion)에만 영향을 준다.
+-- 내장 완성(<C-x><C-o> 등)에만 영향을 준다.
 
 -- 새로운 wildmode 옵션
 vim.opt.wildmode:append("noselect")

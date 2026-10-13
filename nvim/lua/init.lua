@@ -1,4 +1,14 @@
 -- init
+
+-- mason이 설치한 LSP/린터/포매터를 mason.nvim 로드 전에도 찾을 수 있게 한다.
+-- mason-lspconfig는 파일 열기 경로(BufReadPre)에서 빼고 VeryLazy에 로드하는데,
+-- 서버는 config/nvim-lspconfig.lua가 vim.lsp.enable로 먼저 시작하므로 PATH가 필요하다.
+-- mason.setup()의 PATH="prepend"와 겹치지만 같은 경로라 무해하다.
+local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+if not vim.env.PATH:find(mason_bin, 1, true) then
+  vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
+end
+
 vim.opt.mouse = "a"
 vim.opt.number = true
 vim.opt.history = 1000
@@ -93,7 +103,7 @@ end
 
 -- 내장 완성 동작.
 -- blink.cmp는 자체 메뉴를 그려서 completeopt를 보지 않으므로, 이 값은
--- 내장 완성(<C-x><C-o> 등)과 <leader>Lt로 토글하는 vim.lsp.completion에만 적용된다.
+-- 내장 완성(<C-x><C-o> 등)에만 적용된다.
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 
 -- 검색 설정 개선
@@ -143,11 +153,9 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function()
     vim.opt_local.shiftwidth = 2
     vim.opt_local.tabstop = 2
-    -- 0.11에서 개선된 Lua omnifunc 활용
-    vim.opt_local.omnifunc = "v:lua.vim.lua_omnifunc"
-    -- 0.11 기본 foldexpr 활용
-    vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-    vim.opt_local.foldmethod = "expr"
+    -- omnifunc는 설정하지 않는다. $VIMRUNTIME/ftplugin/lua.lua가 vim.lua_omnifunc를 주고,
+    -- 런타임이 준 값이라야 LSP attach 때 vim.lsp.omnifunc로 바뀐다(is_empty_or_default).
+    -- foldexpr/foldmethod는 config/fold.lua가 전역으로 설정한다
   end,
 })
 
