@@ -10,5 +10,10 @@ if [ "$#" -ne 2 ]; then
   exit 2
 fi
 
-exec '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' \
-  --wait --diff "$1" "$2"
+code='/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code'
+if [ ! -x "$code" ]; then
+  printf 'vscode-diff: VS Code not found: %s\n' "$code" >&2
+  exit 127
+fi
+
+exec "$code" --wait --diff "$1" "$2"

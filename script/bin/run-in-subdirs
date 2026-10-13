@@ -124,7 +124,8 @@ skipped=()
 has_marker() {
   [ -n "$ONLY" ] || return 0
 
-  local hit
+  # IFS를 비워 공백이 든 마커('some marker.json')가 쪼개지지 않게 한다. 글로브는 그대로 확장된다.
+  local hit IFS=
   for hit in "$1"/$ONLY; do
     [ -e "$hit" ] && return 0
   done

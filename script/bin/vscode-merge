@@ -10,6 +10,11 @@ if [ "$#" -ne 4 ]; then
   exit 2
 fi
 
+code='/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code'
+if [ ! -x "$code" ]; then
+  printf 'vscode-merge: VS Code not found: %s\n' "$code" >&2
+  exit 127
+fi
+
 # VS Code는 REMOTE LOCAL BASE MERGED 순서로 받는다.
-exec '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' \
-  --wait --merge "$3" "$2" "$1" "$4"
+exec "$code" --wait --merge "$3" "$2" "$1" "$4"

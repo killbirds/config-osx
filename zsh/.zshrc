@@ -104,7 +104,8 @@ export NVM_SH="/opt/homebrew/opt/nvm/nvm.sh"
   # alias가 "24"처럼 major만 가리킬 수 있으므로 설치된 매칭 버전 중 최신을 고른다.
   # numeric_glob_sort가 없으면 v24.9.0이 v24.13.0보다 뒤로 정렬된다.
   setopt local_options numeric_glob_sort
-  cands=("$NVM_DIR/versions/node/v${want#v}"*(/N))
+  # 버전 성분 경계에서만 확장한다. "v${want}"* 이면 24.1이 v24.13.0까지, 2가 v22.x까지 잡힌다.
+  cands=("$NVM_DIR/versions/node/v${want#v}"(/N) "$NVM_DIR/versions/node/v${want#v}".*(/N))
   if (( ! $#cands )); then
     # 버전 형태인데 설치본이 없다 — 조용히 넘기지 말고 nvm이 판단하게 한다
     setopt local_options no_extended_glob

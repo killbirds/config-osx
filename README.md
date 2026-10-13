@@ -491,7 +491,7 @@ export NVIM_PROFILE=1
 - `<leader>e`: 진단 플로팅 창 표시 (`config/diagnostics.lua`)
 - `<leader>dt`: 진단 virtual text 토글
 - `<leader>dm`: 진단 모드 전환 (default / performance / development)
-- `<Leader>Lt`: LSP 자동완성 토글 (`vim.lsp.completion`)
+- `<Leader>Lt`: 현재 버퍼의 자동완성(blink.cmp) 켜기/끄기
 - `jj`: 삽입 모드 빠져나오기
 
 > Virtual lines 토글(`<leader>dl`)은 표시 중복 때문에 **비활성 상태**입니다.
@@ -1010,7 +1010,7 @@ ls -l ~/.config/herdr/config.toml   # '-> .../config-osx/herdr/config.toml' 이�
 
 ```bash
 rm -rf ~/.local/share/nvim/lazy
-nvim --headless -c "Lazy sync" -c "qa"
+nvim --headless -c "Lazy! sync" -c "qa"   # bang이 있어야 완료를 기다린다
 ```
 
 ### 한글 입력 문제
@@ -1080,7 +1080,8 @@ Scala 빌드 도구 설정
 `script/`는 성격이 다른 두 종류를 나눠 담습니다.
 
 - **`script/bin/`**: 어디서나 이름으로 부르는 명령. `./install`이 `~/bin`에 심링크합니다
-  (`~/bin`은 `zsh/.zprofile`이 PATH 맨 앞에 넣습니다).
+  (`~/bin`은 `zsh/.zprofile`이 PATH에 넣습니다. `brew shellenv`가 뒤에서 Homebrew 경로를 앞에 붙이므로
+  같은 이름의 Homebrew 명령이 있으면 그쪽이 먼저 잡힙니다).
 - **`script/` 최상위**: 이 저장소를 정비하는 1회성 스크립트. 전역 명령이 될 이유가 없어
   링크하지 않고 `./script/X` 로 직접 부릅니다.
 
@@ -1094,38 +1095,6 @@ Scala 빌드 도구 설정
 - `nvim-luals-check.sh`: `nvim/.luarc.json` 기준으로 Neovim 설정 Lua를 lua_ls로 정적 검사
 - `iterm2-herdr-setup.sh`: herdr용 iTerm2 프로파일 설정 일괄 적용 (Option Key = Esc+, 스크롤백 제한)
 - `zoxide-import-fasd.sh`: fasd 디렉토리 히스토리를 zoxide로 이관 (`./install`이 자동 호출, 마커로 한 번만)
-
-**Git 비교·병합 — VS Code**
-
-`vscode-diff`와 `vscode-merge` 스크립트로 VS Code의 비교·병합 기능을 실행합니다.
-`./install`이 두 명령을 `~/bin`에 링크하며, 직접 사용할 수도 있습니다:
-
-```sh
-vscode-diff "before.txt" "after.txt"
-vscode-merge "base.txt" "local.txt" "remote.txt" "merged.txt"
-```
-
-병합 인수는 **공통 원본 → 현재 파일 → 상대 파일 → 결과 파일** 순서입니다.
-각 명령의 `--help`로 사용법을 확인할 수 있습니다.
-스크립트가 VS Code 앱 경로와 `--wait` 옵션을 처리하므로 `code`가 PATH에 없어도 동작합니다.
-Git과 SourceTree도 같은 스크립트를 사용하도록 설정합니다.
-`~/bin`이 PATH에 없는 GUI 앱에서도 실행되도록 `$HOME/bin` 경로를 지정합니다.
-
-```sh
-git config --global diff.tool vscode
-git config --global merge.tool vscode
-git config --global difftool.vscode.cmd '"$HOME/bin/vscode-diff" "$LOCAL" "$REMOTE"'
-git config --global mergetool.vscode.cmd '"$HOME/bin/vscode-merge" "$BASE" "$LOCAL" "$REMOTE" "$MERGED"'
-git config --global mergetool.vscode.trustExitCode false
-
-# SourceTree가 이름으로 호출하는 도구도 동일하게 설정합니다.
-git config --global difftool.sourcetree.cmd "$(git config --global difftool.vscode.cmd)"
-git config --global mergetool.sourcetree.cmd "$(git config --global mergetool.vscode.cmd)"
-git config --global mergetool.sourcetree.trustExitCode false
-```
-
-`git difftool` / `git mergetool`로 실행합니다. 저장 후 비교·병합 탭을 닫으면 Git으로 돌아옵니다.
-`trustExitCode=false`이므로 결과가 바뀌지 않았다면 Git이 병합 성공 여부를 확인합니다.
 
 **`script/bin` — 전역 명령 (`~/bin` 링크)**
 
@@ -1151,3 +1120,37 @@ git config --global mergetool.sourcetree.trustExitCode false
   ```
 
   `cargo upgrade`는 cargo-edit이 있어야 합니다: `cargo install cargo-edit`
+
+**Git 비교·병합 — VS Code**
+
+`vscode-diff`와 `vscode-merge` 스크립트로 VS Code의 비교·병합 기능을 실행합니다.
+`./install`이 두 명령을 `~/bin`에 링크하며, 직접 사용할 수도 있습니다:
+
+```bash
+vscode-diff "before.txt" "after.txt"
+vscode-merge "base.txt" "local.txt" "remote.txt" "merged.txt"
+```
+
+병합 인수는 **공통 원본 → 현재 파일 → 상대 파일 → 결과 파일** 순서입니다.
+각 명령의 `--help`로 사용법을 확인할 수 있습니다.
+스크립트가 VS Code 앱 경로와 `--wait` 옵션을 처리하므로 `code`가 PATH에 없어도 동작합니다.
+Git과 SourceTree에서 쓰려면 아래 설정을 직접 실행합니다 (`./install`은 Git의 diff/merge 도구 설정을 바꾸지 않습니다).
+`~/bin`이 PATH에 없는 GUI 앱에서도 실행되도록 `$HOME/bin` 경로를 지정합니다.
+
+```bash
+git config --global diff.tool vscode
+git config --global merge.tool vscode
+git config --global difftool.vscode.cmd '"$HOME/bin/vscode-diff" "$LOCAL" "$REMOTE"'
+git config --global mergetool.vscode.cmd '"$HOME/bin/vscode-merge" "$BASE" "$LOCAL" "$REMOTE" "$MERGED"'
+git config --global mergetool.vscode.trustExitCode false
+
+# SourceTree가 이름으로 호출하는 도구도 동일하게 설정합니다.
+git config --global difftool.sourcetree.cmd "$(git config --global difftool.vscode.cmd)"
+git config --global mergetool.sourcetree.cmd "$(git config --global mergetool.vscode.cmd)"
+git config --global mergetool.sourcetree.trustExitCode false
+```
+
+`git difftool` / `git mergetool`로 실행합니다. 저장 후 비교·병합 탭을 닫으면 Git으로 돌아옵니다.
+`trustExitCode=false`(Git 기본값과 같지만 명시)이므로 Git은 종료 코드 대신 결과 파일의 수정 시각을 봅니다.
+결과 파일이 바뀌지 않았으면 병합 성공 여부를 묻고, 저장만 해도 성공으로 처리하므로
+충돌 마커가 남아 있는지는 저장 전에 직접 확인해야 합니다.

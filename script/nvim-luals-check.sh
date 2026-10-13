@@ -32,8 +32,10 @@ if [ ! -x "$LUALS" ]; then
 fi
 
 # Neovim 런타임 lua 경로 (버전 하드코딩 회피)
-VIMRUNTIME_LUA="$(nvim --headless -c 'lua io.write(vim.env.VIMRUNTIME)' -c qa 2>&1)/lua"
-LAZY_DIR="$(nvim --headless -c 'lua io.write(vim.fn.stdpath("data"))' -c qa 2>&1)/lazy"
+# --clean: 사용자 설정을 읽지 않는다(lazy bootstrap, treesitter 설치, 로그 이동 같은 부수효과 방지).
+#   stdpath("data")는 --clean이어도 같다. stderr는 버린다 — 섞이면 경로 앞에 경고 문구가 붙는다.
+VIMRUNTIME_LUA="$(nvim --clean --headless -c 'lua io.write(vim.env.VIMRUNTIME)' -c qa 2>/dev/null)/lua"
+LAZY_DIR="$(nvim --clean --headless -c 'lua io.write(vim.fn.stdpath("data"))' -c qa 2>/dev/null)/lazy"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT

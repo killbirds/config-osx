@@ -16,8 +16,7 @@
   "vim.history": 1000,
   "vim.smartcase": true,
   "vim.ignorecase": true,
-  "vim.timeout": true,
-  "vim.timeoutlen": 300,
+  "vim.timeout": 300,
 
   // Vim 모드 표시 설정
   "vim.statusBarColorControl": true,
@@ -123,7 +122,7 @@
       "commands": [":qa!"]
     },
     {
-      "before": ["<leader>", "qq"],
+      "before": ["<leader>", "q", "q"],
       "commands": [":quit"]
     },
     {
@@ -131,7 +130,7 @@
       "commands": [":wq"]
     },
     {
-      "before": ["<leader>", "wq"],
+      "before": ["<leader>", "w", "q"],
       "commands": [":wq"]
     },
 
@@ -144,24 +143,24 @@
     // 시스템 클립보드
     {
       "before": ["<leader>", "p"],
-      "after": ["\"+", "p"]
+      "after": ["\"", "+", "p"]
     },
     {
       "before": ["<leader>", "P"],
-      "after": ["\"+", "P"]
+      "after": ["\"", "+", "P"]
     },
 
     // 버퍼 관리
     {
-      "before": ["<leader>", "bn"],
+      "before": ["<leader>", "b", "n"],
       "commands": [":bnext"]
     },
     {
-      "before": ["<leader>", "bp"],
+      "before": ["<leader>", "b", "p"],
       "commands": [":bprevious"]
     },
     {
-      "before": ["<leader>", "bd"],
+      "before": ["<leader>", "b", "d"],
       "commands": ["workbench.action.closeActiveEditor"]
     },
 
@@ -191,11 +190,11 @@
       "commands": ["editor.action.showHover"]
     },
     {
-      "before": ["<leader>", "rn"],
+      "before": ["<leader>", "r", "n"],
       "commands": ["editor.action.rename"]
     },
     {
-      "before": ["<leader>", "ca"],
+      "before": ["<leader>", "c", "a"],
       "commands": ["editor.action.quickFix"]
     },
     {
@@ -203,7 +202,7 @@
       "commands": ["editor.action.formatDocument"]
     },
     {
-      "before": ["<leader>", "go"],
+      "before": ["<leader>", "g", "o"],
       "commands": ["workbench.action.gotoSymbol"]
     },
 
@@ -227,15 +226,15 @@
 
     // 파일 탐색
     {
-      "before": ["<leader>", "ff"],
+      "before": ["<leader>", "f", "f"],
       "commands": ["workbench.action.quickOpen"]
     },
     {
-      "before": ["<leader>", "fg"],
+      "before": ["<leader>", "f", "g"],
       "commands": ["workbench.action.findInFiles"]
     },
     {
-      "before": ["<leader>", "fb"],
+      "before": ["<leader>", "f", "b"],
       "commands": ["workbench.action.showAllEditors"]
     },
 
@@ -310,15 +309,13 @@
     {
       "before": ["<C-d>"],
       "commands": [
-        "cursorMove",
-        { "to": "down", "by": "halfPage", "select": false }
+        { "command": "cursorMove", "args": { "to": "down", "by": "halfPage", "select": false } }
       ]
     },
     {
       "before": ["<C-u>"],
       "commands": [
-        "cursorMove",
-        { "to": "up", "by": "halfPage", "select": false }
+        { "command": "cursorMove", "args": { "to": "up", "by": "halfPage", "select": false } }
       ]
     },
     {
@@ -338,15 +335,15 @@
       "commands": ["workbench.action.toggleSidebarVisibility"]
     },
     {
-      "before": ["<leader>", "tt"],
+      "before": ["<leader>", "t", "t"],
       "commands": ["workbench.action.terminal.new"]
     },
     {
-      "before": ["<leader>", "tv"],
+      "before": ["<leader>", "t", "v"],
       "commands": ["workbench.action.terminal.split"]
     },
     {
-      "before": ["<leader>", "fe"],
+      "before": ["<leader>", "f", "e"],
       "commands": ["workbench.view.explorer"]
     },
     {
@@ -398,34 +395,32 @@
     // 시스템 클립보드
     {
       "before": ["<leader>", "y"],
-      "after": ["\"+", "y"]
+      "after": ["\"", "+", "y"]
     },
     {
       "before": ["<leader>", "d"],
-      "after": ["\"+", "d"]
+      "after": ["\"", "+", "d"]
     },
     {
       "before": ["<leader>", "p"],
-      "after": ["\"+", "p"]
+      "after": ["\"", "+", "p"]
     },
     {
       "before": ["<leader>", "P"],
-      "after": ["\"+", "P"]
+      "after": ["\"", "+", "P"]
     },
 
     // 스크롤 기능
     {
       "before": ["<C-d>"],
       "commands": [
-        "cursorMove",
-        { "to": "down", "by": "halfPage", "select": true }
+        { "command": "cursorMove", "args": { "to": "down", "by": "halfPage", "select": true } }
       ]
     },
     {
       "before": ["<C-u>"],
       "commands": [
-        "cursorMove",
-        { "to": "up", "by": "halfPage", "select": true }
+        { "command": "cursorMove", "args": { "to": "up", "by": "halfPage", "select": true } }
       ]
     },
 

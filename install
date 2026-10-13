@@ -127,10 +127,18 @@ create_backup() {
 
   # zsh 설치 단계는 홈의 runcom 6개를 지우고 다시 링크한다. 심링크가 아니라
   # 로컬 수정이 담긴 실체 파일일 수 있으므로 -L로 역참조해 사본을 남긴다.
-  mkdir -p "$BACKUP_DIR/zsh"
+  # herdr/Ghostty와 같은 이유로 mkdir과 복사의 실패를 반드시 검사한다.
+  if ! mkdir -p "$BACKUP_DIR/zsh"; then
+    echo "오류: zsh 백업 디렉토리를 만들 수 없습니다: $BACKUP_DIR/zsh" >&2
+    return 1
+  fi
   for zf in .zshenv .zprofile .zshrc .zpreztorc .zlogin .zlogout; do
     [ -e "$HOME/$zf" ] || continue
-    cp -L "$HOME/$zf" "$BACKUP_DIR/zsh/$zf" 2>/dev/null || cp "$HOME/$zf" "$BACKUP_DIR/zsh/$zf"
+    if ! cp -L "$HOME/$zf" "$BACKUP_DIR/zsh/$zf" 2>/dev/null &&
+       ! cp "$HOME/$zf" "$BACKUP_DIR/zsh/$zf"; then
+      echo "오류: zsh 설정 백업에 실패했습니다: $HOME/$zf" >&2
+      return 1
+    fi
   done
 
   # herdr은 설정과 런타임 상태(session.json, 로그, 소켓)가 한 디렉토리에 섞여 있으므로
@@ -189,21 +197,21 @@ main_install() {
   # (2) install.sh의 rm -f가 덮어쓸 수 있는 ~/bin의 이름 범위가 그만큼 넓었다
   #     (저장소 밖 스크립트인 ~/bin/check_package.sh가 실제로 그 사정권에 있었다).
   # 새 스크립트를 전역 명령으로 만들 때만 script/bin에 둘 것.
-  (cd "$cur/script/bin" && $install ~/bin) || exit 1
+  (cd "$cur/script/bin" && "$install" ~/bin) || return 1
 
   echo "설정 파일 설치 중..."
-  (cd "$cur/settings" && $install ~) || exit 1
+  (cd "$cur/settings" && "$install" ~) || return 1
 
   echo "Neovim 설정 설치 중..."
   (mkdir -p ~/.config/nvim)
-  (cd "$cur/nvim" && $install ~/.config/nvim) || exit 1
+  (cd "$cur/nvim" && "$install" ~/.config/nvim) || return 1
 
   echo "zsh 설정 설치 중..."
   # prezto의 runcoms를 ~/.zprezto 클론 안에서 직접 고치면 prezto 업데이트 때
   # 충돌하거나 날아간다. 저장소가 원본을 갖고 홈으로 링크해, ~/.zprezto는
   # upstream 그대로 두고 언제든 git pull 할 수 있게 한다.
   # 비밀정보는 추적하지 않는 ~/.zshenv.local에 두고 zsh/.zshenv가 source 한다.
-  (cd "$cur/zsh" && $install ~) || exit 1
+  (cd "$cur/zsh" && "$install" ~) || return 1
 
   # fasd -> zoxide 히스토리 이관. 마커 파일로 한 번만 돌고, zoxide가 없거나
   # 이관할 DB가 없으면 스스로 건너뛴다. 실패해도 설치를 멈추지 않는다.
