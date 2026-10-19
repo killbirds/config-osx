@@ -98,7 +98,7 @@ local servers = {
   -- oxlint를 설정하지 않은 프로젝트에서는 서버가 시작되지 않는다.
   oxlint = {},
   -- pyright: 타입 체크 전용. 린팅/포맷은 nvim-lint + conform의 ruff가 담당한다.
-  -- (mason의 ruff 패키지는 LSP로 띄우지 않는다 - config/mason-lspconfig.lua 참고)
+  -- pyright와 ruff는 mason이 아니라 Homebrew 설치본을 쓴다 (brew install pyright ruff).
   pyright = {},
   marksman = {
     filetypes = { "markdown" },

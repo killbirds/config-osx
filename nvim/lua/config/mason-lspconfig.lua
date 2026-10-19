@@ -25,8 +25,13 @@ local servers = {
   -- 중복 룰을 끄는 것으로 해결한다(에디터 설정으로 풀 문제가 아니다).
   "oxlint",
 
-  "pyright", -- Python
   "marksman", -- Markdown
+
+  -- pyright도 여기서 설치하지 않는다. Homebrew 설치본(brew install pyright)을 쓴다.
+  -- mason이 자기 bin을 PATH 앞에 붙이므로 mason에도 깔려 있으면 그쪽이 우선한다.
+  -- pyright는 이 목록(= automatic_enable allowlist)에 없어도
+  -- config/nvim-lspconfig.lua의 servers 테이블이 vim.lsp.enable()로 켠다.
+  -- 이전에 mason으로 깔았던 머신에서는 한 번 :MasonUninstall pyright 를 실행한다.
 
   -- rust_analyzer는 여기서 설치하지 않는다.
   -- rustup 컴포넌트(~/.cargo/bin/rust-analyzer)가 이미 있고, mason이
@@ -66,7 +71,8 @@ require("mason-lspconfig").setup({
   -- 순회하고(automatic_enable.lua의 registry.get_installed_package_names()),
   -- 매칭 기준은 filetype이 아니라 레지스트리의 neovim.lspconfig 필드다.
   -- 그래서 LSP로 띄울 생각이 없던 도구도 "설치돼 있다"는 이유만으로 서버가 된다.
-  --   ruff   - 린터인데 neovim.lspconfig = "ruff". 진단/포맷은 nvim-lint + conform이
+  --   ruff   - (지금은 mason으로 설치하지 않지만 예전 설치본이 남아 있을 수 있다)
+  --            린터인데 neovim.lspconfig = "ruff". 진단/포맷은 nvim-lint + conform이
   --            담당하므로 LSP로 뜨면 진단이 중복된다.
   --   stylua - 포매터인데 neovim.lspconfig = "stylua" (lspconfig가 stylua --lsp 실행).
   --            Lua 버퍼에 lua_ls와 함께 formatting client 두 개가 붙고, :LspFormat이

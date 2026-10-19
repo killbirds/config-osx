@@ -21,7 +21,9 @@ check_dependencies() {
   local cmd pkg
   for pkg in \
     "zoxide:zoxide:디렉토리 점프 (z, zi, j)" \
-    "fzf:fzf:^R 히스토리 검색, ^T 파일 선택, alt+c cd"
+    "fzf:fzf:^R 히스토리 검색, ^T 파일 선택, alt+c cd" \
+    "ruff:ruff:Neovim Python 린트·포맷" \
+    "pyright:pyright:Neovim Python LSP"
   do
     cmd="${pkg%%:*}"
     if ! command -v "$cmd" &> /dev/null; then

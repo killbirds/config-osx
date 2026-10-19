@@ -12,7 +12,9 @@ require("mason-tool-installer").setup({
     -- 인터프리터 경로를 래퍼에 하드코딩해서 Homebrew lua가 올라가면 조용히 깨진다
     -- (실측 2회). selene은 단일 Rust 바이너리다. 기준은 nvim/selene.toml 참고.
     "selene", -- Lua
-    "ruff", -- Python
+    -- ruff는 여기서 설치하지 않는다. Homebrew 설치본(brew install ruff)을 쓴다.
+    -- mason이 자기 bin을 PATH 앞에 붙이므로 mason에도 깔려 있으면 그쪽이 우선한다.
+    -- 이전에 mason으로 깔았던 머신에서는 한 번 :MasonUninstall ruff 를 실행한다.
 
     -- 필수 포매터만 포함
     "stylua", -- Lua

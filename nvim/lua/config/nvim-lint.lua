@@ -285,7 +285,7 @@ end
 -- 파일 타입별 린터 설정
 -- 주의: 이 목록을 **로드 시점의** executable() 결과로 가리지 마라.
 -- 이 모듈은 BufReadPre에 로드되는데 mason이 vim.env.PATH를 prepend하는 시점보다
--- 앞설 수 있다. 그러면 mason에만 설치된 도구(selene, ruff 등)가 그 순간 안 보여서
+-- 앞설 수 있다. 그러면 mason에만 설치된 도구(selene 등)가 그 순간 안 보여서
 -- 목록이 조용히 빈 테이블이 되고, 나중에 PATH가 갖춰져도 영원히 린트되지 않는다.
 -- (실측: `lua = selene_cmd and {"selene"} or {}` -> linters_by_ft.lua = {} 인데
 --  같은 세션에서 executable("selene") = 1)
