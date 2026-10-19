@@ -25,3 +25,4 @@ CLAUDE.md
 .omo/
 .cbmignore
 .codebase-memory/
+__pycache__/
