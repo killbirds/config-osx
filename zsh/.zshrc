@@ -228,6 +228,15 @@ path=("$BUN_INSTALL/bin" $path)
 # 같은 줄이 두 번 있었다. 한 번만 두고 가장 앞에 유지한다.
 path=("$HOME/.local/bin" $path)
 
+# pnpm
+# `pnpm setup`이 ~/.zshrc 끝에 직접 써넣은 블록을 옮긴 것이다. 그 설치기는 파일을 새로
+# 써서 저장소로 가는 심링크를 일반 파일로 바꿔 놓았고, 그 뒤로 홈의 .zshrc와 이 파일이
+# 따로 놀았다(이 파일을 고쳐도 셸에 반영되지 않았다). 설치기가 쓰던
+# `export PATH="$PNPM_HOME/bin:$PATH"`는 위 PATH 절의 이유로 배열 대입으로 바꿨다.
+# 순서는 설치기가 만든 그대로 .local/bin보다 앞이다.
+export PNPM_HOME="$HOME/Library/pnpm"
+path=("$PNPM_HOME/bin" $path)
+
 
 # 사내 전용 설정은 추적하지 않는 ~/.zshrc.local에 둔다 (공개 저장소 유입 방지).
 if [[ -f "$HOME/.zshrc.local" ]]; then
