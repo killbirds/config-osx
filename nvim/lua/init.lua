@@ -234,8 +234,10 @@ map("n", "<C-k>", "<C-w>k", opts)
 map("n", "<C-l>", "<C-w>l", opts)
 
 -- 비주얼 모드에서 들여쓰기 후 선택 유지
-map("v", "<", "<gv", opts)
-map("v", ">", ">gv", opts)
+-- "v"가 아니라 "x"다. "v"는 select 모드에도 걸리는데, 스니펫 placeholder가 select 모드라서
+-- 거기서 <나 >를 치면 글자가 들어가지 않고 이 매핑이 실행됐다(실측: 선택이 그대로 남음).
+map("x", "<", "<gv", opts)
+map("x", ">", ">gv", opts)
 
 -- 참고: 다음 매핑들은 keys.lua로 이동되었습니다
 -- 1. ESC로 하이라이트 끄기

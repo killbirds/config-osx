@@ -74,10 +74,11 @@ require("gitsigns").setup({
     -- 액션
     map("n", "<leader>hs", gs.stage_hunk, { desc = "Hunk 스테이징" })
     map("n", "<leader>hr", gs.reset_hunk, { desc = "Hunk 리셋" })
-    map("v", "<leader>hs", function()
+    -- "x": "v"로 걸면 select 모드(스니펫 placeholder)에서도 <Space>hs/hr이 가로챈다
+    map("x", "<leader>hs", function()
       gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
     end, { desc = "선택 부분 스테이징" })
-    map("v", "<leader>hr", function()
+    map("x", "<leader>hr", function()
       gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
     end, { desc = "선택 부분 리셋" })
     map("n", "<leader>hS", gs.stage_buffer, { desc = "버퍼 전체 스테이징" })

@@ -10,17 +10,20 @@ vim.keymap.set("n", "<Esc>", ":noh<CR>", { noremap = true, silent = true, desc =
 vim.keymap.set("n", "<Leader><Space>", ":nohlsearch<CR>", { noremap = true, desc = "Clear search highlight" })
 
 -- 시스템 클립보드 매핑 (+ 레지스터) - 0.11 최적화
+-- 비주얼 쪽은 "v"가 아니라 "x"로 건다. "v"는 select 모드(스니펫 placeholder)에도 걸려서,
+-- placeholder를 Space로 시작하는 글자로 덮어쓸 때 timeoutlen만큼 멈추고 <Space>p 같은
+-- 조합은 글자 대신 매핑이 실행된다. 이 파일의 다른 비주얼 매핑도 같은 이유로 "x"다.
 local clipboard_opts = { noremap = true, silent = true }
-vim.keymap.set("v", "<Leader>y", '"+y', vim.tbl_extend("force", clipboard_opts, { desc = "Copy to system clipboard" }))
-vim.keymap.set("v", "<Leader>d", '"+d', vim.tbl_extend("force", clipboard_opts, { desc = "Cut to system clipboard" }))
+vim.keymap.set("x", "<Leader>y", '"+y', vim.tbl_extend("force", clipboard_opts, { desc = "Copy to system clipboard" }))
+vim.keymap.set("x", "<Leader>d", '"+d', vim.tbl_extend("force", clipboard_opts, { desc = "Cut to system clipboard" }))
 vim.keymap.set(
-  { "n", "v" },
+  { "n", "x" },
   "<Leader>p",
   '"+p',
   vim.tbl_extend("force", clipboard_opts, { desc = "Paste from system clipboard after cursor" })
 )
 vim.keymap.set(
-  { "n", "v" },
+  { "n", "x" },
   "<Leader>P",
   '"+P',
   vim.tbl_extend("force", clipboard_opts, { desc = "Paste from system clipboard before cursor" })
@@ -66,8 +69,8 @@ vim.keymap.set("n", "<A-j>", ":m .+1<CR>==", vim.tbl_extend("force", move_opts, 
 vim.keymap.set("n", "<A-k>", ":m .-2<CR>==", vim.tbl_extend("force", move_opts, { desc = "Move line up" }))
 vim.keymap.set("i", "<A-j>", "<Esc>:m .+1<CR>==gi", vim.tbl_extend("force", move_opts, { desc = "Move line down" }))
 vim.keymap.set("i", "<A-k>", "<Esc>:m .-2<CR>==gi", vim.tbl_extend("force", move_opts, { desc = "Move line up" }))
-vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", vim.tbl_extend("force", move_opts, { desc = "Move selection down" }))
-vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", vim.tbl_extend("force", move_opts, { desc = "Move selection up" }))
+vim.keymap.set("x", "<A-j>", ":m '>+1<CR>gv=gv", vim.tbl_extend("force", move_opts, { desc = "Move selection down" }))
+vim.keymap.set("x", "<A-k>", ":m '<-2<CR>gv=gv", vim.tbl_extend("force", move_opts, { desc = "Move selection up" }))
 
 -- 터미널 모드 - 0.11에서 개선된 터미널 기능 활용
 local terminal_opts = { noremap = true, silent = true }

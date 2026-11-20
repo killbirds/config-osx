@@ -215,7 +215,7 @@ return {
           -- visual 감지는 마지막 행을 놓치므로 쓰지 않는다).
           require("config.conform").format_visual()
         end,
-        mode = "v",
+        mode = "x", -- "v"는 select 모드(스니펫 placeholder)에도 걸린다
         desc = "Format selected lines",
       },
     },
