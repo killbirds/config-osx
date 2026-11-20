@@ -1,4 +1,59 @@
+-- 투명 배경(plugins/theme.lua의 transparent_background)에서도 탭 바 색을 유지한다.
+--
+-- bufferline은 바·비활성 탭·구분선 색을 전부 Normal의 배경을 어둡게 해서 만든다
+-- (bufferline/config.lua의 derive_colors: -45 / -25 / -8). Normal에 배경이 없으면 그 값이
+-- 모두 NONE이 되고, slant 구분선은 "fg = 바 색, bg = 탭 색"으로 사선을 그리는 글리프라서
+-- fg가 비면 Normal의 글자색으로 칠해진다. 탭 사이에 흰 삼각형이 뜨던 이유다.
+-- (실측: 투명일 때 BufferLineSeparator fg/bg가 둘 다 없음, 불투명일 때 #101019 / #161622)
+--
+-- 그래서 Normal 배경 대신 catppuccin의 base를 기준으로 같은 계산을 해 준다. 색은 투명
+-- 배경을 켜기 전과 같고, 선택된 탭만 배경을 비워 편집 영역과 이어지게 한다.
+-- ColorScheme이 바뀌면 bufferline이 이 함수를 다시 부른다(config.update_highlights).
+local function highlights(defaults)
+  if vim.api.nvim_get_hl(0, { name = "Normal", link = false }).bg then
+    return {} -- Normal에 배경이 있으면 bufferline이 직접 계산한다
+  end
+  local ok, palettes = pcall(require, "catppuccin.palettes")
+  if not ok then
+    return {}
+  end
+
+  local shade = require("bufferline.colors").shade_color
+  local base = palettes.get_palette().base
+  local fill, inactive, visible = shade(base, -45), shade(base, -25), shade(base, -8)
+
+  local hl = {}
+  for name in pairs(defaults.highlights) do
+    local bg = inactive
+    if name:find("_selected$") then
+      bg = "NONE"
+    elseif name:find("_visible$") then
+      bg = visible
+    end
+    hl[name] = { bg = bg }
+  end
+
+  -- 바 자체의 색을 배경으로 쓰는 그룹
+  for _, name in ipairs({ "fill", "group_separator", "trunc_marker", "offset_separator" }) do
+    hl[name].bg = fill
+  end
+  -- 바 색을 글자색으로 쓰는 그룹 (사선 구분선이 여기에 해당한다)
+  for _, name in ipairs({
+    "separator",
+    "separator_visible",
+    "separator_selected",
+    "tab_separator",
+    "tab_separator_selected",
+  }) do
+    hl[name].fg = fill
+  end
+  hl.group_label = { fg = fill } -- 배경은 bufferline 기본값(주석 색) 그대로
+  hl.indicator_visible.fg = visible
+  return hl
+end
+
 require("bufferline").setup({
+  highlights = highlights,
   options = {
     mode = "buffers", -- 버퍼 모드 (기본값, 탭 대신 버퍼 표시)
     numbers = "none", -- 버퍼 번호 표시 안 함
