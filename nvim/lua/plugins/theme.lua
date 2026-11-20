@@ -7,7 +7,7 @@ return {
     priority = 1000,
     opts = {
       flavour = "mocha",
-      transparent_background = false,
+      transparent_background = true,
       -- LSP 진단 스타일은 integrations.native_lsp가 아니라 최상위 lsp_styles다.
       -- (integrations 아래에 두면 해당 integration 모듈이 없어 조용히 무시됨)
       lsp_styles = {
