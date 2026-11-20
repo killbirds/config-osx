@@ -176,6 +176,23 @@ if [[ -d "$_fzf_shell" ]]; then
 fi
 unset _fzf_shell
 
+# 터미널이 보내는 줄 편집 시퀀스를 vi 키맵에서도 받는다.
+# Herdr 앱과 Ghostty는 emacs 키맵을 전제로 아래 시퀀스를 보낸다.
+#   Alt+←  -> ^[b    Alt+→ -> ^[f    Cmd+← -> ^A    Cmd+→ -> ^E
+# prezto editor 모듈을 vi로 쓰면(.zpreztorc) viins에 이 바인딩이 없어서(실측)
+#   ^[b : vi-cmd-mode + b   -> 삽입 모드에서 빠져나간다
+#   ^[f : vi-cmd-mode + f   -> 빠져나간 뒤 다음에 친 글자 하나를 f의 인자로 삼킨다
+#   ^A  : self-insert       -> 제어문자가 그대로 입력된다
+# 로 동작했다. ^E는 viins에서 이미 vi-add-eol(줄 끝)이라 그대로 둔다.
+# ^[는 화살표 키와 fzf의 ^[c 때문에 이미 접두어라 Esc 지연(KEYTIMEOUT)은 달라지지 않는다.
+bindkey -M viins '^[b' vi-backward-word
+bindkey -M viins '^[f' vi-forward-word
+bindkey -M viins '^A' beginning-of-line
+bindkey -M vicmd '^[b' vi-backward-word
+bindkey -M vicmd '^[f' vi-forward-word
+bindkey -M vicmd '^A' beginning-of-line
+bindkey -M vicmd '^E' end-of-line
+
 # SDKMAN
 # 원래 "THIS MUST BE AT THE END OF THE FILE" 주석이 붙어 있었으나 아래로 PATH
 # 조작이 계속 이어져 사실이 아니었다. 실제로 옮기면 SDKMAN 후보가 .local/bin,

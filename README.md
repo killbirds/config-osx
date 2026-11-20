@@ -281,6 +281,19 @@ nvm current          # system 이면 default가 적용되지 않은 것
 nvm_alias default    # bad pattern: #* 이 나오면 EXTENDED_GLOB 문제
 ```
 
+### 줄 편집 키 (vi 키맵)
+
+커맨드라인은 vi 키맵입니다(`.zpreztorc`의 `key-bindings 'vi'`). 터미널이 emacs 키맵을
+전제로 보내는 시퀀스를 삽입·명령 모드 양쪽에서 받도록 `.zshrc`가 바인딩합니다.
+
+| 키 | 터미널이 보내는 것 | 동작 |
+| --- | --- | --- |
+| `Alt+←` / `Alt+→` | `^[b` / `^[f` | 이전 / 다음 단어로 이동 |
+| `Cmd+←` / `Cmd+→` | `^A` / `^E` | 줄 처음 / 줄 끝으로 이동 |
+
+`Cmd+←`/`Cmd+→`는 Herdr 앱에서만 이 시퀀스로 옵니다. Ghostty에서는 탭 이동에 묶어
+두었습니다(`ghostty/config.ghostty`).
+
 ### 디렉토리 점프와 검색
 
 | 키/명령 | 동작 |
