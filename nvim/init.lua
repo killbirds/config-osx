@@ -39,3 +39,6 @@ vim.o.winborder = "rounded"
 
 -- 새로운 wildmode 옵션
 vim.opt.wildmode:append("noselect")
+
+-- Herdr 터미널 안에서는 Herdr pane 모양에 맞춘다 (조건과 내용은 config/herdr.lua).
+require("config.herdr").setup()

@@ -433,7 +433,8 @@ nvim/
     ├── plugin.lua          # lazy.nvim 플러그인 관리자
     ├── utils.lua           # 유틸리티 함수
     ├── cache_manager.lua   # 대용량 파일/버퍼 캐시 관리
-    ├── config/             # 플러그인별 설정 (diagnostics.lua = 중앙화된 진단 설정)
+    ├── config/             # 플러그인별 설정 (diagnostics.lua = 중앙화된 진단 설정,
+    │                       #  herdr.lua = Herdr 터미널 안에서 pane 모양 맞춤)
     └── plugins/            # 플러그인 정의
 ```
 
