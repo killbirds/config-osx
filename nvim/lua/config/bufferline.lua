@@ -6,20 +6,27 @@
 -- fg가 비면 Normal의 글자색으로 칠해진다. 탭 사이에 흰 삼각형이 뜨던 이유다.
 -- (실측: 투명일 때 BufferLineSeparator fg/bg가 둘 다 없음, 불투명일 때 #101019 / #161622)
 --
--- 그래서 Normal 배경 대신 catppuccin의 base를 기준으로 같은 계산을 해 준다. 색은 투명
--- 배경을 켜기 전과 같고, 선택된 탭만 배경을 비워 편집 영역과 이어지게 한다.
+-- 그래서 Normal 배경 대신 화면에 실제로 깔리는 배경색을 기준으로 같은 계산을 해 준다.
+-- 선택된 탭만 배경을 비워 편집 영역과 이어지게 한다.
+--   - Herdr 터미널 안: Herdr 테마의 배경색(config/herdr.lua). 그 안에서는 편집 영역이 Herdr
+--     pane 색이라, catppuccin 기준으로 칠하면 탭 바만 다른 색조로 남는다(실측: 바 #101019,
+--     pane #14141c). Herdr 테마를 바꾸면 config/herdr.lua가 다시 칠하게 한다.
+--   - 그 밖: catppuccin의 base. 색은 투명 배경을 켜기 전과 같다.
 -- ColorScheme이 바뀌면 bufferline이 이 함수를 다시 부른다(config.update_highlights).
 local function highlights(defaults)
   if vim.api.nvim_get_hl(0, { name = "Normal", link = false }).bg then
     return {} -- Normal에 배경이 있으면 bufferline이 직접 계산한다
   end
-  local ok, palettes = pcall(require, "catppuccin.palettes")
-  if not ok then
-    return {}
+  local base = require("config.herdr").background()
+  if not base then
+    local ok, palettes = pcall(require, "catppuccin.palettes")
+    if not ok then
+      return {}
+    end
+    base = palettes.get_palette().base
   end
 
   local shade = require("bufferline.colors").shade_color
-  local base = palettes.get_palette().base
   local fill, inactive, visible = shade(base, -45), shade(base, -25), shade(base, -8)
 
   local hl = {}
