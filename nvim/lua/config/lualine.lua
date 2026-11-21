@@ -73,8 +73,23 @@ require("lualine").setup({
       { "filetype", icon_only = false, colored = true }, -- 파일 타입과 아이콘 함께 표시
     },
     lualine_y = {
-      { "encoding", show_bom = false }, -- BOM 표시 비활성화
-      { "fileformat", icons_enabled = true }, -- 파일 형식 (예: unix, dos)
+      -- 인코딩과 줄바꿈 형식은 기본값(utf-8, unix)이 아닐 때만 보인다. 거의 모든 파일이 기본값이라
+      -- 정보는 없이 자리만 차지했고, 좁은 pane에서는 파일 이름이 그만큼 잘렸다(실측: 60칸).
+      {
+        "encoding",
+        show_bomb = false, -- BOM 표시 비활성화 (옵션 이름은 show_bomb다. 예전의 show_bom은 없는 이름이었다)
+        cond = function()
+          local encoding = vim.bo.fileencoding ~= "" and vim.bo.fileencoding or vim.o.encoding
+          return encoding ~= "utf-8"
+        end,
+      },
+      {
+        "fileformat", -- 파일 형식 (예: dos)
+        icons_enabled = true,
+        cond = function()
+          return vim.bo.fileformat ~= "unix"
+        end,
+      },
     },
     lualine_z = {
       { "progress", padding = { left = 1, right = 0 } }, -- 진행률 표시 (패딩 조정)
