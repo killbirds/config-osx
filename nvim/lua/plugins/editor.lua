@@ -75,14 +75,8 @@ return {
     end,
   },
 
-  -- im-select.nvim for Korean input method management
-  {
-    "keaising/im-select.nvim",
-    lazy = false,
-    config = function()
-      require("config.im-select")
-    end,
-  },
+  -- (keaising/im-select.nvim 제거함. 노멀 모드에서 입력기를 영문으로 돌리는 일은
+  --  config/input-source.lua가 한다 — 이유는 그 파일 머리말)
 
   -- 터미널 통합
   {

@@ -1044,8 +1044,8 @@ nvim --headless -c "Lazy! sync" -c "qa"   # bang이 있어야 완료를 기다�
 
 한글 입력 관련 문제가 있다면 다음 사항을 확인하세요:
 
-1. macism 또는 im-select.nvim 플러그인이 올바르게 설정되었는지 확인하세요:
-   - `nvim/lua/config/im-select.lua` 파일에서 설정 확인
+1. macism이 올바르게 설정되었는지 확인하세요 (Neovim 쪽 동작은 `nvim/lua/config/input-source.lua`가 정합니다.
+   노멀 모드로 돌아올 때 영문으로 바꾸고, 글자를 넣는 중에는 포커스가 돌아와도 건드리지 않습니다):
    - 터미널에서 `macism` 명령어가 정상적으로 실행되는지 확인
    - 시스템 환경설정에서 macism에 대한 접근성 권한이 부여되었는지 확인
    - 시스템 환경설정에서 "이전 입력 소스 선택" 단축키가 활성화되어 있는지 확인

@@ -131,6 +131,9 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 -- config/autoread.lua가 한다.
 require("config.autoread").setup()
 
+-- 노멀 모드로 돌아오면 입력기를 영문으로 돌린다 (config/input-source.lua).
+require("config.input-source").setup()
+
 -- 버퍼 메모리 관리는 cache_manager.lua에서 중앙 관리됨
 
 -- 파일 타입별 설정
