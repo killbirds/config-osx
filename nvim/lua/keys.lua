@@ -136,6 +136,10 @@ vim.keymap.set("n", "<Leader>Lt", function()
   vim.notify("Completion " .. (vim.b.completion and "enabled" or "disabled"), vim.log.levels.INFO)
 end, { desc = "Toggle completion (buffer)" })
 
+-- undo 트리 창 토글 (내장 nvim.undotree, 명령은 config/undotree.lua가 만든다). 창 안에서 커서를
+-- 옮기면 그 시점으로 되돌아간다. <Leader>u로 시작하는 다른 키가 없어 timeoutlen을 기다리지 않는다.
+vim.keymap.set("n", "<Leader>u", "<Cmd>Undotree<CR>", { silent = true, desc = "Toggle undo tree" })
+
 -- 추가 유용한 매핑
 vim.keymap.set("n", "<Leader>w", ":w<CR>", { noremap = true, silent = true, desc = "Save file" })
 -- <Leader>q는 config/diagnostics.lua에서 진단 관련으로 사용됨.

@@ -24,6 +24,11 @@ local termfeatures = vim.g.termfeatures or {}
 termfeatures.osc52 = true
 vim.g.termfeatures = termfeatures
 
+-- 내장 undo 트리(0.12의 opt 패키지 nvim.undotree). :Undotree 명령을 만든다. 키는 keys.lua의 <Leader>u.
+-- swap/backup을 끄고 undofile로 편집 이력을 남기므로(lua/init.lua) 그 이력을 볼 창이 필요하다.
+-- 내장 명령을 그대로 쓰지 않는 이유는 config/undotree.lua 머리말.
+require("config.undotree").setup()
+
 -- 중앙화된 진단 설정 로드
 require("config.diagnostics").setup()
 

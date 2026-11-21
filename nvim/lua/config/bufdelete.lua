@@ -15,7 +15,7 @@ local protected_filetypes = {
   "fzflua_backdrop", -- fzf-lua 배경 창
   "lazy", -- Lazy 플러그인 관리자
   "lspinfo", -- LSP 정보 창
-  "toggleterm", -- ToggleTerm 터미널
+  "nvim-undotree", -- 내장 :Undotree 창 (<Leader>u)
   "alpha", -- Alpha 시작 화면
   "DiffviewFiles", -- Diffview 파일 목록
   -- 필요에 따라 더 추가할 수 있습니다
@@ -161,8 +161,16 @@ local function buffer_to_show_instead(cur_win, cur_buf)
   return other_file_buffer(cur_buf)
 end
 
--- 현재 버퍼가 마지막 파일 버퍼이고 이 창 옆에 nvim-tree만 있으면 그 트리 창들을 돌려준다.
--- 내장 :q는 이때 파일 창만 닫고 트리를 남긴다. 그러면 트리가 화면 전체를 차지하고,
+-- 파일 창 곁에 붙어 있을 뿐, 파일 창이 사라지면 혼자 남을 이유가 없는 창의 filetype.
+-- nvim-undotree(내장 undo 트리, config/undotree.lua)는 원본 파일이 있어야 뜻이 있다. 빼 두면
+-- 마지막 파일에서 :q를 눌렀을 때 undo 트리만 화면에 남는다(실측).
+local companion_filetypes = {
+  NvimTree = true,
+  ["nvim-undotree"] = true,
+}
+
+-- 현재 버퍼가 마지막 파일 버퍼이고 이 창 옆에 곁창(nvim-tree, undo 트리)만 있으면 그 창들을
+-- 돌려준다. 내장 :q는 이때 파일 창만 닫고 트리를 남긴다. 그러면 트리가 화면 전체를 차지하고,
 -- 버퍼는 목록에 남아 있어서 bufferline이 "File Explorer" 자리에 그 버퍼의 탭을 그린다.
 -- help·quickfix·터미널 창이 함께 남는 경우는 건드리지 않는다(그 창을 계속 볼 수 있다).
 --
@@ -175,7 +183,7 @@ local function trees_beside_last_buffer(cur_win, cur_buf)
   local trees = {}
   for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
     if win ~= cur_win and vim.api.nvim_win_get_config(win).relative == "" then
-      if vim.bo[vim.api.nvim_win_get_buf(win)].filetype ~= "NvimTree" then
+      if not companion_filetypes[vim.bo[vim.api.nvim_win_get_buf(win)].filetype] then
         return nil
       end
       table.insert(trees, win)
@@ -205,15 +213,24 @@ end
 -- 것도 안 된다 — QuitPre autocmd가 검사 뒤에 버퍼를 고칠 수 있고, prompt 버퍼와 autowriteall의
 -- 판정도 내장과 어긋났다(리뷰에서 각각 재현됨). 판정은 전부 내장 :quit에 맡긴다.
 --
--- 끝내지 못했으면(E37 / E162) 닫았던 트리를 다시 연다.
+-- 끝내지 못했으면(E37 / E162) 닫았던 트리를 다시 연다. 닫은 종류만 되살린다.
 local function quit_beside_tree(trees, bang)
+  local closed = {}
   for _, win in ipairs(trees) do
+    closed[vim.bo[vim.api.nvim_win_get_buf(win)].filetype] = true
     pcall(vim.api.nvim_win_close, win, false)
   end
   if not try_cmd({ cmd = "quit", bang = bang }) then
-    pcall(function()
-      require("nvim-tree.api").tree.toggle({ focus = false })
-    end)
+    if closed.NvimTree then
+      pcall(function()
+        require("nvim-tree.api").tree.toggle({ focus = false })
+      end)
+    end
+    if closed["nvim-undotree"] then
+      pcall(function()
+        require("config.undotree").show()
+      end)
+    end
   end
 end
 
