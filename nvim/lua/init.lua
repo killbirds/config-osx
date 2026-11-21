@@ -127,16 +127,9 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
--- autoread는 외부 명령 실행 시에만 동작하므로, 포커스 복귀/버퍼 진입 시
--- 파일 변경 여부를 직접 확인해 외부 수정 사항을 반영한다.
-vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
-  group = augroup,
-  callback = function()
-    if vim.api.nvim_get_mode().mode ~= "c" and vim.fn.getcmdwintype() == "" then
-      vim.cmd("checktime")
-    end
-  end,
-})
+-- 밖에서 바뀐 파일을 버퍼에 반영하는 일(포커스 복귀·버퍼 진입, 보이는 버퍼의 주기 확인)은
+-- config/autoread.lua가 한다.
+require("config.autoread").setup()
 
 -- 버퍼 메모리 관리는 cache_manager.lua에서 중앙 관리됨
 
