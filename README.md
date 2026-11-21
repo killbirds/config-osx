@@ -514,6 +514,12 @@ export NVIM_PROFILE=1
 - `<leader>dm`: 진단 모드 전환 (default / performance / development)
 - `<Leader>Lt`: 현재 버퍼의 자동완성(blink.cmp) 켜기/끄기
 - `jj`: 삽입 모드 빠져나오기
+- `:q` / `:wq` / `:x` (`<Leader>Q`, `<Leader>X`): 파일 창이 하나뿐이고 다른 버퍼가 남아 있으면
+  창이 아니라 **현재 버퍼만** 닫고 다른 파일 버퍼를 보여 줌 (옆에 트리·help·quickfix 창이
+  있어도 같음). 마지막 버퍼라 닫으면 트리만 남을 때는 nvim을 종료하되, 다른 버퍼에 저장 안 된
+  변경이 있으면 `:q!`여도 거부. 파일 분할이 또 있을 때, diff 중일 때, 트리·help·quickfix 창
+  안에서는 내장 동작 그대로. 명령줄이 정확히 `q`/`wq`/`x`(+`!`)일 때만 적용되고
+  `:q | …`, `:wq 파일`, `:2q` 등은 내장 명령이 받음 (`config/bufdelete.lua`의 `smart_quit`)
 
 > Virtual lines 토글(`<leader>dl`)은 표시 중복 때문에 **비활성 상태**입니다.
 > `config/diagnostics.lua`에 주석으로 남아 있으니 필요하면 풀어서 쓰면 됩니다.

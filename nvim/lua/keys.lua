@@ -140,9 +140,47 @@ end, { desc = "Toggle completion (buffer)" })
 vim.keymap.set("n", "<Leader>w", ":w<CR>", { noremap = true, silent = true, desc = "Save file" })
 -- <Leader>q는 config/diagnostics.lua에서 진단 관련으로 사용됨.
 -- <Leader>qq를 쓰면 <Leader>q가 timeoutlen만큼 대기하므로 종료는 <Leader>Q를 사용한다.
-vim.keymap.set("n", "<Leader>Q", ":q<CR>", { noremap = true, silent = true, desc = "Quit" })
+vim.keymap.set("n", "<Leader>Q", "<Cmd>SmartQuit<CR>", { silent = true, desc = "Quit (buffer or window)" })
 -- 같은 이유로, trouble의 <leader>x* 6개 때문에 <Leader>x도 timeoutlen을 기다린다.
-vim.keymap.set("n", "<Leader>X", ":x<CR>", { noremap = true, silent = true, desc = "Save and quit" })
+vim.keymap.set("n", "<Leader>X", "<Cmd>SmartExit<CR>", { silent = true, desc = "Save and quit (buffer or window)" })
+
+-- :q / :wq / :x — 파일 창이 하나뿐이면 창이 아니라 버퍼를 닫는다.
+-- 판단과 이유는 config/bufdelete.lua의 smart_quit.
+for name, write in pairs({ SmartQuit = false, SmartWriteQuit = "write", SmartExit = "update" }) do
+  vim.api.nvim_create_user_command(name, function(args)
+    require("config.bufdelete").smart_quit({ bang = args.bang, write = write or nil })
+  end, { bang = true, desc = "파일 창이 하나뿐이면 버퍼만 닫는 :q / :wq / :x" })
+end
+
+-- 내장 명령은 덮어쓸 수 없으므로 명령줄에서 <CR>을 누르는 순간 줄 전체를 보고 바꾼다.
+-- 줄이 정확히 q / wq / x(뒤에 !만 허용)일 때만 바꾸고, 나머지는 손대지 않는다:
+--   `:q | echo 1`, `:wq 다른이름`, `:w | q`, `:2q`, `:'<,'>x`, `/q` 검색, input() 프롬프트,
+--   Ex 모드(gQ).
+-- 명령줄 약어(cabbrev)로 하면 안 된다. 약어는 단어 뒤에 공백이나 !를 치는 순간 바뀌어서
+-- `:q | …`와 `:wq 파일`이 인자를 받지 않는 Smart* 명령으로 넘어가 E488로 실패했다(실측).
+-- noremap 매핑·`:normal!`·vim.cmd("q")가 실행하는 q는 이 키를 거치지 않으므로 내장 동작이다.
+-- <NL>(<C-j>)도 명령줄을 실행하는 키라서 같이 건다.
+local smart_quit_commands = { q = "SmartQuit", wq = "SmartWriteQuit", x = "SmartExit" }
+local function run_cmdline(key)
+  return function()
+    if vim.fn.getcmdtype() == ":" and vim.fn.mode() == "c" then
+      local typed, bang = vim.fn.getcmdline():match("^%s*(%a+)(!?)%s*$")
+      local command = typed and smart_quit_commands[typed]
+      if command then
+        -- <C-u>는 커서 앞만 지운다. 커서를 줄 끝으로 보낸 뒤 지워야 `:q<Home><CR>`처럼
+        -- 커서를 옮긴 줄에서 뒤에 남은 글자가 명령 이름에 붙지 않는다(SmartQuitq, E492).
+        return "<End><C-u>" .. command .. bang .. "<CR>"
+      end
+    end
+    return key
+  end
+end
+for _, key in ipairs({ "<CR>", "<NL>" }) do
+  vim.keymap.set("c", key, run_cmdline(key), {
+    expr = true,
+    desc = "명령줄 실행 (:q / :wq / :x만이면 Smart* 명령으로)",
+  })
+end
 
 -- 멀티커서(multicursor.nvim) 키:
 -- <C-n>: 커서 아래 단어/선택의 다음 일치에 커서 추가
@@ -152,9 +190,10 @@ vim.keymap.set("n", "<Leader>X", ":x<CR>", { noremap = true, silent = true, desc
 
 -- 오타 방지 명령어
 vim.api.nvim_create_user_command("W", "w", {})
-vim.api.nvim_create_user_command("Q", "q", {})
-vim.api.nvim_create_user_command("Wq", "wq", {})
-vim.api.nvim_create_user_command("WQ", "wq", {})
+-- Q / Wq / WQ는 :q / :wq와 같은 동작이어야 하므로 위의 Smart* 명령으로 보낸다.
+vim.api.nvim_create_user_command("Q", "SmartQuit<bang>", { bang = true })
+vim.api.nvim_create_user_command("Wq", "SmartWriteQuit<bang>", { bang = true })
+vim.api.nvim_create_user_command("WQ", "SmartWriteQuit<bang>", { bang = true })
 
 -- 0.11 기본 매핑 정보 (참고용 주석)
 -- grn - LSP rename
