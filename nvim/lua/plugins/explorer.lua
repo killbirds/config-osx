@@ -68,6 +68,20 @@ return {
       { ",ag", "<cmd>FzfLua live_grep<cr>", desc = "Live grep" },
       { "<leader>fr", "<cmd>FzfLua resume<cr>", desc = "Resume last picker" },
       { "<leader>fP", "<cmd>FzfLua builtin<cr>", desc = "FzfLua pickers" },
+      -- 바뀐 파일 목록(diff 미리보기). 에이전트가 고친 파일을 훑을 때 쓴다.
+      { "<leader>fs", "<cmd>FzfLua git_status<cr>", desc = "Git status (changed files)" },
+      {
+        "<leader>fo",
+        function()
+          -- 이 프로젝트(cwd)에서 연 파일만, 이번 세션에 연 것도 포함해서 보여 준다.
+          require("fzf-lua").oldfiles({ cwd_only = true, include_current_session = true })
+        end,
+        desc = "Recent files (cwd)",
+      },
+      -- 내장 grr은 quickfix로 보낸다. 이쪽은 참조가 여럿이면 미리보기를 보면서 고르고,
+      -- 하나뿐이면 바로 그리로 간다(fzf-lua lsp.jump1 기본값).
+      -- (<leader>fr은 resume이라 대문자를 쓴다)
+      { "<leader>fR", "<cmd>FzfLua lsp_references<cr>", desc = "LSP references" },
       {
         "<leader>ag",
         function()
