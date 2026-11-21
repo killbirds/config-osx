@@ -17,6 +17,10 @@ return {
   --  실측: typescriptreact/javascriptreact -> {/* */}, rust/java/js/ts -> //.
   --  vue/svelte/terraform 같은 다른 filetype을 쓰게 되면 다시 필요할 수 있다)
 
+  -- (tpope/vim-repeat 제거함. 설치된 플러그인 중 repeat#set을 부르는 곳은 gitsigns뿐인데
+  --  선택 사항이고, gitsigns는 operatorfunc로 `.` 반복을 직접 처리한다. 원래 쓰던
+  --  nvim-surround·Comment.nvim이 빠진 뒤로는 하는 일이 없었다)
+
   -- 멀티커서. vim-visual-multi에서 이전함 — VM은 upstream이 2024-09에 멈췄고
   -- (우리 핀 = upstream HEAD) 자체 모드를 만드는 구조라 blink.cmp/스니펫과
   -- 겉돌 여지가 있다. multicursor.nvim은 Neovim API 기반이고 활발히 유지된다.
@@ -56,7 +60,10 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     config = function()
       require("illuminate").configure({
-        providers = { "lsp", "treesitter", "regex" },
+        -- "treesitter" provider는 쓰지 않는다. nvim-treesitter.locals를 require하는데
+        -- 우리가 쓰는 nvim-treesitter main 브랜치에는 그 모듈이 없어 항상 빈 결과였다
+        -- (illuminate/providers/treesitter.lua의 pcall(require, ...) 실패).
+        providers = { "lsp", "regex" },
         delay = 200, -- 100에서 200으로 증가 (성능 개선)
         filetypes_denylist = {
           "NvimTree",
@@ -78,23 +85,8 @@ return {
   -- (keaising/im-select.nvim 제거함. 노멀 모드에서 입력기를 영문으로 돌리는 일은
   --  config/input-source.lua가 한다 — 이유는 그 파일 머리말)
 
-  -- 터미널 통합
-  {
-    "akinsho/toggleterm.nvim",
-    version = "*",
-    cmd = { "ToggleTerm", "TermExec" }, -- 명령어 사용시에만 로드
-    keys = { [[<c-\>]] },
-    opts = {
-      open_mapping = [[<c-\>]],
-      direction = "float",
-      float_opts = {
-        border = "curved",
-      },
-      -- 성능 최적화
-      persist_size = true,
-      persist_mode = true,
-    },
-  },
+  -- (akinsho/toggleterm.nvim 제거함. 업스트림이 2025-03 이후 멈췄고 <C-\> 플로팅 터미널을
+  --  쓰지 않았다. 터미널은 Herdr pane과 내장 :terminal(<Leader>tt / <Leader>tv)을 쓴다)
 
   -- (MeanderingProgrammer/render-markdown.nvim 제거함.
   --  opts.enabled = false로 렌더링이 꺼진 상태였어서 실질 동작이 없었다.
