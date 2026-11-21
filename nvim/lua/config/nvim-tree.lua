@@ -66,36 +66,64 @@ local function on_attach(bufnr)
   vim.keymap.set("n", "<C-r>", api.tree.reload, opts("Refresh"))
 end
 
--- 하이라이트 그룹 정의
-local function setup_nvim_tree_highlights()
-  vim.api.nvim_set_hl(0, "NvimTreeGitDirty", { fg = "#f1c40f" }) -- 변경된 파일 (노란색)
-  vim.api.nvim_set_hl(0, "NvimTreeGitStaged", { fg = "#2ecc71" }) -- 스테이징된 파일 (녹색)
-  vim.api.nvim_set_hl(0, "NvimTreeGitMerge", { fg = "#3498db" }) -- 머지 충돌 (파란색)
-  vim.api.nvim_set_hl(0, "NvimTreeGitRenamed", { fg = "#e67e22" }) -- 이름 변경 (주황색)
-  vim.api.nvim_set_hl(0, "NvimTreeGitNew", { fg = "#95a5a6" }) -- 새 파일 (회색)
-  vim.api.nvim_set_hl(0, "NvimTreeGitDeleted", { fg = "#e74c3c" }) -- 삭제된 파일 (빨간색)
+-- git 상태 색(NvimTreeGit*)은 plugins/theme.lua의 custom_highlights가 catppuccin 팔레트로 정한다.
+-- 예전에는 여기서 Flat UI 색을 하드코딩하고 ColorScheme마다 다시 덮어썼다.
+
+-- 트리 폭의 상한: 화면의 35%, 적어도 30칸.
+local function max_tree_width()
+  return math.max(30, math.floor(vim.o.columns * 0.35))
 end
 
--- 하이라이트 설정 적용
-setup_nvim_tree_highlights()
-
--- 컬러 스키마 변경 시 하이라이트 다시 적용
-vim.api.nvim_create_autocmd("ColorScheme", {
-  pattern = "*",
+-- 화면이 좁아지면 열려 있는 트리를 상한까지 줄인다. 상한(아래 view.width.max)은 트리를 그릴
+-- 때만 계산되고 트리 창은 winfixwidth라서, 넓을 때 연 트리는 pane이 좁아져도 그 폭으로 남는다
+-- (실측: 160칸에서 56칸이던 트리가 60칸으로 줄인 뒤에도 56칸, 편집 창 3칸).
+-- Herdr에서는 pane을 나누고 합칠 때마다 nvim의 화면 크기가 바뀐다.
+--
+-- 하는 일은 상한을 넘은 트리 창의 폭을 상한으로 맞추는 것뿐이다. nvim-tree의 resize()를 쓰면
+-- 안 된다. 폭을 매번 최솟값(30)으로 되돌리고 `wincmd =`까지 실행해서, 화면 높이만 바뀌어도 손으로
+-- 맞춘 트리 폭과 다른 분할 창들의 비율이 사라졌다(실측: 56/20/82 -> 30/64/64).
+-- 다시 넓어진 화면에서 트리를 넓히는 일은 하지 않는다. 다음에 트리를 그릴 때 nvim-tree가 한다.
+local resized_at = vim.o.columns
+vim.api.nvim_create_autocmd("VimResized", {
+  group = vim.api.nvim_create_augroup("NvimTreeFitWidth", { clear = true }),
   callback = function()
-    setup_nvim_tree_highlights()
+    if vim.o.columns == resized_at then
+      return -- 높이만 바뀌었다
+    end
+    resized_at = vim.o.columns
+    local limit = max_tree_width()
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      if
+        vim.bo[vim.api.nvim_win_get_buf(win)].filetype == "NvimTree"
+        and vim.api.nvim_win_get_config(win).relative == ""
+        and vim.api.nvim_win_get_width(win) > limit
+      then
+        vim.api.nvim_win_set_width(win, limit)
+      end
+    end
   end,
 })
 
 require("nvim-tree").setup({
   sort_by = "name",
   update_cwd = false,
+  -- 끈 채로 둔다. 켜면 밖에서 만든 파일이 트리에 바로 나타나지만, 트리에 보이는 디렉토리마다
+  -- 감시가 하나씩 붙고 이벤트 하나가 그 디렉토리의 `git status`를 따로 실행한다. 디렉토리끼리는
+  -- 묶이지 않는다. 실측(파일 12,000개 레포, 디렉토리 200개가 보이는 트리): 감시 204개, 파일
+  -- 300개를 100개 디렉토리에 걸쳐 고치는 6초 동안 git 프로세스 336개. debounce_delay를 500으로
+  -- 올려도 324개였다(디렉토리별로 따로 세기 때문). 큰 레포에서 느려지던 이유다.
+  -- 갱신은 R(또는 <C-r>, <leader>tr), 그리고 nvim에서 저장할 때 된다.
   filesystem_watchers = {
     enable = false,
   },
   view = {
-    adaptive_size = true,
-    width = 30,
+    -- 가장 긴 이름에 맞춰 넓어지되 화면의 35%까지만. 상한이 없으면 깊은 경로를 펼쳤을 때 트리가
+    -- 편집 창을 밀어낸다(실측: 60칸 pane에서 트리 39 / 편집 20, 100칸에서 54 / 45).
+    -- Herdr의 Nvim 토글이 nvim을 pane 절반에 띄우므로 좁은 화면이 흔하다.
+    width = {
+      min = 30,
+      max = max_tree_width,
+    },
     side = "left",
     signcolumn = "yes",
   },
