@@ -213,9 +213,6 @@ export SDKMAN_DIR="$HOME/.sdkman"
 # metals, bloop — append (기존 경로가 우선)
 path=($path "$HOME/Library/Application Support/Coursier/bin")
 
-# krew
-path=("${KREW_ROOT:-$HOME/.krew}/bin" $path)
-
 # Antigravity
 path=("$HOME/.antigravity/antigravity/bin" $path)
 
