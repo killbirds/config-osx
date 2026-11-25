@@ -213,9 +213,6 @@ export SDKMAN_DIR="$HOME/.sdkman"
 # metals, bloop — append (기존 경로가 우선)
 path=($path "$HOME/Library/Application Support/Coursier/bin")
 
-# Antigravity
-path=("$HOME/.antigravity/antigravity/bin" $path)
-
 # bun
 export BUN_INSTALL="$HOME/.bun"
 path=("$BUN_INSTALL/bin" $path)
